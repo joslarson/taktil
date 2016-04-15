@@ -1,5 +1,4 @@
-import View from './core/View';
-import state from './state';
+import {View} from './core';
 
 
 export function isInArray(array, searchValue) {
@@ -8,7 +7,6 @@ export function isInArray(array, searchValue) {
     }
     return false;
 }
-
 
 export function getCcList(ctrlSection) {
     var ccList = [];
@@ -127,9 +125,8 @@ export class IntervalTask {
     }
 
     start(...args) {
-        var that = this;
-        host.scheduleTask(function(){
-            if (!that.cancelled) that.callback.apply(that.scope, args);
+        host.scheduleTask(() => {
+            if (!this.cancelled) this.callback.apply(this.scope, args);
         }, [], this.interval);
         return this;
     }
@@ -144,12 +141,6 @@ export class IntervalTask {
 // TODO: move to Views
 export function initViews(views: { [key: string]: View; }) {
     for (let viewName in views) views[viewName].init();
-}
-
-// TODO: move to Hardware
-export function updateHwCtrlD2(hwCtrlName, d2: number) {
-    var hwCtrl = state.device.hwCtrls[hwCtrlName];
-    state.midiOut.sendMidi(hwCtrl.s, hwCtrl.d1, d2);
 }
 
 export function areDeepEqual(obj1, obj2) {

@@ -1,5 +1,5 @@
 import CachedClip from './CachedClip';
-import settings from '../../settings';
+import {config} from '../../session';
 
 
 export default class CachedScene {
@@ -62,7 +62,7 @@ export default class CachedScene {
         } else if (this.isPlaying) {
             hsb = { h: 47, s: 127, b: 127 };
         } else if (this.hasContent) {
-            hsb = { h: 100, s: 0, b: this.isSelected ? 127 : settings.DIM_VALUE };
+            hsb = { h: 100, s: 0, b: this.isSelected ? 127 : config['DIM_VALUE'] };
         }
         return hsb;
     }

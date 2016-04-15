@@ -15,5 +15,12 @@
   "bugs": {
     "url": "https://github.com/joslarson/typewig/issues"
   },
-  "homepage": "https://github.com/joslarson/typewig#readme"
+  "homepage": "https://github.com/joslarson/typewig#readme",
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "gulp-replace": "^0.5.4",
+    "gulp-typescript": "^2.12.2",
+    "merge2": "^1.0.2",
+    "typescript": "^1.8.9"
+  }
 }

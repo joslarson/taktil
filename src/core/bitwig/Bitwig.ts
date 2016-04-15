@@ -1,4 +1,4 @@
-import settings from '../../settings';
+import {config} from '../../session';
 import CachedTrack from './CachedTrack';
 import CachedScene from './CachedScene';
 import CachedClip from './CachedClip';
@@ -9,7 +9,7 @@ export default class Bitwig {
     project: api.Project = host.getProject();
     transport: api.Transport = host.createTransport();
     trackBank: api.TrackBank;
-    sceneBank: api.SceneBank = host.createSceneBank(settings.SCENE_COUNT);
+    sceneBank: api.SceneBank = host.createSceneBank(config['SCENE_COUNT']);
     master: api.MasterTrack = host.createMasterTrack(0);
 
     cache = {
@@ -36,7 +36,7 @@ export default class Bitwig {
         // trackBank setup
         this.trackBank = this.project
             .getShownTopLevelTrackGroup()
-            .createMainTrackBank(settings.TRACK_COUNT, 0, settings.SCENE_COUNT, true);
+            .createMainTrackBank(config['TRACK_COUNT'], 0, config['SCENE_COUNT'], true);
 
         // tempo observer
         this.transport.getTempo().addRawValueObserver(function(tempo) {
@@ -74,7 +74,7 @@ export default class Bitwig {
 
         // trackBank scrolll= position observer
         this.trackBank.addChannelScrollPositionObserver(function(position) {
-            that.cache.trackBankPage.index = position / settings.TRACK_COUNT;
+            that.cache.trackBankPage.index = position / config['TRACK_COUNT'];
             that.setBankPageTrackCount();
             that.resetTrackExistsFlags();
         }, 0);
@@ -86,11 +86,11 @@ export default class Bitwig {
             that.resetTrackExistsFlags();
         });
 
-        for (var i = 0; i < settings.SCENE_COUNT; i++) {
+        for (var i = 0; i < config['SCENE_COUNT']; i++) {
             this.cache.trackBankPage.scenes[i] = new CachedScene();
         }
 
-        for (var i = 0; i < settings.TRACK_COUNT; i++) {
+        for (var i = 0; i < config['TRACK_COUNT']; i++) {
             // init track list
             if (that.cache.trackBankPage.tracks[i] === undefined) {
                 that.cache.trackBankPage.tracks[i] = new CachedTrack();
@@ -215,13 +215,13 @@ export default class Bitwig {
     }
 
     setBankPageTrackCount() {
-        var highestTrackSlot = (this.cache.trackBankPage.index + 1) * settings.TRACK_COUNT;
+        var highestTrackSlot = (this.cache.trackBankPage.index + 1) * config['TRACK_COUNT'];
         var moreSlotsThanTracks = this.cache.trackCount < highestTrackSlot;
-        this.cache.trackBankPage.trackCount = moreSlotsThanTracks ? this.cache.trackCount % settings.TRACK_COUNT : settings.TRACK_COUNT;
+        this.cache.trackBankPage.trackCount = moreSlotsThanTracks ? this.cache.trackCount % config['TRACK_COUNT'] : config['TRACK_COUNT'];
     };
 
     resetTrackExistsFlags() {
-        for (var i = 0; i < settings.TRACK_COUNT; i++) {
+        for (var i = 0; i < config['TRACK_COUNT']; i++) {
             this.cache.trackBankPage.tracks[i].exists = this.trackIndexExistsOnPage(i);
         };
     }

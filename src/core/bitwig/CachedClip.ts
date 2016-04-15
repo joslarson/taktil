@@ -1,5 +1,5 @@
-import state from '../../state';
-import settings from '../../settings';
+import {config, bitwig} from '../../session';
+
 
 export default class CachedClip {
     hasContent: boolean = false;
@@ -12,12 +12,12 @@ export default class CachedClip {
 
     getColor() {
         var hsb = this.hsb;
-        var track = state.bitwig.cache.trackBankPage.tracks[state.bitwig.cache.trackBankPage.selectedTrackIndex];
+        var track = bitwig.cache.trackBankPage.tracks[bitwig.cache.trackBankPage.selectedTrackIndex];
 
         if (this.isQueued || this.isPlaying || this.isRecordingQueued || this.isRecording) {
             hsb = { h: hsb.h ? hsb.h : track.hsb.h, s: hsb.s ? hsb.s : track.hsb.s, b: 127 };
         } else if (this.hasContent) {
-            hsb = { h: hsb.h, s: hsb.s, b: settings.DIM_VALUE };
+            hsb = { h: hsb.h, s: hsb.s, b: config['DIM_VALUE'] };
         } else {
             hsb = { h: hsb.h, s: hsb.s, b: 0 };
         }

@@ -1,3 +1,6 @@
-let a = 'Test index.ts!';
+import * as _utils from './utils';
 
-export default a;
+
+export * from './core';
+export * from './session';
+export let utils = _utils;

@@ -1,4 +1,4 @@
-import settings from '../../settings';
+import {config} from '../../session';
 import CachedClip from './CachedClip';
 
 
@@ -44,7 +44,7 @@ export default class CachedTrack {
         if (this.isSelected) {
             hsb = { h: hsb.h, s: hsb.s, b: 127 };
         } else if (this.exists) {
-            hsb = { h: hsb.h, s: hsb.s, b: settings.DIM_VALUE };
+            hsb = { h: hsb.h, s: hsb.s, b: config['DIM_VALUE'] };
         } else {
             hsb = { h: hsb.h, s: hsb.s, b: 0 };
         }
