@@ -1,33 +1,39 @@
-import {devices} from '../../session';
 import {View} from '../view';
 import {AbstractCollectionItem} from '../../helpers';
 import {areDeepEqual, IntervalTask} from '../../utils';
+import {views} from '../../session';
+import {AbstractDevice, DeviceControl} from '../device';
 
 
-abstract class AbstractControl extends AbstractCollectionItem {
+abstract class AbstractControl {
+    name: string;
     parent: AbstractControl;
-    hwCtrlNames: Array<string> = [];
+    deviceCtrls: DeviceControl[] = [];
     registered: boolean = false;
     registrations: Object[] = [];
-    views: Array<View> = [];
+    views: View[] = [];
     eventHandlers: { [key: string]: Function[] } = {};
     memory: { [key: string]: any } = {};
     state: any; // depends on control type
 
+
+    constructor(name:string) {
+        this.name = name;
+    }
+
     // called when button is regstered to a view for the first time
     // allows running of code that is only aloud in the api's init function
-    register(hwCtrlNameSet, view) {
-        this.registrations.push({'view': view, 'hwCtrlNameSet': hwCtrlNameSet});
-        this.hwCtrlNames = this.hwCtrlNames.concat(hwCtrlNameSet);
+    register(deviceCtrls: DeviceControl[], view:View) {
+        this.registrations.push({'view': view, 'deviceCtrls': deviceCtrls});
+        this.deviceCtrls = this.deviceCtrls.concat(deviceCtrls);
         this.views.push(view);
         if (this.eventHandlers['register'] && !this.registered) {
             this.callCallback('register');
         }
     }
 
-    refresh(hwCtrlName: string) {
-        let hwCtrl = scriptState.device.hwCtrls[hwCtrlName];
-        scriptState.view.updateHwCtrlState(this, hwCtrlName, this.state);
+    refresh(deviceCtrl:DeviceControl) {
+        views.active.updateDeviceCtrlState(this, deviceCtrl, this.state);
     }
 
     setState(state) {
@@ -37,28 +43,28 @@ abstract class AbstractControl extends AbstractCollectionItem {
         this.state = state;
         // update hardware state through view to avoid
         // updating hardwar ctrls not in current view
-        for (let hwCtrlName of this.hwCtrlNames) {
-            scriptState.view.updateHwCtrlState(this, hwCtrlName, state);
+        for (let deviceCtrl of this.deviceCtrls) {
+            views.active.updateDeviceCtrlState(this, deviceCtrl, state);
         }
     }
 
-    setHwCtrlState(hwCtrlName: string, state: any) {
-
+    setDeviceCtrlState(deviceCtrl:DeviceControl, state) {
+        // implemented in child classes
     }
 
     // registers event handlers
-    on(eventName, callback) {
+    on(eventName:string, callback:Function) {
         if (!this.eventHandlers[eventName]) this.eventHandlers[eventName] = [];
         this.eventHandlers[eventName].push(callback);
         return this;
     }
 
     // handles midi messages routed to control
-    onMidi(hwCtrlName: string, midi: Midi) {
+    onMidi(deviceCtrl:DeviceControl, midi:Midi) {
         // implemented in subclasses
     }
 
-    callCallback(callbackName: string, ...args) {
+    callCallback(callbackName:string, ...args) {
         log(callbackName + ' ' + this.name);
         var callbackList = this.eventHandlers[callbackName];
         for (let callback of callbackList) {
@@ -67,7 +73,7 @@ abstract class AbstractControl extends AbstractCollectionItem {
         }
     }
 
-    cancelCallback(callbackName: string) {
+    cancelCallback(callbackName:string) {
         var memory = this.memory[callbackName];
         if (memory instanceof IntervalTask) memory.cancel();
         delete this.memory[callbackName];

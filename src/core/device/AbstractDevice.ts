@@ -1,27 +1,24 @@
 import {AbstractCollectionItem} from '../../helpers';
 import {isCc, isNote} from '../../utils';
-
+import DeviceControl from './DeviceControl';
+import DeviceControlCollection from './DeviceControlCollection';
 
 abstract class AbstractDevice extends AbstractCollectionItem {
-    hwCtrls: HardwareCtrls;
-    reverseHwCtrlsMap: ReverseHardwareCtrlsMap;
-    // TODO: figure out how these will work
+    deviceCtrls: DeviceControlCollection;
     midiIns: api.MidiIn[];
     midiOuts: api.MidiOut[];
     padNotes;
     padMIDITable;
 
-    constructor(hwCtrls: HardwareCtrls) {
+    constructor(deviceCtrls: DeviceControlCollection) {
         super();
-        this.hwCtrls = hwCtrls;
-        this.reverseHwCtrlsMap = this.getReverseHwCtrlsMap();
+        this.deviceCtrls = deviceCtrls;
     }
 
-    arePressed(...hwCtrlNames) {
+    arePressed(...deviceCtrls: DeviceControl[]) {
     	var result = true;
-    	for (let hwCtrlName of hwCtrlNames) {
-    		var d2 = this.hwCtrls[hwCtrlName].d2;
-    		if (!d2) {
+    	for (let deviceCtrl of deviceCtrls) {
+    		if (!deviceCtrl.data2) {
     			result = false;
     			break;
     		}
@@ -29,28 +26,19 @@ abstract class AbstractDevice extends AbstractCollectionItem {
     	return result;
     }
 
-    getReverseHwCtrlsMap(): ReverseHardwareCtrlsMap {
-        var result: ReverseHardwareCtrlsMap = {};
-        for (let hwCtrlName in this.hwCtrls) {
-            var ctrl: HardwareCtrl = this.hwCtrls[hwCtrlName];
-            if (!result[ctrl.s]) result[ctrl.s] = {};
-            result[ctrl.s][ctrl.d1] = hwCtrlName;
-        }
-        return result;
+    getDeviceCtrl(midiIndex: number, midi: Midi): DeviceControl {
+        return this.deviceCtrls.midiGet(midiIndex, midi.status, midi.data1);
     }
 
-    getHwCtrlName(midi: Midi) {
-        return this.reverseHwCtrlsMap[midi.s][midi.d1];
-    }
-
-    updateHwCtrl(midi: Midi) {
+    updateHwCtrl(midiIndex: number, midi: Midi) {
         // ignore all midi accept cc and note messages
-        if (!isCc(midi.s) && !isNote(midi.s)) return;
-        var hwCtrlName = this.getHwCtrlName(midi);
-        this.hwCtrls[hwCtrlName].d2 = midi.d2;
+        if (!isCc(midi.status) && !isNote(midi.status)) return;
+        let deviceCtrl = this.getDeviceCtrl(midiIndex, midi);
+        deviceCtrl.data2 = midi.data2;
     }
 
     blankController() {
+        // implemented in child classes
     }
 }
 

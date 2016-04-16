@@ -1,14 +1,15 @@
-import {AbstractCollectionItem} from '../../helpers';
+import {AbstractCollectionItem, Collection} from '../../helpers';
 import {AbstractControl} from '../control';
+import {DeviceControl} from '../device';
 
 
 export default class View extends AbstractCollectionItem {
-    parent: View;
-    ctrls: { [key: string]: { [key: string]: AbstractControl } } = { 'BASE': {} };
-    ctrlMap: { [key: string]: { [key: string]: string } } = { 'BASE': {} };
-    hwCtrlNames: string[] = [];
-    activeModes: string[] = [];
     initFunc: Function;
+    parent: View;
+    ctrlMap: { [mode: string]: { [deviceCtrlName: string]: AbstractControl } } = { 'BASE': {} };
+    deviceCtrls: DeviceControl[] = [];
+
+    private activeModes: string[] = [];
 
     constructor(initFunc: Function) {
         super();
@@ -20,33 +21,30 @@ export default class View extends AbstractCollectionItem {
     }
 
     refresh() {
-        for (let hwCtrlName of this.hwCtrlNames) {
+        for (let deviceCtrl of this.deviceCtrls) {
             for (let activeMode of this.getActiveModes()) {
-                if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][hwCtrlName]) {
-                    var ctrlName = this.ctrlMap[activeMode][hwCtrlName];
-                    var ctrl = this.ctrls[activeMode][ctrlName];
-                    ctrl.refresh(hwCtrlName);
+                if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.name()]) {
+                    let ctrl = this.ctrlMap[activeMode][deviceCtrl.name()];
+                    ctrl.refresh(deviceCtrl);
                     break;
                 }
             }
         }
     }
 
-    registerCtrl(ctrl: AbstractControl, hwCtrlNames, mode='BASE') {
-        if (typeof hwCtrlNames === 'string') hwCtrlNames = [hwCtrlNames];
-        log(ctrl);
-        ctrl.register(hwCtrlNames, this);
-        for (let hwCtrlName of hwCtrlNames) {
-            // register hwCtrl w/ ctrl
-            // register hwCtrl with view
+    registerCtrl(ctrl: AbstractControl, deviceCtrls:DeviceControl[]|DeviceControl, mode='BASE') {
+        if (deviceCtrls instanceof DeviceControl) {
+            deviceCtrls = [<DeviceControl>deviceCtrls];
+        }
+        // register deviceCtrls w/ ctrl
+        ctrl.register(<DeviceControl[]>deviceCtrls, this);
+        for (let deviceCtrl of <DeviceControl[]>deviceCtrls) {
+            // register deviceCtrl with view
             if (!this.ctrlMap[mode]) this.ctrlMap[mode] = {};
-            this.ctrlMap[mode][hwCtrlName] = ctrl.name();
+            this.ctrlMap[mode][deviceCtrl.name()] = ctrl;
 
-            if (!this.ctrls[mode]) this.ctrls[mode] = {};
-            this.ctrls[mode][ctrl.name()] = ctrl;
-
-            if (this.hwCtrlNames.indexOf(hwCtrlName) == -1) {
-                this.hwCtrlNames.push(hwCtrlName);
+            if (this.deviceCtrls.indexOf(deviceCtrl) == -1) {
+                this.deviceCtrls.push(deviceCtrl);
             }
         }
     }
@@ -70,49 +68,45 @@ export default class View extends AbstractCollectionItem {
         return result;
     }
 
-    onMidi(hwCtrlName, midi) {
-        var mode;
-        var ctrlName;
+    onMidi(deviceCtrl: DeviceControl, midi: Midi) {
+        let mode: string;
+        let ctrl: AbstractControl;
         // if ctrl in an active mode, let the ctrl in the first associates mode handle
         for (let activeMode of this.getActiveModes()) {
-            if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][hwCtrlName]) {
-                ctrlName = this.ctrlMap[activeMode][hwCtrlName];
+            if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.name()]) {
                 mode = activeMode;
+                ctrl = this.ctrlMap[activeMode][deviceCtrl.name()];
                 break;
             }
         }
 
-        if (mode && ctrlName) {
-            this.ctrls[mode][ctrlName].onMidi(hwCtrlName, midi);
+        if (mode && ctrl) {
+            this.ctrlMap[mode][deviceCtrl.name()].onMidi(deviceCtrl, midi);
         } else {
             if (this.parent) {
-                this.parent.onMidi(hwCtrlName, midi);
+                this.parent.onMidi(deviceCtrl, midi);
             } else {
-                toast(`Control "${hwCtrlName}" not implemented in view.`);
+                toast(`Control "${deviceCtrl.name()}" not implemented in view.`);
             }
         }
     }
 
-    updateHwCtrlState(ctrl: AbstractControl, hwCtrlName: string, state: any) {
-        var ctrlInView = false;
+    updateDeviceCtrlState(ctrl: AbstractControl, deviceCtrl: DeviceControl, state: any): void {
+        let ctrlInView = false;
         for (let activeMode of this.getActiveModes()) {
-            if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][hwCtrlName]) {
-                var modeCtrlName = this.ctrlMap[activeMode][hwCtrlName];
-                var modeCtrl = this.ctrls[activeMode][modeCtrlName];
+            if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.name()]) {
+                let modeCtrl = this.ctrlMap[activeMode][deviceCtrl.name()];
+                if(modeCtrl == ctrl || modeCtrl == ctrl.parent) {
+                    ctrl.setDeviceCtrlState(deviceCtrl, state);
+                }
 
                 ctrlInView = true;
-
-                if(modeCtrl == ctrl || modeCtrl == ctrl.parent) {
-                    ctrl.setHwCtrlState(hwCtrlName, state);
-                }
                 break;
             }
         }
-
+        // if current view doesn't handle ctrl in available modes, send up to parent
         if (!ctrlInView && this.parent) {
-            this.parent.updateHwCtrlState(ctrl, hwCtrlName, state);
-        } else {
-            // pass
+            this.parent.updateDeviceCtrlState(ctrl, deviceCtrl, state);
         }
     }
 }

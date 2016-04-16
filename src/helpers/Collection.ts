@@ -9,7 +9,7 @@ export default class Collection<ItemType extends AbstractCollectionItem> {
         return this._keys.slice(0);  // cloned this._keys
     }
 
-    items(): any[] {
+    items(): ItemType[] {
         return this._items.slice(0);  // cloned this._items
     }
 

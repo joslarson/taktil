@@ -1,41 +1,43 @@
 import AbstractControl from './AbstractControl';
+import {View} from '../view';
+import {DeviceControl} from '../device';
 
 
 export default class ControlSet extends AbstractControl {
     ctrlMap: { [key: string]: AbstractControl } = {};
     createCtrl: Function;
 
-    register(hwCtrlNameSet, view) {
-        super.register(hwCtrlNameSet, view);
+    register(deviceCtrls:DeviceControl[], view:View) {
+        super.register(deviceCtrls, view);
 
-        for (let i = 0; i < hwCtrlNameSet.length; i++) {
-            let hwCtrlName = hwCtrlNameSet[i];
+        for (let i = 0; i < deviceCtrls.length; i++) {
+            let deviceCtrl = deviceCtrls[i];
             // create/add Control
             let ctrl: AbstractControl = this.createCtrl.apply(this, [i]);
             ctrl.parent = this;
-            this.ctrlMap[hwCtrlName] = ctrl;
+            this.ctrlMap[deviceCtrl.name()] = ctrl;
             // register Control
-            ctrl.register([hwCtrlName], view);
+            ctrl.register([deviceCtrl], view);
         }
     }
 
-    refresh(hwCtrlName: string) {
+    refresh(deviceCtrl:DeviceControl) {
         // pass on refresh to corresponding control
-        this.ctrlMap[hwCtrlName].refresh(hwCtrlName);
+        this.ctrlMap[deviceCtrl.name()].refresh(deviceCtrl);
     }
 
-    setCreatCtrlCallback(callback: Function) {
+    setCreatCtrlCallback(callback:Function) {
         this.createCtrl = callback;
         return this;
     }
 
-    setHwCtrlState(hwCtrlName: string, state: any) {
+    setHwCtrlState(deviceCtrl:DeviceControl, state) {
         // pass on state to corresponding control
-        this.ctrlMap[hwCtrlName].setHwCtrlState(hwCtrlName, state);
+        this.ctrlMap[deviceCtrl.name()].setDeviceCtrlState(deviceCtrl, state);
     }
 
-    onMidi(hwCtrlName: string, midi: Midi) {
+    onMidi(deviceCtrl:DeviceControl, midi:Midi) {
         // pass on midi to corresponding control
-        this.ctrlMap[hwCtrlName].onMidi(hwCtrlName, midi);
+        this.ctrlMap[deviceCtrl.name()].onMidi(deviceCtrl, midi);
     }
 }

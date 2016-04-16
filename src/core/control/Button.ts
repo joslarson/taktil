@@ -1,6 +1,7 @@
 import {config} from  '../../session';
 import AbstractControl from './AbstractControl';
 import {msgType, IntervalTask} from '../../utils';
+import {DeviceControl} from '../device';
 
 
 enum Brightness {
@@ -20,8 +21,8 @@ export default class Button extends AbstractControl {
     mode: string;
     isColor: boolean;
 
-    constructor(mode='GATE', isColor=false) {
-        super();
+    constructor(name:string, mode:string='GATE', isColor:boolean=false) {
+        super(name);
         this.mode = mode;  // 'GATE', 'TOGGLE', 'PRESS', 'MANUAL'
         this.isColor = isColor;
         if (this.isColor) {
@@ -39,22 +40,22 @@ export default class Button extends AbstractControl {
         super.setState(state);
     }
 
-    setHwCtrlState(hwCtrlName, state) {
-        let hwCtrl = scriptState.device.hwCtrls[hwCtrlName];
+    setDeviceCtrlState(deviceCtrl: DeviceControl, state) {
+        let midiOut = deviceCtrl.device.midiOuts[deviceCtrl.midiIndex];
         if (this.isColor) {
-            scriptState.midiOut.sendMidi(msgType(hwCtrl.s) + 0, hwCtrl.d1, this.state.h);
-            scriptState.midiOut.sendMidi(msgType(hwCtrl.s) + 1, hwCtrl.d1, this.state.s);
-            scriptState.midiOut.sendMidi(msgType(hwCtrl.s) + 2, hwCtrl.d1, state.b);
+            midiOut.sendMidi(msgType(deviceCtrl.status) + 0, deviceCtrl.data1, this.state.h);
+            midiOut.sendMidi(msgType(deviceCtrl.status) + 1, deviceCtrl.data1, this.state.s);
+            midiOut.sendMidi(msgType(deviceCtrl.status) + 2, deviceCtrl.data1, state.b);
         } else {
             if (state) {
-                scriptState.midiOut.sendMidi(hwCtrl.s, hwCtrl.d1, 127);
+                midiOut.sendMidi(deviceCtrl.status, deviceCtrl.data1, 127);
             } else {
-                scriptState.midiOut.sendMidi(hwCtrl.s, hwCtrl.d1, 0);
+                midiOut.sendMidi(deviceCtrl.status, deviceCtrl.data1, 0);
             }
         }
     }
 
-    onMidi(hwCtrlName: string, midi: Midi) {
+    onMidi(deviceCtrl: DeviceControl, midi: Midi) {
         if (this.mode == 'TOGGLE') {
             this.handleToggle(midi);
         } else {
