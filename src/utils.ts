@@ -1,46 +1,46 @@
-import {View} from './core';
+import {HSB} from './helpers';
 
 
-export function isInArray(array, searchValue) {
+export function isInArray(array:any[], searchValue): boolean {
     for (var i = array.length - 1; i >= 0; i--) {
         if (array[i] == searchValue) return true;
     }
     return false;
 }
 
-export function getCcList(ctrlSection) {
-    var ccList = [];
-    var keys = Object.keys(ctrlSection);
-    // println(keys);
-    for (var i = 0; i < keys.length; i++) {
-        var node = ctrlSection[keys[i]];
-        if (typeof(node) === 'number'){
-            ccList.push(node);
-        } else {
-            ccList = ccList.concat(getCcList(node));
-        }
-    };
-    return ccList;
-}
+// export function getCcList(ctrlSection) {
+//     var ccList = [];
+//     var keys = Object.keys(ctrlSection);
+//     // println(keys);
+//     for (var i = 0; i < keys.length; i++) {
+//         var node = ctrlSection[keys[i]];
+//         if (typeof(node) === 'number'){
+//             ccList.push(node);
+//         } else {
+//             ccList = ccList.concat(getCcList(node));
+//         }
+//     };
+//     return ccList;
+// }
 
-export function isCc(status) {
+export function isCc(status:number): boolean {
     return (status & 0xf0) == 0xb0;
 }
 
-export function isNote(status) {
+export function isNote(status:number): boolean {
     return ((status & 0xf0) == 0x80) || ((status & 0xf0) == 0x90);
 }
 
-export function midiChannel(status) {
+export function midiChannel(status:number): number {
 	return (status & 0x0f) + 1;
 }
 
-export function msgType(status) {
+export function msgType(status:number): number {
     return (status & 0xf0);
 }
 
-export function rgb2hsb(r, g, b) {
-    var result = {h: undefined, s: undefined, b: undefined};
+export function rgb2hsb(r:number, g:number, b:number): HSB {
+    var result: HSB = {h: undefined, s: undefined, b: undefined};
 
     var minVal = Math.min(r, g, b);
     var maxVal = Math.max(r, g, b);
@@ -77,16 +77,16 @@ export function rgb2hsb(r, g, b) {
     return result;
 }
 
-export function initCountingArray(startValue, length) {
-    var arr = [];
-    arr.length = length;
-    for (var x = 0; x < arr.length; x++) {
-        arr[x] = x;
+export function initCountingArray(startValue:number, length:number): number[] {
+    let array: number[] = [];
+    array.length = length;
+    for (let x = 0; x < array.length; x++) {
+        array[x] = x;
     }
-    return arr;
+    return array;
 }
 
-export function all(testArray) {
+export function all(testArray: any[]) {
     var result = true;
     for (var i = 0; i < testArray.length; i++) {
         var test = testArray[i];
@@ -98,7 +98,7 @@ export function all(testArray) {
     return result;
 };
 
-export function any(testArray) {
+export function any(testArray: any[]) {
     var result = false;
     for (var i = 0; i < testArray.length; i++) {
         var test = testArray[i];
@@ -137,11 +137,6 @@ export class IntervalTask {
     }
 }
 
-
-// TODO: move to Views
-export function initViews(views: { [key: string]: View; }) {
-    for (let viewName in views) views[viewName].init();
-}
 
 export function areDeepEqual(obj1, obj2) {
     var i, l, leftChain, rightChain;

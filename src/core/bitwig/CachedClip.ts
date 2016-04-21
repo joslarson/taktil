@@ -1,4 +1,5 @@
 import {config, bitwig} from '../../session';
+import {HSB} from '../../helpers';
 
 
 export default class CachedClip {

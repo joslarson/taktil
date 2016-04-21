@@ -2,6 +2,7 @@ import {config} from  '../../session';
 import AbstractControl from './AbstractControl';
 import {msgType, IntervalTask} from '../../utils';
 import {DeviceControl} from '../device';
+import {Midi} from '../../helpers';
 
 
 enum Brightness {

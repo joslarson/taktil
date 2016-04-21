@@ -3,6 +3,8 @@ import CachedTrack from './CachedTrack';
 import CachedScene from './CachedScene';
 import CachedClip from './CachedClip';
 import {rgb2hsb} from '../../utils';
+import {HSB} from '../../helpers';
+
 
 export default class Bitwig {
     application: api.Application = host.createApplication();

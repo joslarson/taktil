@@ -1,4 +1,4 @@
-import {AbstractCollectionItem} from '../../helpers';
+import {AbstractCollectionItem, Midi} from '../../helpers';
 import AbstractDevice from './AbstractDevice';
 
 

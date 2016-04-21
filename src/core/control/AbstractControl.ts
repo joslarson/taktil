@@ -1,5 +1,5 @@
 import {View} from '../view';
-import {AbstractCollectionItem} from '../../helpers';
+import {AbstractCollectionItem, Midi} from '../../helpers';
 import {areDeepEqual, IntervalTask} from '../../utils';
 import {views} from '../../session';
 import {AbstractDevice, DeviceControl} from '../device';

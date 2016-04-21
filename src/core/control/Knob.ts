@@ -1,6 +1,7 @@
 import AbstractControl from './AbstractControl';
 import {DeviceControl} from '../device';
 import * as utils from '../../utils';
+import {Midi} from '../../helpers';
 
 
 export default class Knob extends AbstractControl {

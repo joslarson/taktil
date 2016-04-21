@@ -13,8 +13,12 @@ export default class Collection<ItemType extends AbstractCollectionItem> {
         return this._items.slice(0);  // cloned this._items
     }
 
-    get(key: string) {
-        return this._items[this.indexOf(key)];
+    get(key: string|number) {
+        if (typeof key == 'number') {
+            this._items[<number>key];
+        } else {
+            return this._items[this.indexOf(<string>key)];
+        }
     }
 
     add(key: string, item: ItemType): void {

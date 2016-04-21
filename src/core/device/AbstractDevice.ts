@@ -1,43 +1,61 @@
-import {AbstractCollectionItem} from '../../helpers';
+import {AbstractCollectionItem, Midi} from '../../helpers';
 import {isCc, isNote} from '../../utils';
+import DeviceTemplate from './DeviceTemplate';
 import DeviceControl from './DeviceControl';
 import DeviceControlCollection from './DeviceControlCollection';
+import {views} from '../../session';
+
 
 abstract class AbstractDevice extends AbstractCollectionItem {
-    deviceCtrls: DeviceControlCollection;
+    deviceCtrls: DeviceControlCollection = new DeviceControlCollection();
     midiIns: api.MidiIn[];
     midiOuts: api.MidiOut[];
-    padNotes;
     padMIDITable;
 
-    constructor(deviceCtrls: DeviceControlCollection) {
+    constructor (deviceTemplate: DeviceTemplate, midiIns: api.MidiIn[]|api.MidiIn, midiOuts: api.MidiOut[]|api.MidiOut) {
         super();
-        this.deviceCtrls = deviceCtrls;
+        this.midiIns = midiIns instanceof Array ? <api.MidiIn[]>midiIns : [<api.MidiIn>midiIns];
+        this.midiOuts = midiOuts instanceof Array ? <api.MidiOut[]>midiOuts : [<api.MidiOut>midiOuts];
+
+        for (let midiIndex = 0; midiIndex < deviceTemplate.length; midiIndex++) {
+            for (let deviceCtrlName in deviceTemplate[midiIndex]) {
+                let deviceCtrl = new DeviceControl(this, midiIndex, deviceTemplate[midiIndex][deviceCtrlName])
+                this.deviceCtrls.add(deviceCtrlName, deviceCtrl);
+            }
+        }
+    }
+
+    onMidi (midiIndex:number, midi:Midi) {
+        log(`${this.name() + String(midiIndex)}(${midi.status.toString(16)}, ${midi.data1.toString()}, ${midi.data2.toString()})`);
+        if (!isCc(midi.status) && !isNote(midi.status)) return;
+
+        let deviceCtrl = this.deviceCtrls.midiGet(midiIndex, midi.status, midi.data1);
+
+        views.active.onMidi(deviceCtrl, midi);
+
+        this.updateDeviceCtrl(midiIndex, midi);
+    }
+
+    onSysex (midiIndex:number, data) {
     }
 
     arePressed(...deviceCtrls: DeviceControl[]) {
-    	var result = true;
     	for (let deviceCtrl of deviceCtrls) {
     		if (!deviceCtrl.data2) {
-    			result = false;
-    			break;
+    			return false;
     		}
     	}
-    	return result;
+    	return true;
     }
 
-    getDeviceCtrl(midiIndex: number, midi: Midi): DeviceControl {
-        return this.deviceCtrls.midiGet(midiIndex, midi.status, midi.data1);
-    }
-
-    updateHwCtrl(midiIndex: number, midi: Midi) {
+    updateDeviceCtrl (midiIndex: number, midi: Midi) {
         // ignore all midi accept cc and note messages
         if (!isCc(midi.status) && !isNote(midi.status)) return;
-        let deviceCtrl = this.getDeviceCtrl(midiIndex, midi);
+        let deviceCtrl = this.deviceCtrls.midiGet(midiIndex, midi.status, midi.data1);
         deviceCtrl.data2 = midi.data2;
     }
 
-    blankController() {
+    blankController () {
         // implemented in child classes
     }
 }
