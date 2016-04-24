@@ -1,6 +1,6 @@
-import {config} from '../../session';
+import config from '../../config';
 import CachedClip from './CachedClip';
-import {HSB} from '../../helpers';
+import HSB from '../../helpers/HSB';
 
 
 export default class CachedTrack {

@@ -1,6 +1,6 @@
 import CachedClip from './CachedClip';
-import {config} from '../../session';
-import {HSB} from '../../helpers';
+import config from '../../config';
+import HSB from '../../helpers/HSB';
 
 
 export default class CachedScene {

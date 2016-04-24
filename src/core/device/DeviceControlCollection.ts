@@ -1,4 +1,4 @@
-import {Collection} from '../../helpers';
+import Collection from '../../helpers/Collection';
 import DeviceControl from './DeviceControl';
 import {areDeepEqual} from '../../utils';
 

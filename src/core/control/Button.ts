@@ -1,8 +1,8 @@
-import {config} from  '../../session';
+import config from  '../../config';
 import AbstractControl from './AbstractControl';
 import {msgType, IntervalTask} from '../../utils';
-import {DeviceControl} from '../device';
-import {Midi} from '../../helpers';
+import DeviceControl from '../device/DeviceControl';
+import Midi from '../../helpers/Midi';
 
 
 enum Brightness {
@@ -22,7 +22,7 @@ export default class Button extends AbstractControl {
     mode: string;
     isColor: boolean;
 
-    constructor(name:string, mode:string='GATE', isColor:boolean=false) {
+    constructor (name:string, mode:string='GATE', isColor:boolean=false) {
         super(name);
         this.mode = mode;  // 'GATE', 'TOGGLE', 'PRESS', 'MANUAL'
         this.isColor = isColor;
@@ -33,7 +33,7 @@ export default class Button extends AbstractControl {
         }
     }
 
-    setState(state) {
+    setState (state) {
         if (this.isColor) {
             state = state === true ? {h: this.state.h, s: this.state.s, b: Brightness.ON} : state;
             state = state === false ? {h: this.state.h, s: this.state.s, b: Brightness.OFF} : state;
@@ -41,7 +41,7 @@ export default class Button extends AbstractControl {
         super.setState(state);
     }
 
-    setDeviceCtrlState(deviceCtrl: DeviceControl, state) {
+    setDeviceCtrlState (deviceCtrl: DeviceControl, state) {
         let midiOut = deviceCtrl.device.midiOuts[deviceCtrl.midiIndex];
         if (this.isColor) {
             midiOut.sendMidi(msgType(deviceCtrl.status) + 0, deviceCtrl.data1, this.state.h);
@@ -56,7 +56,8 @@ export default class Button extends AbstractControl {
         }
     }
 
-    onMidi(deviceCtrl: DeviceControl, midi: Midi) {
+    onMidi (deviceCtrl: DeviceControl, midi: Midi) {
+
         if (this.mode == 'TOGGLE') {
             this.handleToggle(midi);
         } else {
@@ -69,23 +70,23 @@ export default class Button extends AbstractControl {
         }
     }
 
-    private isPress(midi) {
-        return midi.d2 > 0;
+    private isPress (midi: Midi) {
+        return midi.data2 > 0;
     }
 
-    private isDoublePress(midi) {
+    private isDoublePress (midi: Midi) {
         return this.isPress(midi) && this.memory['doublePress'];
     }
 
-    private isRelease(midi) {
-        return midi.d2 == 0;
+    private isRelease (midi: Midi) {
+        return midi.data2 == 0;
     }
 
-    private isDoubleRelease(midi) {
+    private isDoubleRelease (midi: Midi) {
         return this.isRelease(midi) && this.memory['doubleRelease'];
     }
 
-    private handleToggle(midi: Midi) {
+    private handleToggle (midi: Midi) {
         if (!this.eventHandlers['toggleOn'] || !this.eventHandlers['toggleOff']) {
             throw 'Must implement "toggleOn" and "toggleOff" callbacks.';
         }
@@ -100,14 +101,15 @@ export default class Button extends AbstractControl {
         }
     }
 
-    private handlePress(midi: Midi) {
+    private handlePress (midi: Midi) {
         // if it's not a press, not implemented or is a doublePress, ignore it
         if (!this.isPress(midi) || !this.eventHandlers['press'] || this.memory['doublePress']) return;
+
         // handle single press
         this.callCallback('press');
     }
 
-    private handleDoublePress(midi: Midi) {
+    private handleDoublePress (midi: Midi) {
         // if it's not a press or not implemented, ignore it
         if (!this.isPress(midi) || !this.eventHandlers['doublePress']) return;
 
@@ -123,7 +125,7 @@ export default class Button extends AbstractControl {
         }
     }
 
-    private handleLongPress(midi: Midi) {
+    private handleLongPress (midi: Midi) {
         // if it's a doublePress or is not implemented, ignore it
         if (this.isDoublePress(midi) || !this.eventHandlers['longPress']) return;
 
@@ -139,14 +141,14 @@ export default class Button extends AbstractControl {
         }
     }
 
-    private handleRelease(midi: Midi) {
+    private handleRelease (midi: Midi) {
         // if it's not a release, not implemented or is a doubleRelease, ignore it
         if (!this.isRelease(midi) || !this.eventHandlers['release'] || this.memory['doubleRelease']) return;
         // handle single release
         this.callCallback('release');
     }
 
-    private handleDoubleRelease(midi: Midi) {
+    private handleDoubleRelease (midi: Midi) {
         // if it's not a release or not implemented, ignore it
         if (!this.isRelease(midi) || !this.eventHandlers['doubleRelease']) return;
 
@@ -162,7 +164,7 @@ export default class Button extends AbstractControl {
         }
     }
 
-    private handleState(midi: Midi) {
+    private handleState (midi: Midi) {
         if (this.state == undefined) return;
 
         if (this.isPress(midi) && (this.mode == 'GATE' || this.mode == 'PRESS')) {

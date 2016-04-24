@@ -1,9 +1,9 @@
-import {config} from '../../session';
+import config from '../../config';
 import CachedTrack from './CachedTrack';
 import CachedScene from './CachedScene';
 import CachedClip from './CachedClip';
 import {rgb2hsb} from '../../utils';
-import {HSB} from '../../helpers';
+import HSB from '../../helpers/HSB';
 
 
 export default class Bitwig {

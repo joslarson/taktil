@@ -14,11 +14,9 @@ export default class Collection<ItemType extends AbstractCollectionItem> {
     }
 
     get(key: string|number) {
-        if (typeof key == 'number') {
-            this._items[<number>key];
-        } else {
-            return this._items[this.indexOf(<string>key)];
-        }
+        let result = typeof key == 'number' ? this._items[<number>key] : this._items[this.indexOf(<string>key)];
+        if (result === undefined) throw 'Collection item not found.';
+        return result;
     }
 
     add(key: string, item: ItemType): void {

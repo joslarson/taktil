@@ -1,6 +1,8 @@
-import {AbstractCollectionItem, Collection, Midi} from '../../helpers';
-import {AbstractControl} from '../control';
-import {DeviceControl} from '../device';
+import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
+import Collection from '../../helpers/Collection';
+import Midi from '../../helpers/Midi';
+import AbstractControl from '../control/AbstractControl';
+import DeviceControl from '../device/DeviceControl';
 
 
 export default class View extends AbstractCollectionItem {
@@ -23,8 +25,8 @@ export default class View extends AbstractCollectionItem {
     refresh() {
         for (let deviceCtrl of this.deviceCtrls) {
             for (let activeMode of this.getActiveModes()) {
-                if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.name()]) {
-                    let ctrl = this.ctrlMap[activeMode][deviceCtrl.name()];
+                if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.id]) {
+                    let ctrl = this.ctrlMap[activeMode][deviceCtrl.id];
                     ctrl.refresh(deviceCtrl);
                     break;
                 }
@@ -41,7 +43,7 @@ export default class View extends AbstractCollectionItem {
         for (let deviceCtrl of <DeviceControl[]>deviceCtrls) {
             // register deviceCtrl with view
             if (!this.ctrlMap[mode]) this.ctrlMap[mode] = {};
-            this.ctrlMap[mode][deviceCtrl.name()] = ctrl;
+            this.ctrlMap[mode][deviceCtrl.id] = ctrl;
 
             if (this.deviceCtrls.indexOf(deviceCtrl) == -1) {
                 this.deviceCtrls.push(deviceCtrl);
@@ -71,22 +73,23 @@ export default class View extends AbstractCollectionItem {
     onMidi(deviceCtrl: DeviceControl, midi: Midi) {
         let mode: string;
         let ctrl: AbstractControl;
+
         // if ctrl in an active mode, let the ctrl in the first associates mode handle
         for (let activeMode of this.getActiveModes()) {
-            if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.name()]) {
+            if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.id]) {
                 mode = activeMode;
-                ctrl = this.ctrlMap[activeMode][deviceCtrl.name()];
+                ctrl = this.ctrlMap[activeMode][deviceCtrl.id];
                 break;
             }
         }
 
         if (mode && ctrl) {
-            this.ctrlMap[mode][deviceCtrl.name()].onMidi(deviceCtrl, midi);
+            this.ctrlMap[mode][deviceCtrl.id].onMidi(deviceCtrl, midi);
         } else {
             if (this.parent) {
                 this.parent.onMidi(deviceCtrl, midi);
             } else {
-                toast(`Control "${deviceCtrl.name()}" not implemented in view.`);
+                toast(`Control not implemented in view.`);
             }
         }
     }
@@ -94,8 +97,8 @@ export default class View extends AbstractCollectionItem {
     updateDeviceCtrlState(ctrl: AbstractControl, deviceCtrl: DeviceControl, state: any): void {
         let ctrlInView = false;
         for (let activeMode of this.getActiveModes()) {
-            if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.name()]) {
-                let modeCtrl = this.ctrlMap[activeMode][deviceCtrl.name()];
+            if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.id]) {
+                let modeCtrl = this.ctrlMap[activeMode][deviceCtrl.id];
                 if(modeCtrl == ctrl || modeCtrl == ctrl.parent) {
                     ctrl.setDeviceCtrlState(deviceCtrl, state);
                 }

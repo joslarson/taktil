@@ -1,9 +1,10 @@
-import {AbstractCollectionItem, Midi} from '../../helpers';
+import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
+import Midi from '../../helpers/Midi';
 import {isCc, isNote} from '../../utils';
 import DeviceTemplate from './DeviceTemplate';
 import DeviceControl from './DeviceControl';
 import DeviceControlCollection from './DeviceControlCollection';
-import {views} from '../../session';
+import session from '../../session';
 
 
 abstract class AbstractDevice extends AbstractCollectionItem {
@@ -17,12 +18,23 @@ abstract class AbstractDevice extends AbstractCollectionItem {
         this.midiIns = midiIns instanceof Array ? <api.MidiIn[]>midiIns : [<api.MidiIn>midiIns];
         this.midiOuts = midiOuts instanceof Array ? <api.MidiOut[]>midiOuts : [<api.MidiOut>midiOuts];
 
+        if (deviceTemplate.length != this.midiIns.length) throw 'Number of inputs in template does not match defined number of device midi inputs';
+
         for (let midiIndex = 0; midiIndex < deviceTemplate.length; midiIndex++) {
+            this.midiIns[midiIndex].setMidiCallback(this.getMidiCallback(midiIndex));
+
             for (let deviceCtrlName in deviceTemplate[midiIndex]) {
                 let deviceCtrl = new DeviceControl(this, midiIndex, deviceTemplate[midiIndex][deviceCtrlName])
                 this.deviceCtrls.add(deviceCtrlName, deviceCtrl);
             }
         }
+    }
+
+    private getMidiCallback (midiIndex) {
+        return (status:number, data1:number, data2:number) => {
+            let midi = {status, data1, data2};
+            this.onMidi(midiIndex, midi);
+        };
     }
 
     onMidi (midiIndex:number, midi:Midi) {
@@ -31,7 +43,7 @@ abstract class AbstractDevice extends AbstractCollectionItem {
 
         let deviceCtrl = this.deviceCtrls.midiGet(midiIndex, midi.status, midi.data1);
 
-        views.active.onMidi(deviceCtrl, midi);
+        session.views.active.onMidi(deviceCtrl, midi);
 
         this.updateDeviceCtrl(midiIndex, midi);
     }

@@ -17,10 +17,12 @@ gulp.task('js', function() {
 
     return merge([
   		tsResult.dts
-        .pipe(replace('.default;', '["default"];'))
+        // .pipe(replace('.default;', "['default'];"))
+        // .pipe(replace('.default =', "['default'] ="))
         .pipe(gulp.dest('dist')),
   		tsResult.js
-        .pipe(replace('.default;', '["default"];'))
+        // .pipe(replace('.default;', "['default'];"))
+        // .pipe(replace('.default =', "['default'] ="))
         .pipe(gulp.dest('dist'))
   	]);
 });

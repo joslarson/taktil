@@ -1,4 +1,4 @@
-import {Collection} from '../../helpers';
+import Collection from '../../helpers/Collection';
 import View from './View';
 
 

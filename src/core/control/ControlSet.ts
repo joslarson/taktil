@@ -1,7 +1,7 @@
 import AbstractControl from './AbstractControl';
-import {View} from '../view';
-import {DeviceControl} from '../device';
-import {Midi} from '../../helpers';
+import View from '../view/View';
+import DeviceControl from '../device/DeviceControl';
+import Midi from '../../helpers/Midi';
 
 
 export default class ControlSet extends AbstractControl {

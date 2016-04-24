@@ -1,8 +1,10 @@
-import {View} from '../view';
-import {AbstractCollectionItem, Midi} from '../../helpers';
+import View from '../view/View';
+import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
+import Midi from '../../helpers/Midi';
 import {areDeepEqual, IntervalTask} from '../../utils';
-import {views} from '../../session';
-import {AbstractDevice, DeviceControl} from '../device';
+import session from '../../session';
+import AbstractDevice from '../device/AbstractDevice';
+import DeviceControl from '../device/DeviceControl';
 
 
 abstract class AbstractControl {
@@ -33,7 +35,7 @@ abstract class AbstractControl {
     }
 
     refresh(deviceCtrl:DeviceControl) {
-        views.active.updateDeviceCtrlState(this, deviceCtrl, this.state);
+        session.views.active.updateDeviceCtrlState(this, deviceCtrl, this.state);
     }
 
     setState(state) {
@@ -44,7 +46,7 @@ abstract class AbstractControl {
         // update hardware state through view to avoid
         // updating hardwar ctrls not in current view
         for (let deviceCtrl of this.deviceCtrls) {
-            views.active.updateDeviceCtrlState(this, deviceCtrl, state);
+            session.views.active.updateDeviceCtrlState(this, deviceCtrl, state);
         }
     }
 
