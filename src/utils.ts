@@ -2,52 +2,38 @@ import HSB from './helpers/HSB';
 
 
 export function guid () {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
-        return v.toString(16);
+    let date = new Date().getTime();
+     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        var r = (date + Math.random() * 16) % 16 | 0;
+        date = Math.floor(date/16);
+        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
     });
 }
 
-
-export function isInArray(array:any[], searchValue): boolean {
+export function isInArray (array:any[], searchValue): boolean {
     for (var i = array.length - 1; i >= 0; i--) {
         if (array[i] == searchValue) return true;
     }
     return false;
 }
 
-// export function getCcList(ctrlSection) {
-//     var ccList = [];
-//     var keys = Object.keys(ctrlSection);
-//     // println(keys);
-//     for (var i = 0; i < keys.length; i++) {
-//         var node = ctrlSection[keys[i]];
-//         if (typeof(node) === 'number'){
-//             ccList.push(node);
-//         } else {
-//             ccList = ccList.concat(getCcList(node));
-//         }
-//     };
-//     return ccList;
-// }
-
-export function isCc(status:number): boolean {
+export function isCc (status:number): boolean {
     return (status & 0xf0) == 0xb0;
 }
 
-export function isNote(status:number): boolean {
+export function isNote (status:number): boolean {
     return ((status & 0xf0) == 0x80) || ((status & 0xf0) == 0x90);
 }
 
-export function midiChannel(status:number): number {
+export function midiChannel (status:number): number {
 	return (status & 0x0f) + 1;
 }
 
-export function msgType(status:number): number {
+export function msgType (status:number): number {
     return (status & 0xf0);
 }
 
-export function rgb2hsb(r:number, g:number, b:number): HSB {
+export function rgb2hsb (r:number, g:number, b:number): HSB {
     var result: HSB = {h: undefined, s: undefined, b: undefined};
 
     var minVal = Math.min(r, g, b);
@@ -85,7 +71,7 @@ export function rgb2hsb(r:number, g:number, b:number): HSB {
     return result;
 }
 
-export function initCountingArray(startValue:number, length:number): number[] {
+export function initCountingArray (startValue:number, length:number): number[] {
     let array: number[] = [];
     array.length = length;
     for (let x = 0; x < array.length; x++) {
@@ -94,7 +80,7 @@ export function initCountingArray(startValue:number, length:number): number[] {
     return array;
 }
 
-export function all(testArray: any[]) {
+export function all (testArray: any[]) {
     var result = true;
     for (var i = 0; i < testArray.length; i++) {
         var test = testArray[i];
@@ -106,7 +92,7 @@ export function all(testArray: any[]) {
     return result;
 };
 
-export function any(testArray: any[]) {
+export function any (testArray: any[]) {
     var result = false;
     for (var i = 0; i < testArray.length; i++) {
         var test = testArray[i];
@@ -118,38 +104,36 @@ export function any(testArray: any[]) {
     return result;
 };
 
-
-
 export class IntervalTask {
     scope: any;
     callback: Function;
     interval: number;
     cancelled = false;
 
-    constructor(scope, callback, interval) {
+    constructor (scope, callback, interval) {
         this.scope = scope;
         this.callback = callback;
         this.interval = interval;
     }
 
-    start(...args) {
+    start (...args) {
         host.scheduleTask(() => {
             if (!this.cancelled) this.callback.apply(this.scope, args);
         }, [], this.interval);
         return this;
     }
 
-    cancel() {
+    cancel () {
         this.cancelled = true;
         return this;
     }
 }
 
 
-export function areDeepEqual(obj1, obj2) {
-    var i, l, leftChain, rightChain;
+export function areDeepEqual (obj1, obj2) {
+    let i, l, leftChain, rightChain;
 
-    function compare2Objects(x, y) {
+    function compare2Objects (x, y) {
         var p;
 
         // remember that NaN === NaN returns false
