@@ -13,6 +13,7 @@
     ],
     "files": [
         "src/config.ts",
+        "src/index.ts",
         "src/core/bitwig/Bitwig.ts",
         "src/core/bitwig/CachedClip.ts",
         "src/core/bitwig/CachedScene.ts",

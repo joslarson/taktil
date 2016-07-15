@@ -29,7 +29,7 @@ gulp.task('js', function() {
 
 // copy
 gulp.task('copy', function() {
-  return gulp.src(['README.md', 'package.json'])
+  return gulp.src(['README.md', 'LICENSE', 'package.json'])
     .pipe(gulp.dest('dist'));
 });
 
@@ -37,7 +37,7 @@ gulp.task('copy', function() {
 gulp.task('watch', ['js', 'copy'], function() {
   // watch js files
   gulp.watch('src/**/*.ts', ['js']);
-  gulp.watch(['README.md', 'package.json'], ['copy']);
+  gulp.watch(['README.md', 'LICENSE', 'package.json'], ['copy']);
 });
 
 // default task

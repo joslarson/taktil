@@ -2,7 +2,7 @@
   "name": "typewig",
   "version": "0.0.1",
   "description": "Typescript Bitwig controller script framework.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,7 +23,5 @@
     "merge2": "^1.0.2",
     "typescript": "^1.8.9"
   },
-  "dependencies": {
-    "es5-shim": "^4.5.8"
-  }
+  "dependencies": {}
 }
