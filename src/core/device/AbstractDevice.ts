@@ -21,8 +21,10 @@ abstract class AbstractDevice extends AbstractCollectionItem {
             midiIn.setMidiCallback(this.getMidiCallback(midiInIndex));
             if (ioMidiPair['noteInput']) {
                 let noteInput: api.NoteInput = midiIn.createNoteInput(ioMidiPair['noteInput']);
-                noteInput.setShouldConsumeEvents(false);
-                // if (ioMidiPair['shouldConsumeEvents']) noteInput.setShouldConsumeEvents(ioMidiPair['shouldConsumeEvents']);
+                // noteInput.setShouldConsumeEvents(false);
+                if (ioMidiPair['shouldConsumeEvents'] !== undefined) {
+                    noteInput.setShouldConsumeEvents(ioMidiPair['shouldConsumeEvents']);
+                }
                 // TODO: figure out where to store pointer to note input fo modifying shouldConsumeEvents
             }
 
