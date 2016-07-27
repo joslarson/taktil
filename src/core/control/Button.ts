@@ -42,7 +42,7 @@ export default class Button extends AbstractControl {
     }
 
     setDeviceCtrlState (deviceCtrl: DeviceControl, state) {
-        let midiOut = deviceCtrl.device.midiOuts[deviceCtrl.midiIndex];
+        let midiOut = deviceCtrl.midiOut;
         if (this.isColor) {
             midiOut.sendMidi(msgType(deviceCtrl.status) + 0, deviceCtrl.data1, this.state.h);
             midiOut.sendMidi(msgType(deviceCtrl.status) + 1, deviceCtrl.data1, this.state.s);

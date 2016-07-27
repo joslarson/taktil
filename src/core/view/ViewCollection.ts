@@ -5,7 +5,11 @@ import View from './View';
 export default class ViewCollection extends Collection<View> {
     active: View;
 
-    init(): void {
-        for (let view of this.items()) view.init();
+    add(key: string, view: View): void {
+        super.add(key, view);
+        // set first view as active
+        if (!this.active) this.active = view;
+        // initialize the view (requires that add be called within the global.init function)
+        view.init();
     }
 }

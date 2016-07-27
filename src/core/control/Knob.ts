@@ -26,8 +26,7 @@ export default class Knob extends AbstractControl {
     }
 
     setDeviceCtrlState(deviceCtrl: DeviceControl, state) {
-        let midiIndex = deviceCtrl.midiIndex;
-        deviceCtrl.device.midiOuts[midiIndex]
+        deviceCtrl.midiOut
             .sendMidi(deviceCtrl.status, deviceCtrl.data1, this.state);
     }
 
@@ -36,8 +35,7 @@ export default class Knob extends AbstractControl {
         data2 = data2 > 126 ? 126 : data2;
         data2 = data2 < 1 ? 1 : data2;
         for (let deviceCtrl of this.deviceCtrls) {
-            let midiIndex = deviceCtrl.midiIndex;
-            deviceCtrl.device.midiOuts[midiIndex]
+            deviceCtrl.midiOut
                 .sendMidi(deviceCtrl.status, deviceCtrl.data1, data2);
         }
     }
@@ -66,8 +64,7 @@ export default class Knob extends AbstractControl {
 
         if (this.meter) {
             for (let deviceCtrl of this.deviceCtrls) {
-                let midiIndex = deviceCtrl.midiIndex;
-                deviceCtrl.device.midiOuts[midiIndex]
+                deviceCtrl.midiOut
                     .sendMidi(deviceCtrl.status, deviceCtrl.data1, this.state);
             }
             this.meter = false;
@@ -80,8 +77,7 @@ export default class Knob extends AbstractControl {
         if (newData2 == 127) newData2 = 126;
 
         for (let deviceCtrl of this.deviceCtrls) {
-            let midiIndex = deviceCtrl.midiIndex;
-            deviceCtrl.device.midiOuts[midiIndex]
+            deviceCtrl.midiOut
                 .sendMidi(deviceCtrl.status, deviceCtrl.data1, newData2);
         }
     }

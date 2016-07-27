@@ -57,6 +57,7 @@ abstract class AbstractControl {
     // registers event handlers
     on(eventName:string, callback:Function) {
         if (!this.eventHandlers[eventName]) this.eventHandlers[eventName] = [];
+
         this.eventHandlers[eventName].push(callback);
         return this;
     }
@@ -66,11 +67,11 @@ abstract class AbstractControl {
         // implemented in subclasses
     }
 
-    callCallback(callbackName:string, ...args) {
-        log(callbackName + ' ' + this.name);
-        var callbackList = this.eventHandlers[callbackName];
+    callCallback(eventName:string, ...args) {
+        log(eventName + ' ' + this.name);
+        let callbackList = this.eventHandlers[eventName];
         for (let callback of callbackList) {
-            if (this.memory[callbackName]) this.cancelCallback(callbackName);
+            if (this.memory[eventName]) this.cancelCallback(eventName);
             callback.apply(this, args);
         }
     }
