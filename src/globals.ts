@@ -1,5 +1,8 @@
 loadAPI(1);  // load bitwig api v1
+// import 'bitwig-es-polyfill';
 import {guid} from './utils';
+import session from './session';
+
 
 // set globals (make sure to add any new globals to the globals.d.ts file)
 (function() {
@@ -8,11 +11,11 @@ import {guid} from './utils';
     globalTemp.global = globalTemp;
 
     global.toast = function (msg) {
-        host.showPopupNotification(msg);
+        session.host.showPopupNotification(msg);
     }
 
     global.log = function (...msgs) {
-        host.println(msgs.join(' '));
+        session.host.println(msgs.join(' '));
     }
 
     global.guid = guid;

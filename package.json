@@ -23,5 +23,7 @@
     "merge2": "^1.0.2",
     "typescript": "^1.8.9"
   },
-  "dependencies": {}
+  "dependencies": {
+    "bitwig-es-polyfill": "^0.2.0"
+  }
 }

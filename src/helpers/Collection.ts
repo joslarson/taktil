@@ -26,7 +26,7 @@ export default class Collection<ItemType extends AbstractCollectionItem> {
         item.setCollection(this);
     }
 
-    remove(keyOrItem:string|ItemType): void {
+    remove(keyOrItem: string|ItemType): void {
         let index = this.indexOf(keyOrItem);
         let item = this._items[index];
 

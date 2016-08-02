@@ -1,6 +1,7 @@
 import Collection from './Collection';
 import {guid} from '../utils';
 
+
 abstract class AbstractCollectionItem {
     id: string = guid();
     private collection: Collection<AbstractCollectionItem>;

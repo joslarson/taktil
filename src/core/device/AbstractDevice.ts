@@ -5,6 +5,7 @@ import DeviceTemplate from './DeviceTemplate';
 import DeviceControl from './DeviceControl';
 import DeviceControlCollection from './DeviceControlCollection';
 import session from '../../session';
+import * as api from '../../typings/api';
 
 
 abstract class AbstractDevice extends AbstractCollectionItem {
@@ -17,7 +18,7 @@ abstract class AbstractDevice extends AbstractCollectionItem {
             let midiInIndex = ioMidiPair['midiInIndex'];
             let midiOutIndex = ioMidiPair['midiOutIndex'];
 
-            let midiIn = host.getMidiInPort(midiInIndex);
+            let midiIn = session.host.getMidiInPort(midiInIndex);
             midiIn.setMidiCallback(this.getMidiCallback(midiInIndex));
             if (ioMidiPair['noteInput']) {
                 let noteInput: api.NoteInput = midiIn.createNoteInput(ioMidiPair['noteInput']);

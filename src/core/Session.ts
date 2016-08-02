@@ -3,9 +3,11 @@ import Bitwig from '../core/bitwig/Bitwig';
 import Collection from '../helpers/Collection';
 import AbstractDevice from '../core/device/AbstractDevice';
 import ViewCollection from '../core/view/ViewCollection';
+import * as api from '../typings/api';
 
 
 export default class Session {
+    host: api.Host = global.host;
     bitwig: Bitwig;
     devices: Collection<AbstractDevice> = new Collection<AbstractDevice>();
     views: ViewCollection = new ViewCollection();
@@ -20,6 +22,10 @@ export default class Session {
             this.callEventCallbacks('init');
         };
 
+        global.flush = () => {
+            this.callEventCallbacks('flush');
+        };
+
         global.exit = () => {
             // blank controllers
             for (let device of this.devices.items()) device.blankController();
@@ -32,7 +38,7 @@ export default class Session {
         // extend config default with localConfig
         config.extend(localConfig);
 
-        host.defineController(
+        this.host.defineController(
             config['MAKE'],  // hardware manufacturer / script creator
             config['MODEL'],  // hardware model name / script name
             config['VERSION'],  // version number

@@ -33,8 +33,14 @@ gulp.task('copy', function() {
     .pipe(gulp.dest('dist'));
 });
 
+// copy
+gulp.task('copy-typings', function() {
+  return gulp.src('src/typings/api/*')
+    .pipe(gulp.dest('dist/typings/api'));
+});
+
 // gulp watch
-gulp.task('watch', ['js', 'copy'], function() {
+gulp.task('watch', ['js', 'copy', 'copy-typings'], function() {
   // watch js files
   gulp.watch('src/**/*.ts', ['js']);
   gulp.watch(['README.md', 'LICENSE', 'package.json'], ['copy']);

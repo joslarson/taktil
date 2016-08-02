@@ -4,15 +4,17 @@ import CachedScene from './CachedScene';
 import CachedClip from './CachedClip';
 import {rgb2hsb} from '../../utils';
 import HSB from '../../helpers/HSB';
-
+import session from '../../session';
+import * as api from '../../typings/api';
 
 export default class Bitwig {
-    application: api.Application = host.createApplication();
-    project: api.Project = host.getProject();
-    transport: api.Transport = host.createTransport();
+    application: api.Application = session.host.createApplication();
+    project: api.Project = session.host.getProject();
+    transport: api.Transport = session.host.createTransport();
+    cursorTrack: api.CursorTrack = session.host.createArrangerCursorTrack(0, config['SCENE_COUNT']);
     trackBank: api.TrackBank;
-    sceneBank: api.SceneBank = host.createSceneBank(config['SCENE_COUNT']);
-    master: api.MasterTrack = host.createMasterTrack(0);
+    sceneBank: api.SceneBank = session.host.createSceneBank(config['SCENE_COUNT']);
+    master: api.MasterTrack = session.host.createMasterTrack(0);
 
     cache = {
         layout: <string> 'ARRANGE',
@@ -23,6 +25,10 @@ export default class Bitwig {
         overdub: <boolean> false,
         loop: <boolean> false,
         trackCount: 0,
+        cursorTrack: {
+            index: <number> 0,
+            track: <CachedTrack> new CachedTrack(),
+        },
         trackBankPage: {
             index: <number> 0,
             trackCount: <number> 0,
@@ -33,7 +39,11 @@ export default class Bitwig {
     }
 
     constructor() {
-        var that = this;
+        let that = this;
+
+        this.cursorTrack.addPositionObserver(position => {
+            this.cache.cursorTrack.index = position;
+        });
 
         // trackBank setup
         this.trackBank = this.project
@@ -41,125 +51,120 @@ export default class Bitwig {
             .createMainTrackBank(config['TRACK_COUNT'], 0, config['SCENE_COUNT'], true);
 
         // tempo observer
-        this.transport.getTempo().addRawValueObserver(function(tempo) {
-            that.cache.tempo = tempo;
+        this.transport.getTempo().addRawValueObserver((tempo) => {
+            this.cache.tempo = tempo;
         });
 
         // transport play state observer
-        this.transport.addIsPlayingObserver(function(isPlaying) {
-            that.cache.transportIsPlaying = isPlaying;
+        this.transport.addIsPlayingObserver((isPlaying) => {
+            this.cache.transportIsPlaying = isPlaying;
         });
 
         // metronome state observer
-        this.transport.addClickObserver(function(isOn) {
-            that.cache.click = isOn;
+        this.transport.addClickObserver((isOn) => {
+            this.cache.click = isOn;
         });
 
-        this.transport.addPreRollObserver(function(state) {
-            that.cache.preRoll = state;
+        this.transport.addPreRollObserver((state) => {
+            this.cache.preRoll = state;
         });
 
         // overdub state observer
-        this.transport.addOverdubObserver(function(isActive) {
-            that.cache.overdub = isActive;
+        this.transport.addOverdubObserver((isActive) => {
+            this.cache.overdub = isActive;
         });
 
         // loop state observer
-        this.transport.addIsLoopActiveObserver(function(isActive) {
-            that.cache.loop = isActive;
+        this.transport.addIsLoopActiveObserver((isActive) => {
+            this.cache.loop = isActive;
         });
 
         // layout observer
-        this.application.addPanelLayoutObserver(function(layout) {
-            that.cache.layout = layout;
+        this.application.addPanelLayoutObserver((layout) => {
+            this.cache.layout = layout;
         }, 1000);
 
         // trackBank scrolll= position observer
-        this.trackBank.addChannelScrollPositionObserver(function(position) {
-            that.cache.trackBankPage.index = position / config['TRACK_COUNT'];
-            that.setBankPageTrackCount();
-            that.resetTrackExistsFlags();
+        this.trackBank.addChannelScrollPositionObserver((position) => {
+            this.cache.trackBankPage.index = position / config['TRACK_COUNT'];
+            this.setBankPageTrackCount();
+            this.resetTrackExistsFlags();
         }, 0);
 
         // channel count observer
-        this.trackBank.addChannelCountObserver(function(count) {
-            that.cache.trackCount = count;
-            that.setBankPageTrackCount();
-            that.resetTrackExistsFlags();
+        this.trackBank.addChannelCountObserver((count) => {
+            this.cache.trackCount = count;
+            this.setBankPageTrackCount();
+            this.resetTrackExistsFlags();
         });
 
-        for (var i = 0; i < config['SCENE_COUNT']; i++) {
+        for (let i = 0; i < config['SCENE_COUNT']; i++) {
             this.cache.trackBankPage.scenes[i] = new CachedScene();
         }
 
-        for (var i = 0; i < config['TRACK_COUNT']; i++) {
+        for (let i=0; i < config['TRACK_COUNT']; i++) {
             // init track list
-            if (that.cache.trackBankPage.tracks[i] === undefined) {
-                that.cache.trackBankPage.tracks[i] = new CachedTrack();
+            if (this.cache.trackBankPage.tracks[i] === undefined) {
+                this.cache.trackBankPage.tracks[i] = new CachedTrack();
             }
 
-            (function() { // enclosure
+            (() => { // enclosure
                 const trackIndex = i;
-                var track = that.cache.trackBankPage.tracks[trackIndex];
-                var trackClipSlots = that.trackBank
+                let track = this.cache.trackBankPage.tracks[trackIndex];
+                let trackClipSlots = this.trackBank
                     .getChannel(trackIndex).getClipLauncherSlots();
 
-                that.trackBank.getChannel(trackIndex).addColorObserver(function(r, g, b) {
-                    var hsb: HSB = rgb2hsb(r, g, b);
-                    that.cache.trackBankPage.tracks[trackIndex].hsb = hsb;
+                this.trackBank.getChannel(trackIndex).addColorObserver((r, g, b) => {
+                    let hsb: HSB = rgb2hsb(r, g, b);
+                    this.cache.trackBankPage.tracks[trackIndex].hsb = hsb;
                 });
 
-                that.trackBank.getChannel(trackIndex)
-                    .addTrackTypeObserver(25, 'Unassigned', function(type) {
-                        track.type = type; // Unassigned, Instrument, Audio, or Hybrid
-                    });
+                this.trackBank.getChannel(trackIndex).addTrackTypeObserver(25, 'Unassigned', (type) => {
+                    track.type = type; // Unassigned, Instrument, Audio, or Hybrid
+                });
 
-                that.trackBank.getChannel(trackIndex).addIsGroupObserver(function(isGroup) {
+                this.trackBank.getChannel(trackIndex).addIsGroupObserver((isGroup) => {
                     track.isGroup = isGroup;
                 });
 
-                that.trackBank.getChannel(trackIndex).addIsSelectedInMixerObserver(
-                    function(isSelected) {
-                        // if no track is selected, set selectedTrackIndex to null
-                        if (isSelected) {
-                            that.cache.trackBankPage.tracks[trackIndex].isSelected = true;
-                            that.cache.trackBankPage.selectedTrackIndex = trackIndex;
-                        } else {
-                            var page = that.cache.trackBankPage;
-                            if (trackIndex == page.selectedTrackIndex) page.selectedTrackIndex = null;
-                            track.isSelected = false;
-                        }
+                this.trackBank.getChannel(trackIndex).addIsSelectedInMixerObserver(isSelected => {
+                    // if no track is selected, set selectedTrackIndex to null
+                    if (isSelected) {
+                        this.cache.trackBankPage.tracks[trackIndex].isSelected = true;
+                        this.cache.trackBankPage.selectedTrackIndex = trackIndex;
+                    } else {
+                        let page = this.cache.trackBankPage;
+                        if (trackIndex == page.selectedTrackIndex) page.selectedTrackIndex = null;
+                        track.isSelected = false;
                     }
-                );
+                });
 
-                trackClipSlots.addHasContentObserver(function(index, hasContent) {
-                    var scene = that.cache.trackBankPage.scenes[index];
+                trackClipSlots.addHasContentObserver((index, hasContent) => {
+                    let scene = this.cache.trackBankPage.scenes[index];
                     // println(trackIndex + ':' + index + ' ' + hasContent);
                     // adds clips to tracks and scenes upon init
                     if (track.clips[index] == undefined) track.clips[index] = new CachedClip();
                     if (scene.clips[trackIndex] == undefined) scene.clips[trackIndex] = track.clips[index];
 
                     track.clips[index].hasContent = hasContent;
-                    that.cache.trackBankPage.scenes[index].setHasContent();
+                    this.cache.trackBankPage.scenes[index].setHasContent();
                 });
 
-                trackClipSlots.addIsQueuedObserver(function(index, isQueued) {
-                    var scene = that.cache.trackBankPage.scenes[index];
+                trackClipSlots.addIsPlaybackQueuedObserver((index, isQueued) => {
+                    let scene = this.cache.trackBankPage.scenes[index];
 
                     if (isQueued) {
                         track.queuedClipIndex = index;
                         track.clips[index].isQueued = true;
-                        that.cache.trackBankPage.scenes[index].setIsQueued();
+                        this.cache.trackBankPage.scenes[index].setIsQueued();
                     } else {
                         if (track.queuedClipIndex == index) track.queuedClipIndex = null;
                         track.clips[index].isQueued = false;
-                        that.cache.trackBankPage.scenes[index].isQueued = false;
+                        this.cache.trackBankPage.scenes[index].isQueued = false;
                     }
-
                 });
 
-                trackClipSlots.addIsPlayingObserver(function(index, isPlaying) {
-
+                trackClipSlots.addIsPlayingObserver((index, isPlaying) => {
                     if (isPlaying) {
                         track.playingClipIndex = index;
                         track.clips[index].isPlaying = true;
@@ -168,11 +173,11 @@ export default class Bitwig {
                         track.clips[index].isPlaying = false;
                     }
 
-                    var scene = that.cache.trackBankPage.scenes[index];
-                    that.cache.trackBankPage.scenes[index].setIsPlaying();
+                    let scene = this.cache.trackBankPage.scenes[index];
+                    this.cache.trackBankPage.scenes[index].setIsPlaying();
                 });
 
-                trackClipSlots.addIsRecordingObserver(function(index, isRecording) {
+                trackClipSlots.addIsRecordingObserver((index, isRecording) => {
                     if (isRecording) {
                         track.recordingClipIndex = index;
                         track.clips[index].isRecording = true;
@@ -182,7 +187,7 @@ export default class Bitwig {
                     }
                 });
 
-                trackClipSlots.addIsRecordingQueuedObserver(function(index, isRecordingQueued) {
+                trackClipSlots.addIsRecordingQueuedObserver((index, isRecordingQueued) => {
                     if (isRecordingQueued) {
                         track.recordingQueuedClipIndex = index;
                         track.clips[index].isRecordingQueued = true;
@@ -192,7 +197,7 @@ export default class Bitwig {
                     }
                 });
 
-                trackClipSlots.addIsSelectedObserver(function(index, isSelected) {
+                trackClipSlots.addIsSelectedObserver((index, isSelected) => {
                     if (isSelected) {
                         track.selectedClipIndex = index;
                         track.clips[index].isSelected = true;
@@ -202,8 +207,8 @@ export default class Bitwig {
                     }
                 });
 
-                trackClipSlots.addColorObserver(function(index, r, g, b) {
-                    var hsb = rgb2hsb(r, g, b);
+                trackClipSlots.addColorObserver((index, r, g, b) => {
+                    let hsb = rgb2hsb(r, g, b);
                     // set clip color
                     track.clips[index].hsb = hsb;
                 });
@@ -212,18 +217,18 @@ export default class Bitwig {
     }
 
     trackIndexExistsOnPage(index) {
-        var trackCount = this.cache.trackBankPage.trackCount;
+        let trackCount = this.cache.trackBankPage.trackCount;
         return trackCount > 0 && index <= (trackCount - 1);
     }
 
     setBankPageTrackCount() {
-        var highestTrackSlot = (this.cache.trackBankPage.index + 1) * config['TRACK_COUNT'];
-        var moreSlotsThanTracks = this.cache.trackCount < highestTrackSlot;
+        let highestTrackSlot = (this.cache.trackBankPage.index + 1) * config['TRACK_COUNT'];
+        let moreSlotsThanTracks = this.cache.trackCount < highestTrackSlot;
         this.cache.trackBankPage.trackCount = moreSlotsThanTracks ? this.cache.trackCount % config['TRACK_COUNT'] : config['TRACK_COUNT'];
     };
 
     resetTrackExistsFlags() {
-        for (var i = 0; i < config['TRACK_COUNT']; i++) {
+        for (let i=0; i < config['TRACK_COUNT']; i++) {
             this.cache.trackBankPage.tracks[i].exists = this.trackIndexExistsOnPage(i);
         };
     }
