@@ -1,23 +1,19 @@
 import config from '../config';
-import Bitwig from '../core/bitwig/Bitwig';
 import Collection from '../helpers/Collection';
 import AbstractDevice from '../core/device/AbstractDevice';
 import ViewCollection from '../core/view/ViewCollection';
 import * as api from '../typings/api';
+import Host from './bitwig/Host';
 
 
 export default class Session {
-    host: api.Host = global.host;
-    bitwig: Bitwig;
+    host: api.Host = new Host(global.host) as any as api.Host;
     devices: Collection<AbstractDevice> = new Collection<AbstractDevice>();
     views: ViewCollection = new ViewCollection();
     eventHandlers: { [key: string]: Function[] } = {};
 
     constructor () {
         global.init = () => {
-            // create bitwig instance inside global init
-            this.bitwig = new Bitwig();
-
             // call the session init callbacks
             this.callEventCallbacks('init');
         };

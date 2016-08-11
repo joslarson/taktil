@@ -2,7 +2,6 @@
   "name": "typewig",
   "version": "0.0.1",
   "description": "Typescript Bitwig controller script framework.",
-  "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -24,6 +23,7 @@
     "typescript": "^1.8.9"
   },
   "dependencies": {
-    "bitwig-es-polyfill": "^0.2.0"
+    "bitwig-es-polyfill": "^0.2.0",
+    "object-hash": "^1.1.4"
   }
 }

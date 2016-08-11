@@ -1,5 +1,5 @@
 loadAPI(1);  // load bitwig api v1
-// import 'bitwig-es-polyfill';
+import 'bitwig-es-polyfill';
 import {guid} from './utils';
 import session from './session';
 
