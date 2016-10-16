@@ -1,6 +1,6 @@
 import Collection from '../../helpers/Collection';
 import DeviceControl from './DeviceControl';
-import {areDeepEqual} from '../../utils';
+import { areDeepEqual } from '../../utils';
 
 
 export default class DeviceControlCollection extends Collection<DeviceControl> {
@@ -18,7 +18,7 @@ export default class DeviceControlCollection extends Collection<DeviceControl> {
         this._midiMap[`${item.midiInIndex}`][item.status][item.data1] = item;
     }
 
-    remove(keyOrItem:string|DeviceControl): void {
+    remove(keyOrItem: string | DeviceControl): void {
         super.remove(keyOrItem);
         let item = this._items[this.indexOf(keyOrItem)];
         // cleanup cache in this._midiMap
@@ -27,6 +27,10 @@ export default class DeviceControlCollection extends Collection<DeviceControl> {
 
     // enables looking up with incoming midi
     midiGet(midiInIndex: number, status: number, data1: number) {
-        return this._midiMap[midiInIndex][status][data1];
+        try {
+            return this._midiMap[midiInIndex][status][data1];
+        } catch (e) {
+            return undefined;
+        }
     }
 }

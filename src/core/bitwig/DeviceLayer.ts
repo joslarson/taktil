@@ -4,7 +4,8 @@ import * as api from '../../typings/api';
 import Channel from './Channel';
 
 
-class DeviceLayer extends Channel {
+// class DeviceLayer extends Channel {
+class DeviceLayer {
 
 }
 

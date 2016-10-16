@@ -1,9 +1,10 @@
 import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import Midi from '../../helpers/Midi';
-import {isCc, isNote} from '../../utils';
+import { isCc, isNote } from '../../utils';
 import DeviceTemplate from './DeviceTemplate';
 import DeviceControl from './DeviceControl';
 import DeviceControlCollection from './DeviceControlCollection';
+import host from '../../host';
 import session from '../../session';
 import * as api from '../../typings/api';
 
@@ -18,7 +19,7 @@ abstract class AbstractDevice extends AbstractCollectionItem {
             let midiInIndex = ioMidiPair['midiInIndex'];
             let midiOutIndex = ioMidiPair['midiOutIndex'];
 
-            let midiIn = session.host.getMidiInPort(midiInIndex);
+            let midiIn = host.getMidiInPort(midiInIndex);
             midiIn.setMidiCallback(this.getMidiCallback(midiInIndex));
             if (ioMidiPair['noteInput']) {
                 let noteInput: api.NoteInput = midiIn.createNoteInput(ioMidiPair['noteInput']);
@@ -26,7 +27,7 @@ abstract class AbstractDevice extends AbstractCollectionItem {
                 if (ioMidiPair['shouldConsumeEvents'] !== undefined) {
                     noteInput.setShouldConsumeEvents(ioMidiPair['shouldConsumeEvents']);
                 }
-                // TODO: figure out where to store pointer to note input fo modifying shouldConsumeEvents
+                // TODO: figure out where to store pointer to note input for modifying shouldConsumeEvents
             }
 
 
@@ -49,6 +50,11 @@ abstract class AbstractDevice extends AbstractCollectionItem {
         log(`${this.name()}:${String(midiInIndex)}(${midi.status.toString(16)}, ${midi.data1.toString()}, ${midi.data2.toString()})`);
 
         let deviceCtrl = this.deviceCtrls.midiGet(midiInIndex, midi.status, midi.data1);
+ 
+        if (deviceCtrl === undefined) {
+            toast('Control not defined in device template.');
+            return;
+        }
 
         session.views.active.onMidi(deviceCtrl, midi);
 

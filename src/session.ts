@@ -1,15 +1,7 @@
 import Session from './core/Session';
 
 
-// singleton pattern to always get back the same config instance
-let session: Session;
-(function () {
-    if (!session) {
-        session = new Session();
-        global.session = session;
-    }
-    return session;
-})();
+let session = new Session();
 
 
 export default session;

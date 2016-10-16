@@ -18,7 +18,7 @@ export default class ApiProxy<ApiPricipal> {
             return this._handleGet(methodName, args);
         } else if (methodName.slice(0, 6) === 'create') {  // starts with 'create'
             return this._handleCreate(methodName, args);
-        } else if (methodName.slice(0, 3) === 'add' && methodName.slice(-8) === 'Observer') {  // starts with add
+        } else if (methodName.slice(0, 3) === 'add' && methodName.slice(-8) === 'Observer') {  // starts with add, ends with Observer
             return this._handleAddObserver(methodName, args);
         } else {
             return this._getPrincipalResult(methodName, args);
@@ -26,7 +26,7 @@ export default class ApiProxy<ApiPricipal> {
     }
 
     private _getPrincipalResult (methodName: string, args: any[]) {
-        return this.principal[methodName].apply(this, args);
+        return this.principal[methodName].apply(this.principal, args);
     }
 
     private _handleGet (methodName: string, args: any[]) {
@@ -84,7 +84,7 @@ export default class ApiProxy<ApiPricipal> {
                 }
             });
             // setup the principal observer
-            this.principal[methodName].apply(this, principalArgs);
+            this.principal[methodName](...principalArgs);
         }
     }
 

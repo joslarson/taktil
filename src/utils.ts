@@ -1,5 +1,5 @@
 import HSB from './helpers/HSB';
-import session from './session';
+import host from './host';
 
 
 export function guid () {
@@ -118,7 +118,7 @@ export class IntervalTask {
     }
 
     start (...args) {
-        session.host.scheduleTask(() => {
+        host.scheduleTask(() => {
             if (!this.cancelled) this.callback.apply(this.scope, args);
         }, [], this.interval);
         return this;
