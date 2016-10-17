@@ -4,8 +4,41 @@ import gts from 'gulp-typescript';
 import babel from 'gulp-babel';
 import merge from 'merge2';
 
+// rollup
+import rollup from 'rollup-stream';
+import source from 'vinyl-source-stream';
+import rollupTypescript from 'rollup-plugin-typescript';
+import nodeResolve from 'rollup-plugin-node-resolve';
+import commonjs from 'rollup-plugin-commonjs';
+
 
 // js
+// gulp.task('js', () =>
+//     rollup({
+//         entry: 'src/index.ts',
+//         plugins: [
+//             rollupTypescript({ typescript: typescript }),
+//             nodeResolve({
+//                 jsnext: true,
+//                 main: true,
+//                 extensions: [
+//                     '.js',
+//                 ]
+//             }),
+//             commonjs({
+//                 include: 'node_modules/**',
+//                 extensions: [
+//                     '.js'
+//                 ]
+//             }),
+//         ],
+//         context: 'global',
+//     })
+//     // give the file the name you want to output with
+//     .pipe(source('index.js'))
+//     // save to build dirs
+//     .pipe(gulp.dest('dist'))
+// );
 const tsProject = gts.createProject('tsconfig.json', { typescript });
 gulp.task('js', () => {
     const tsResult = tsProject.src().pipe(gts(tsProject));
