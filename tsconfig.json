@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es3",
+        "target": "es2015",
         "module": "es2015",
         "sourceMap": false,
         "declaration": true,
@@ -16,7 +16,7 @@
         "src/**/*.ts"
     ],
     "exclude": [
-        "node_modules",
+        "node_modules/**/*",
         "dist",
         "src/core/bitwig_old"
     ]
