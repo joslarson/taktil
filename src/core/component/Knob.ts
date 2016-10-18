@@ -1,10 +1,10 @@
-import AbstractControl from './AbstractControl';
-import DeviceControl from '../device/DeviceControl';
+import AbstractComponent from './AbstractComponent';
+import Control from '../device/Control';
 import * as utils from '../../utils';
 import Midi from '../../helpers/Midi';
 
 
-export default class Knob extends AbstractControl {
+export default class Knob extends AbstractComponent {
     mode: string;
     meter: boolean = false;
 
@@ -25,23 +25,23 @@ export default class Knob extends AbstractControl {
         super.setState(state);
     }
 
-    setDeviceCtrlState(deviceCtrl: DeviceControl, state) {
-        deviceCtrl.midiOut
-            .sendMidi(deviceCtrl.status, deviceCtrl.data1, this.state);
+    setControlState(control: Control, state) {
+        control.midiOut
+            .sendMidi(control.status, control.data1, this.state);
     }
 
     setMeter(data2) {
         if (!this.meter) return;
         data2 = data2 > 126 ? 126 : data2;
         data2 = data2 < 1 ? 1 : data2;
-        for (let deviceCtrl of this.deviceCtrls) {
-            deviceCtrl.midiOut
-                .sendMidi(deviceCtrl.status, deviceCtrl.data1, data2);
+        for (let control of this.controls) {
+            control.midiOut
+                .sendMidi(control.status, control.data1, data2);
         }
     }
 
-    onMidi(deviceCtrl: DeviceControl, midi: Midi) {
-        this.handleState(deviceCtrl, midi);
+    onMidi(control: Control, midi: Midi) {
+        this.handleState(control, midi);
         this.handleChange(midi);
     }
 
@@ -63,9 +63,9 @@ export default class Knob extends AbstractControl {
         }, 600).start();
 
         if (this.meter) {
-            for (let deviceCtrl of this.deviceCtrls) {
-                deviceCtrl.midiOut
-                    .sendMidi(deviceCtrl.status, deviceCtrl.data1, this.state);
+            for (let control of this.controls) {
+                control.midiOut
+                    .sendMidi(control.status, control.data1, this.state);
             }
             this.meter = false;
             return;
@@ -76,9 +76,9 @@ export default class Knob extends AbstractControl {
         if (newData2 == 0) newData2 = 1;
         if (newData2 == 127) newData2 = 126;
 
-        for (let deviceCtrl of this.deviceCtrls) {
-            deviceCtrl.midiOut
-                .sendMidi(deviceCtrl.status, deviceCtrl.data1, newData2);
+        for (let control of this.controls) {
+            control.midiOut
+                .sendMidi(control.status, control.data1, newData2);
         }
     }
 }

@@ -1,19 +1,19 @@
 import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import Midi from '../../helpers/Midi';
 import { isCc, isNote } from '../../utils';
-import DeviceTemplate from './DeviceTemplate';
-import DeviceControl from './DeviceControl';
-import DeviceControlCollection from './DeviceControlCollection';
+import Template from './Template';
+import Control from './Control';
+import ControlCollection from './ControlCollection';
 import host from '../../host';
 import session from '../../session';
 import * as api from '../../typings/api';
 
 
 abstract class AbstractDevice extends AbstractCollectionItem {
-    deviceCtrls: DeviceControlCollection = new DeviceControlCollection();
+    controls: ControlCollection = new ControlCollection();
     padMIDITable;
 
-    constructor (deviceTemplate: DeviceTemplate) {
+    constructor (deviceTemplate: Template) {
         super();
         for (let ioMidiPair of deviceTemplate) {
             let midiInIndex = ioMidiPair['midiInIndex'];
@@ -30,54 +30,53 @@ abstract class AbstractDevice extends AbstractCollectionItem {
                 // TODO: figure out where to store pointer to note input for modifying shouldConsumeEvents
             }
 
-
-            for (let deviceCtrlName in ioMidiPair['controls']) {
-                let deviceCtrl = new DeviceControl(this, midiInIndex, midiOutIndex, ioMidiPair['controls'][deviceCtrlName]);
-                this.deviceCtrls.add(deviceCtrlName, deviceCtrl);
+            for (let controlName in ioMidiPair['controls']) {
+                let control = new Control(this, midiInIndex, midiOutIndex, ioMidiPair['controls'][controlName]);
+                this.controls.add(controlName, control);
             }
         }
     }
 
-    private getMidiCallback (midiInIndex) {
+    private getMidiCallback(midiInIndex) {
         return (status:number, data1:number, data2:number) => {
             let midi = {status, data1, data2};
             this.onMidi(midiInIndex, midi);
         };
     }
 
-    onMidi (midiInIndex:number, midi:Midi) {
+    onMidi(midiInIndex:number, midi:Midi) {
         if (!isCc(midi.status) && !isNote(midi.status)) return;
-        log(`${this.name()}:${String(midiInIndex)}(${midi.status.toString(16)}, ${midi.data1.toString()}, ${midi.data2.toString()})`);
+        log(`[${this.getName()}_${String(midiInIndex)}] status: 0x${midi.status.toString(16).toUpperCase()}, data1: ${midi.data1.toString()}, data2: ${midi.data2.toString()}`);
 
-        let deviceCtrl = this.deviceCtrls.midiGet(midiInIndex, midi.status, midi.data1);
+        let control = this.controls.midiGet(midiInIndex, midi.status, midi.data1);
  
-        if (deviceCtrl === undefined) {
+        if (control === undefined) {
             toast('Control not defined in device template.');
             return;
         }
 
-        session.views.active.onMidi(deviceCtrl, midi);
+        session.views.active.onMidi(control, midi);
 
-        this.updateDeviceCtrl(midiInIndex, midi);
+        this.updateControl(midiInIndex, midi);
     }
 
     onSysex (midiInIndex:number, data) {
     }
 
-    arePressed(...deviceCtrls: DeviceControl[]) {
-    	for (let deviceCtrl of deviceCtrls) {
-    		if (!deviceCtrl.data2) {
-    			return false;
-    		}
-    	}
-    	return true;
+    arePressed(...controls: Control[]) {
+        for (let control of controls) {
+            if (!control.data2) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    updateDeviceCtrl (midiInIndex: number, midi: Midi) {
+    updateControl (midiInIndex: number, midi: Midi) {
         // ignore all midi accept cc and note messages
         if (!isCc(midi.status) && !isNote(midi.status)) return;
-        let deviceCtrl = this.deviceCtrls.midiGet(midiInIndex, midi.status, midi.data1);
-        deviceCtrl.data2 = midi.data2;
+        let control = this.controls.midiGet(midiInIndex, midi.status, midi.data1);
+        control.data2 = midi.data2;
     }
 
     blankController () {

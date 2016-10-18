@@ -4,7 +4,7 @@ import AbstractDevice from './AbstractDevice';
 import host from '../../host';
 import * as api from '../../typings/api';
 
-export default class DeviceControl extends AbstractCollectionItem {
+export default class Control extends AbstractCollectionItem {
     device: AbstractDevice;
     midiInIndex: number;
     midiOutIndex: number;

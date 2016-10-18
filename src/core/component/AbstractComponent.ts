@@ -4,13 +4,13 @@ import Midi from '../../helpers/Midi';
 import {areDeepEqual, IntervalTask} from '../../utils';
 import session from '../../session';
 import AbstractDevice from '../device/AbstractDevice';
-import DeviceControl from '../device/DeviceControl';
+import Control from '../device/Control';
 
 
-abstract class AbstractControl {
+abstract class AbstractComponent {
     name: string;
-    parent: AbstractControl;
-    deviceCtrls: DeviceControl[] = [];
+    parent: AbstractComponent;
+    controls: Control[] = [];
     registered: boolean = false;
     registrations: Object[] = [];
     views: View[] = [];
@@ -25,17 +25,17 @@ abstract class AbstractControl {
 
     // called when button is regstered to a view for the first time
     // allows running of code that is only aloud in the api's init function
-    register(deviceCtrls: DeviceControl[], view:View) {
-        this.registrations.push({'view': view, 'deviceCtrls': deviceCtrls});
-        this.deviceCtrls = this.deviceCtrls.concat(deviceCtrls);
+    register(controls: Control[], view:View) {
+        this.registrations.push({'view': view, 'controls': controls});
+        this.controls = this.controls.concat(controls);
         this.views.push(view);
         if (this.eventHandlers['register'] && !this.registered) {
             this.callCallback('register');
         }
     }
 
-    refresh(deviceCtrl:DeviceControl) {
-        session.views.active.updateDeviceCtrlState(this, deviceCtrl, this.state);
+    refresh(control:Control) {
+        session.views.active.updateControlState(this, control, this.state);
     }
 
     setState(state) {
@@ -44,13 +44,13 @@ abstract class AbstractControl {
         // update object state
         this.state = state;
         // update hardware state through view to avoid
-        // updating hardwar ctrls not in current view
-        for (let deviceCtrl of this.deviceCtrls) {
-            session.views.active.updateDeviceCtrlState(this, deviceCtrl, state);
+        // updating hardware controls not in current view
+        for (let control of this.controls) {
+            session.views.active.updateControlState(this, control, state);
         }
     }
 
-    setDeviceCtrlState(deviceCtrl:DeviceControl, state) {
+    setControlState(control:Control, state) {
         // implemented in child classes
     }
 
@@ -63,7 +63,7 @@ abstract class AbstractControl {
     }
 
     // handles midi messages routed to control
-    onMidi(deviceCtrl:DeviceControl, midi:Midi) {
+    onMidi(control:Control, midi:Midi) {
         // implemented in subclasses
     }
 
@@ -84,4 +84,4 @@ abstract class AbstractControl {
 }
 
 
-export default AbstractControl;
+export default AbstractComponent;

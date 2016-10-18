@@ -1,15 +1,15 @@
 import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import Collection from '../../helpers/Collection';
 import Midi from '../../helpers/Midi';
-import AbstractControl from '../control/AbstractControl';
-import DeviceControl from '../device/DeviceControl';
+import AbstractComponent from '../component/AbstractComponent';
+import Control from '../device/Control';
 
 
 export default class View extends AbstractCollectionItem {
     initFunc: Function;
     parent: View;
-    ctrlMap: { [mode: string]: { [deviceCtrlName: string]: AbstractControl } } = { 'BASE': {} };
-    deviceCtrls: DeviceControl[] = [];
+    componentMap: { [mode: string]: { [controlName: string]: AbstractComponent } } = { 'BASE': {} };
+    controls: Control[] = [];
 
     private activeModes: string[] = [];
 
@@ -23,30 +23,30 @@ export default class View extends AbstractCollectionItem {
     }
 
     refresh() {
-        for (let deviceCtrl of this.deviceCtrls) {
+        for (let control of this.controls) {
             for (let activeMode of this.getActiveModes()) {
-                if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.id]) {
-                    let ctrl = this.ctrlMap[activeMode][deviceCtrl.id];
-                    ctrl.refresh(deviceCtrl);
+                if (this.componentMap[activeMode] && this.componentMap[activeMode][control.id]) {
+                    let component = this.componentMap[activeMode][control.id];
+                    component.refresh(control);
                     break;
                 }
             }
         }
     }
 
-    registerCtrl(ctrl: AbstractControl, deviceCtrls:DeviceControl[]|DeviceControl, mode='BASE') {
-        if (deviceCtrls instanceof DeviceControl) {
-            deviceCtrls = [<DeviceControl>deviceCtrls];
+    registerComponent(component: AbstractComponent, controls: Control[]|Control, mode='BASE') {
+        if (controls instanceof Control) {
+            controls = [<Control>controls];
         }
-        // register deviceCtrls w/ ctrl
-        ctrl.register(<DeviceControl[]>deviceCtrls, this);
-        for (let deviceCtrl of <DeviceControl[]>deviceCtrls) {
-            // register deviceCtrl with view
-            if (!this.ctrlMap[mode]) this.ctrlMap[mode] = {};
-            this.ctrlMap[mode][deviceCtrl.id] = ctrl;
+        // register controls w/ component
+        component.register(<Control[]>controls, this);
+        for (let control of <Control[]>controls) {
+            // register control with view
+            if (!this.componentMap[mode]) this.componentMap[mode] = {};
+            this.componentMap[mode][control.id] = component;
 
-            if (this.deviceCtrls.indexOf(deviceCtrl) == -1) {
-                this.deviceCtrls.push(deviceCtrl);
+            if (this.controls.indexOf(control) == -1) {
+                this.controls.push(control);
             }
         }
     }
@@ -70,46 +70,46 @@ export default class View extends AbstractCollectionItem {
         return result;
     }
 
-    onMidi(deviceCtrl: DeviceControl, midi: Midi) {
+    onMidi(control: Control, midi: Midi) {
         let mode: string;
-        let ctrl: AbstractControl;
+        let component: AbstractComponent;
 
-        // if ctrl in an active mode, let the ctrl in the first associates mode handle
+        // if component in an active mode, let the component in the first associates mode handle
         for (let activeMode of this.getActiveModes()) {
-            if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.id]) {
+            if (this.componentMap[activeMode] && this.componentMap[activeMode][control.id]) {
                 mode = activeMode;
-                ctrl = this.ctrlMap[activeMode][deviceCtrl.id];
+                component = this.componentMap[activeMode][control.id];
                 break;
             }
         }
 
-        if (mode && ctrl) {
-            this.ctrlMap[mode][deviceCtrl.id].onMidi(deviceCtrl, midi);
+        if (mode && component) {
+            this.componentMap[mode][control.id].onMidi(control, midi);
         } else {
             if (this.parent) {
-                this.parent.onMidi(deviceCtrl, midi);
+                this.parent.onMidi(control, midi);
             } else {
                 toast(`Control not implemented in view.`);
             }
         }
     }
 
-    updateDeviceCtrlState(ctrl: AbstractControl, deviceCtrl: DeviceControl, state: any): void {
-        let ctrlInView = false;
+    updateControlState(component: AbstractComponent, control: Control, state: any): void {
+        let componentInView = false;
         for (let activeMode of this.getActiveModes()) {
-            if (this.ctrlMap[activeMode] && this.ctrlMap[activeMode][deviceCtrl.id]) {
-                let modeCtrl = this.ctrlMap[activeMode][deviceCtrl.id];
-                if(modeCtrl == ctrl || modeCtrl == ctrl.parent) {
-                    ctrl.setDeviceCtrlState(deviceCtrl, state);
+            if (this.componentMap[activeMode] && this.componentMap[activeMode][control.id]) {
+                let modeComponent = this.componentMap[activeMode][control.id];
+                if(modeComponent == component || modeComponent == component.parent) {
+                    component.setControlState(control, state);
                 }
 
-                ctrlInView = true;
+                componentInView = true;
                 break;
             }
         }
-        // if current view doesn't handle ctrl in available modes, send up to parent
-        if (!ctrlInView && this.parent) {
-            this.parent.updateDeviceCtrlState(ctrl, deviceCtrl, state);
+        // if current view doesn't handle component in available modes, send up to parent
+        if (!componentInView && this.parent) {
+            this.parent.updateControlState(component, control, state);
         }
     }
 }

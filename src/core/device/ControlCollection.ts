@@ -1,12 +1,12 @@
 import Collection from '../../helpers/Collection';
-import DeviceControl from './DeviceControl';
+import Control from './Control';
 import { areDeepEqual } from '../../utils';
 
 
-export default class DeviceControlCollection extends Collection<DeviceControl> {
-    private _midiMap: { [key: number]: { [key: number]: { [key: number]: DeviceControl } } } = {};
+export default class ControlCollection extends Collection<Control> {
+    private _midiMap: { [key: number]: { [key: number]: { [key: number]: Control } } } = {};
 
-    add(key: string, item: DeviceControl): void {
+    add(key: string, item: Control): void {
         super.add(key, item);
         // cache reverse lookup midi values in this._midiMap
         if (this._midiMap[`${item.midiInIndex}`] == undefined) {
@@ -18,7 +18,7 @@ export default class DeviceControlCollection extends Collection<DeviceControl> {
         this._midiMap[`${item.midiInIndex}`][item.status][item.data1] = item;
     }
 
-    remove(keyOrItem: string | DeviceControl): void {
+    remove(keyOrItem: string | Control): void {
         super.remove(keyOrItem);
         let item = this._items[this.indexOf(keyOrItem)];
         // cleanup cache in this._midiMap

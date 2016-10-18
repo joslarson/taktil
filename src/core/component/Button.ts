@@ -1,7 +1,7 @@
 import config from  '../../config';
-import AbstractControl from './AbstractControl';
+import AbstractComponent from './AbstractComponent';
 import {msgType, IntervalTask} from '../../utils';
-import DeviceControl from '../device/DeviceControl';
+import Control from '../device/Control';
 import Midi from '../../helpers/Midi';
 
 
@@ -18,7 +18,7 @@ enum Brightness {
 //     MANUAL
 // }
 
-export default class Button extends AbstractControl {
+export default class Button extends AbstractComponent {
     mode: string;
     isColor: boolean;
 
@@ -41,22 +41,22 @@ export default class Button extends AbstractControl {
         super.setState(state);
     }
 
-    setDeviceCtrlState (deviceCtrl: DeviceControl, state) {
-        let midiOut = deviceCtrl.midiOut;
+    setControlState (control: Control, state) {
+        let midiOut = control.midiOut;
         if (this.isColor) {
-            midiOut.sendMidi(msgType(deviceCtrl.status) + 0, deviceCtrl.data1, this.state.h);
-            midiOut.sendMidi(msgType(deviceCtrl.status) + 1, deviceCtrl.data1, this.state.s);
-            midiOut.sendMidi(msgType(deviceCtrl.status) + 2, deviceCtrl.data1, state.b);
+            midiOut.sendMidi(msgType(control.status) + 0, control.data1, this.state.h);
+            midiOut.sendMidi(msgType(control.status) + 1, control.data1, this.state.s);
+            midiOut.sendMidi(msgType(control.status) + 2, control.data1, state.b);
         } else {
             if (state) {
-                midiOut.sendMidi(deviceCtrl.status, deviceCtrl.data1, 127);
+                midiOut.sendMidi(control.status, control.data1, 127);
             } else {
-                midiOut.sendMidi(deviceCtrl.status, deviceCtrl.data1, 0);
+                midiOut.sendMidi(control.status, control.data1, 0);
             }
         }
     }
 
-    onMidi (deviceCtrl: DeviceControl, midi: Midi) {
+    onMidi (control: Control, midi: Midi) {
 
         if (this.mode == 'TOGGLE') {
             this.handleToggle(midi);

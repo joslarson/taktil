@@ -1,5 +1,5 @@
 import Collection from './Collection';
-import {guid} from '../utils';
+import { guid } from '../utils';
 
 
 abstract class AbstractCollectionItem {
@@ -24,7 +24,7 @@ abstract class AbstractCollectionItem {
         if (this.collection.has(this)) this.collection.remove(this);
     }
 
-    name(): string {
+    getName(): string {
         return this.collection.keyOf(this);
     }
 }

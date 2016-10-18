@@ -3,11 +3,11 @@ import host from './host';
 import session from './session';
 import * as utils from './utils';
 import { View, ViewCollection } from './core/view';
-import { AbstractDevice, DeviceTemplate, DeviceControl, DeviceControlCollection } from './core/device';
-import { AbstractControl, Button, ControlSet, Knob } from './core/control';
+import { AbstractDevice, Template, Control, ControlCollection } from './core/device';
+import { AbstractComponent, Button, ComponentSet, Knob } from './core/component';
 
 
 export { config, host, session, utils };
-export { AbstractDevice, DeviceTemplate, DeviceControl, DeviceControlCollection };
+export { AbstractDevice, Template, Control, ControlCollection };
 export { View, ViewCollection };
-export { AbstractControl, Button, ControlSet, Knob };
+export { AbstractComponent, Button, ComponentSet, Knob };
