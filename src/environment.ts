@@ -1,5 +1,7 @@
 // setup environment
 import 'bitwig-es-polyfill';
+import logger from './logger';
+
 loadAPI(1); // load bitwig api v1
 
 
@@ -13,3 +15,5 @@ global.toast = function(msg) {
 global.log = function(...msgs) {
     host.println(msgs.join(' '));
 }
+
+global.logger = logger;

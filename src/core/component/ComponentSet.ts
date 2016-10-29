@@ -1,6 +1,6 @@
 import AbstractComponent from './AbstractComponent';
 import View from '../view/View';
-import Control from '../device/Control';
+import Control from '../controller/Control';
 import Midi from '../../helpers/Midi';
 
 

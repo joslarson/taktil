@@ -4,17 +4,17 @@ import CachedScene from './CachedScene';
 import CachedClip from './CachedClip';
 import {rgb2hsb} from '../../utils';
 import HSB from '../../helpers/HSB';
-import session from '../../session';
+import document from '../../document';
 import * as api from '../../typings/api';
 
 export default class Bitwig {
-    application: api.Application = session.host.createApplication();
-    project: api.Project = session.host.getProject();
-    transport: api.Transport = session.host.createTransport();
-    cursorTrack: api.CursorTrack = session.host.createArrangerCursorTrack(0, config['SCENE_COUNT']);
+    application: api.Application = document.host.createApplication();
+    project: api.Project = document.host.getProject();
+    transport: api.Transport = document.host.createTransport();
+    cursorTrack: api.CursorTrack = document.host.createArrangerCursorTrack(0, config['SCENE_COUNT']);
     trackBank: api.TrackBank;
-    sceneBank: api.SceneBank = session.host.createSceneBank(config['SCENE_COUNT']);
-    master: api.MasterTrack = session.host.createMasterTrack(0);
+    sceneBank: api.SceneBank = document.host.createSceneBank(config['SCENE_COUNT']);
+    master: api.MasterTrack = document.host.createMasterTrack(0);
 
     cache = {
         layout: <string> 'ARRANGE',

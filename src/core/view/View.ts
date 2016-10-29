@@ -2,7 +2,7 @@ import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import Collection from '../../helpers/Collection';
 import Midi from '../../helpers/Midi';
 import AbstractComponent from '../component/AbstractComponent';
-import Control from '../device/Control';
+import Control from '../controller/Control';
 
 
 export default class View extends AbstractCollectionItem {
@@ -35,12 +35,10 @@ export default class View extends AbstractCollectionItem {
     }
 
     registerComponent(component: AbstractComponent, controls: Control[]|Control, mode='BASE') {
-        if (controls instanceof Control) {
-            controls = [<Control>controls];
-        }
+        controls = controls instanceof Control ? [<Control>controls] : controls;
         // register controls w/ component
         component.register(<Control[]>controls, this);
-        for (let control of <Control[]>controls) {
+        for (let control of controls as Control[]) {
             // register control with view
             if (!this.componentMap[mode]) this.componentMap[mode] = {};
             this.componentMap[mode][control.id] = component;

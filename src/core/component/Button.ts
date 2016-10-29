@@ -1,7 +1,7 @@
 import config from  '../../config';
 import AbstractComponent from './AbstractComponent';
-import {msgType, IntervalTask} from '../../utils';
-import Control from '../device/Control';
+import { msgType, IntervalTask } from '../../utils';
+import Control from '../controller/Control';
 import Midi from '../../helpers/Midi';
 
 
@@ -11,54 +11,48 @@ enum Brightness {
     OFF = 0
 }
 
-// enum Mode {
-//     GATE,
-//     TOGGLE,
-//     PRESS,
-//     MANUAL
-// }
+export type ButtonMode = 'GATE'|'TOGGLE'|'PRESS'|'MANUAL';
+export type ButtonEvent = 'register'|'toggleOn'|'toggleOff'|'press'|'longPress'|'doublePress'|'release'|'doubleRelease';
 
 export default class Button extends AbstractComponent {
-    mode: string;
+    mode: ButtonMode;
     isColor: boolean;
 
-    constructor (name:string, mode:string='GATE', isColor:boolean=false) {
+    constructor(name: string, mode: ButtonMode = 'GATE', isColor = false) {
         super(name);
-        this.mode = mode;  // 'GATE', 'TOGGLE', 'PRESS', 'MANUAL'
+        this.mode = mode;
         this.isColor = isColor;
-        if (this.isColor) {
-            this.state = { h: 0, s: 0, b: Brightness.ON };
-        } else {
-            this.state = <boolean> false;
-        }
+        this.state = this.isColor ? { h: 0, s: 0, b: Brightness.ON } : false;
     }
 
-    setState (state) {
+    setState(state) {
         if (this.isColor) {
-            state = state === true ? {h: this.state.h, s: this.state.s, b: Brightness.ON} : state;
-            state = state === false ? {h: this.state.h, s: this.state.s, b: Brightness.OFF} : state;
+            const { ON, OFF } = Brightness;
+            state = typeof state === 'boolean' ? { 
+                h: this.state.h, s: this.state.s, b: state ? ON : OFF,
+            } : state;
         }
         super.setState(state);
     }
 
-    setControlState (control: Control, state) {
+    setControlState(control: Control, state) {
         let midiOut = control.midiOut;
         if (this.isColor) {
             midiOut.sendMidi(msgType(control.status) + 0, control.data1, this.state.h);
             midiOut.sendMidi(msgType(control.status) + 1, control.data1, this.state.s);
             midiOut.sendMidi(msgType(control.status) + 2, control.data1, state.b);
         } else {
-            if (state) {
-                midiOut.sendMidi(control.status, control.data1, 127);
-            } else {
-                midiOut.sendMidi(control.status, control.data1, 0);
-            }
+            const { ON, OFF } = Brightness;
+            midiOut.sendMidi(control.status, control.data1, state ? ON : OFF);
         }
     }
 
-    onMidi (control: Control, midi: Midi) {
+    on(eventName: ButtonEvent, callback:Function) {
+        return super.on(eventName, callback);
+    }
 
-        if (this.mode == 'TOGGLE') {
+    onMidi(control: Control, midi: Midi) {
+        if (this.mode === 'TOGGLE') {
             this.handleToggle(midi);
         } else {
             this.handleState(midi);
@@ -70,26 +64,27 @@ export default class Button extends AbstractComponent {
         }
     }
 
-    private isPress (midi: Midi) {
+    private isPress(midi: Midi) {
         return midi.data2 > 0;
     }
 
-    private isDoublePress (midi: Midi) {
-        return this.isPress(midi) && this.memory['doublePress'];
+    private isDoublePress(midi: Midi) {
+        return this.memory['doublePress'] && this.isPress(midi);
     }
 
-    private isRelease (midi: Midi) {
+    private isRelease(midi: Midi) {
         return midi.data2 == 0;
     }
 
-    private isDoubleRelease (midi: Midi) {
-        return this.isRelease(midi) && this.memory['doubleRelease'];
+    private isDoubleRelease(midi: Midi) {
+        return this.memory['doubleRelease'] && this.isRelease(midi);
     }
 
-    private handleToggle (midi: Midi) {
+    private handleToggle(midi: Midi) {
         if (!this.eventHandlers['toggleOn'] || !this.eventHandlers['toggleOff']) {
             throw 'Must implement "toggleOn" and "toggleOff" callbacks.';
         }
+
         if (!this.isPress(midi)) return;
 
         if (!this.state) {
@@ -101,15 +96,14 @@ export default class Button extends AbstractComponent {
         }
     }
 
-    private handlePress (midi: Midi) {
+    private handlePress(midi: Midi) {
         // if it's not a press, not implemented or is a doublePress, ignore it
         if (!this.isPress(midi) || !this.eventHandlers['press'] || this.memory['doublePress']) return;
-
         // handle single press
         this.callCallback('press');
     }
 
-    private handleDoublePress (midi: Midi) {
+    private handleDoublePress(midi: Midi) {
         // if it's not a press or not implemented, ignore it
         if (!this.isPress(midi) || !this.eventHandlers['doublePress']) return;
 
@@ -125,7 +119,7 @@ export default class Button extends AbstractComponent {
         }
     }
 
-    private handleLongPress (midi: Midi) {
+    private handleLongPress(midi: Midi) {
         // if it's a doublePress or is not implemented, ignore it
         if (this.isDoublePress(midi) || !this.eventHandlers['longPress']) return;
 
@@ -141,14 +135,14 @@ export default class Button extends AbstractComponent {
         }
     }
 
-    private handleRelease (midi: Midi) {
+    private handleRelease(midi: Midi) {
         // if it's not a release, not implemented or is a doubleRelease, ignore it
         if (!this.isRelease(midi) || !this.eventHandlers['release'] || this.memory['doubleRelease']) return;
         // handle single release
         this.callCallback('release');
     }
 
-    private handleDoubleRelease (midi: Midi) {
+    private handleDoubleRelease(midi: Midi) {
         // if it's not a release or not implemented, ignore it
         if (!this.isRelease(midi) || !this.eventHandlers['doubleRelease']) return;
 
@@ -164,7 +158,7 @@ export default class Button extends AbstractComponent {
         }
     }
 
-    private handleState (midi: Midi) {
+    private handleState(midi: Midi) {
         if (this.state == undefined) return;
 
         if (this.isPress(midi) && (this.mode == 'GATE' || this.mode == 'PRESS')) {

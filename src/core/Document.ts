@@ -1,20 +1,20 @@
 import config from '../config';
 import Collection from '../helpers/Collection';
-import AbstractDevice from '../core/device/AbstractDevice';
+import AbstractController from '../core/controller/AbstractController';
 import ViewCollection from '../core/view/ViewCollection';
 import * as api from '../typings/api';
 import host from '../host';
 
 
-export default class Session {
-    devices: Collection<AbstractDevice> = new Collection<AbstractDevice>();
+export default class Document {
+    controllers: Collection<AbstractController> = new Collection<AbstractController>();
     views: ViewCollection = new ViewCollection();
     store: Object;
     private _eventHandlers: { [key: string]: Function[] } = {};
 
     constructor() {
         global.init = () => {
-            // call the session init callbacks
+            // call the document init callbacks
             this._callEventCallbacks('init');
         };
 
@@ -24,8 +24,8 @@ export default class Session {
 
         global.exit = () => {
             // blank controllers
-            for (let device of this.devices.items()) device.blankController();
-            // call the session exit callbacks
+            for (let controller of this.controllers.items()) controller.blankController();
+            // call the document exit callbacks
             this._callEventCallbacks('exit');
         };
     }

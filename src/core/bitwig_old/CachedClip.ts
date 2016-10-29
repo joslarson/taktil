@@ -1,5 +1,5 @@
 import config from '../../config';
-import session from '../../session';
+import document from '../../document';
 import HSB from '../../helpers/HSB';
 
 
@@ -14,7 +14,7 @@ export default class CachedClip {
 
     getColor() {
         var hsb = this.hsb;
-        var track = session.bitwig.cache.trackBankPage.tracks[session.bitwig.cache.trackBankPage.selectedTrackIndex];
+        var track = document.bitwig.cache.trackBankPage.tracks[document.bitwig.cache.trackBankPage.selectedTrackIndex];
 
         if (this.isQueued || this.isPlaying || this.isRecordingQueued || this.isRecording) {
             hsb = { h: hsb.h ? hsb.h : track.hsb.h, s: hsb.s ? hsb.s : track.hsb.s, b: 127 };

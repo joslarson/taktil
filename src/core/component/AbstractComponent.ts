@@ -1,10 +1,10 @@
 import View from '../view/View';
 import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import Midi from '../../helpers/Midi';
-import {areDeepEqual, IntervalTask} from '../../utils';
-import session from '../../session';
-import AbstractDevice from '../device/AbstractDevice';
-import Control from '../device/Control';
+import { areDeepEqual, IntervalTask } from '../../utils';
+import document from '../../document';
+import AbstractController from '../controller/AbstractController';
+import Control from '../controller/Control';
 
 
 abstract class AbstractComponent {
@@ -23,7 +23,7 @@ abstract class AbstractComponent {
         this.name = name;
     }
 
-    // called when button is regstered to a view for the first time
+    // called when button is registered to a view for the first time
     // allows running of code that is only aloud in the api's init function
     register(controls: Control[], view:View) {
         this.registrations.push({'view': view, 'controls': controls});
@@ -35,7 +35,7 @@ abstract class AbstractComponent {
     }
 
     refresh(control:Control) {
-        session.views.active.updateControlState(this, control, this.state);
+        document.views.active.updateControlState(this, control, this.state);
     }
 
     setState(state) {
@@ -46,7 +46,7 @@ abstract class AbstractComponent {
         // update hardware state through view to avoid
         // updating hardware controls not in current view
         for (let control of this.controls) {
-            session.views.active.updateControlState(this, control, state);
+            document.views.active.updateControlState(this, control, state);
         }
     }
 

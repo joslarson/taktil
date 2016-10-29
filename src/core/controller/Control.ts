@@ -1,11 +1,11 @@
 import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import Midi from '../../helpers/Midi';
-import AbstractDevice from './AbstractDevice';
+import AbstractController from './AbstractController';
 import host from '../../host';
 import * as api from '../../typings/api';
 
 export default class Control extends AbstractCollectionItem {
-    device: AbstractDevice;
+    controller: AbstractController;
     midiInIndex: number;
     midiOutIndex: number;
     midiIn: api.MidiIn;
@@ -14,9 +14,9 @@ export default class Control extends AbstractCollectionItem {
     data1: number;
     data2: number;
 
-    constructor(device: AbstractDevice, midiInIndex: number, midiOutIndex: number, midi: Midi) {
+    constructor(controller: AbstractController, midiInIndex: number, midiOutIndex: number, midi: Midi) {
         super();
-        this.device = device;
+        this.controller = controller;
         this.midiInIndex = midiInIndex;
         this.midiOutIndex = midiOutIndex;
         this.midiIn = host.getMidiInPort(midiInIndex);

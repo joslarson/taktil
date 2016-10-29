@@ -2,7 +2,7 @@ import config from '../../config';
 import CachedClip from './CachedClip';
 import HSB from '../../helpers/HSB';
 import * as api from '../../typings/api';
-import session from '../../session';
+import document from '../../document';
 import {rgb2hsb} from '../../utils';
 
 export default class CachedTrack {
@@ -68,36 +68,36 @@ export default class CachedTrack {
         //     // if no track is selected, set selectedTrackIndex to null
         //     if (isSelected) {
         //         this.isSelected = true;
-        //         session.bitwig.cache.trackBankPage.selectedTrackIndex = trackIndex;
+        //         document.bitwig.cache.trackBankPage.selectedTrackIndex = trackIndex;
         //     } else {
-        //         let page = session.bitwig.cache.trackBankPage;
+        //         let page = document.bitwig.cache.trackBankPage;
         //         if (trackIndex == page.selectedTrackIndex) page.selectedTrackIndex = null;
         //         this.isSelected = false;
         //     }
         // });
 
         // trackClipSlots.addHasContentObserver((index, hasContent) => {
-        //     let scene = session.bitwig.cache.trackBankPage.scenes[index];
+        //     let scene = document.bitwig.cache.trackBankPage.scenes[index];
         //     // println(trackIndex + ':' + index + ' ' + hasContent);
         //     // adds clips to tracks and scenes upon init
         //     if (this.clips[index] == undefined) this.clips[index] = new CachedClip();
         //     if (scene.clips[trackIndex] == undefined) scene.clips[trackIndex] = this.clips[index];
         //
         //     this.clips[index].hasContent = hasContent;
-        //     session.bitwig.cache.trackBankPage.scenes[index].setHasContent();
+        //     document.bitwig.cache.trackBankPage.scenes[index].setHasContent();
         // });
 
         trackClipSlots.addIsPlaybackQueuedObserver((index, isQueued) => {
-            let scene = session.bitwig.cache.trackBankPage.scenes[index];
+            let scene = document.bitwig.cache.trackBankPage.scenes[index];
 
             if (isQueued) {
                 this.queuedClipIndex = index;
                 this.clips[index].isQueued = true;
-                session.bitwig.cache.trackBankPage.scenes[index].setIsQueued();
+                document.bitwig.cache.trackBankPage.scenes[index].setIsQueued();
             } else {
                 if (this.queuedClipIndex == index) this.queuedClipIndex = null;
                 this.clips[index].isQueued = false;
-                session.bitwig.cache.trackBankPage.scenes[index].isQueued = false;
+                document.bitwig.cache.trackBankPage.scenes[index].isQueued = false;
             }
         });
 
@@ -110,8 +110,8 @@ export default class CachedTrack {
                 this.clips[index].isPlaying = false;
             }
 
-            let scene = session.bitwig.cache.trackBankPage.scenes[index];
-            session.bitwig.cache.trackBankPage.scenes[index].setIsPlaying();
+            let scene = document.bitwig.cache.trackBankPage.scenes[index];
+            document.bitwig.cache.trackBankPage.scenes[index].setIsPlaying();
         });
 
         trackClipSlots.addIsRecordingObserver((index, isRecording) => {

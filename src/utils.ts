@@ -72,6 +72,20 @@ export function rgb2hsb (r:number, g:number, b:number): HSB {
     return result;
 }
 
+export function unsignedInt8ToHex(x) {
+   const upper = (x >> 4) & 0xF;
+   const lower = x & 0xF;
+
+   return upper.toString(16) + lower.toString(16) + " ";
+}
+
+export function unsignedInt7ToHex(x) {
+   const upper = (x >> 4) & 0x7;
+   const lower = x & 0xF;
+
+   return upper.toString(16) + lower.toString(16) + " ";
+}
+
 export function initCountingArray (startValue:number, length:number): number[] {
     let array: number[] = [];
     array.length = length;

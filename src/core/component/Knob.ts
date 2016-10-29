@@ -1,5 +1,5 @@
 import AbstractComponent from './AbstractComponent';
-import Control from '../device/Control';
+import Control from '../controller/Control';
 import * as utils from '../../utils';
 import Midi from '../../helpers/Midi';
 
@@ -52,7 +52,7 @@ export default class Knob extends AbstractComponent {
         this.callCallback('change', midi.data2);
     }
 
-    private handleState(device, midi: Midi) {
+    private handleState(controller, midi: Midi) {
         if (this.state == undefined) return;
         let newData2 = midi.data2;
         let newKnobState = midi.data2;

@@ -5,17 +5,17 @@ import Template from './Template';
 import Control from './Control';
 import ControlCollection from './ControlCollection';
 import host from '../../host';
-import session from '../../session';
+import document from '../../document';
 import * as api from '../../typings/api';
 
 
-abstract class AbstractDevice extends AbstractCollectionItem {
+abstract class AbstractController extends AbstractCollectionItem {
     controls: ControlCollection = new ControlCollection();
     padMIDITable;
 
-    constructor (deviceTemplate: Template) {
+    constructor(controllerTemplate: Template) {
         super();
-        for (let ioMidiPair of deviceTemplate) {
+        for (let ioMidiPair of controllerTemplate) {
             let midiInIndex = ioMidiPair['midiInIndex'];
             let midiOutIndex = ioMidiPair['midiOutIndex'];
 
@@ -51,11 +51,11 @@ abstract class AbstractDevice extends AbstractCollectionItem {
         let control = this.controls.midiGet(midiInIndex, midi.status, midi.data1);
  
         if (control === undefined) {
-            toast('Control not defined in device template.');
+            toast('Control not defined in controller template.');
             return;
         }
 
-        session.views.active.onMidi(control, midi);
+        document.views.active.onMidi(control, midi);
 
         this.updateControl(midiInIndex, midi);
     }
@@ -72,18 +72,19 @@ abstract class AbstractDevice extends AbstractCollectionItem {
         return true;
     }
 
-    updateControl (midiInIndex: number, midi: Midi) {
+    updateControl(midiInIndex: number, midi: Midi) {
         // ignore all midi accept cc and note messages
         if (!isCc(midi.status) && !isNote(midi.status)) return;
         let control = this.controls.midiGet(midiInIndex, midi.status, midi.data1);
         control.data2 = midi.data2;
     }
 
-    blankController () {
+    blankController() {
         // implemented in child classes
+        throw 'Not Implemented';
     }
 
-    // TODO: store color conversion and hardware color update in device (possibly provide mixins for different manufacturers in contrib)
+    // TODO: store color conversion and hardware color update in controller (possibly provide mixins for different manufacturers in contrib)
 }
 
-export default AbstractDevice;
+export default AbstractController;
