@@ -6,8 +6,8 @@ import BrowserFilterColumn from './BrowserFilterColumn';
 
 
 class DeviceBrowsingSession extends BrowsingSession {
-    constructor (principal: api.DeviceBrowsingSession) {
-        super(principal);
+    constructor (target: api.DeviceBrowsingSession) {
+        super(target);
         this._extendMethodClassMap({
             'getCategoryFilter': BrowserFilterColumn,
             'getDeviceTypeFilter': BrowserFilterColumn,

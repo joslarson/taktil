@@ -5,8 +5,8 @@ import AutomatableRangedValue from './AutomatableRangedValue';
 
 
 class UserControlBank extends ApiProxy<api.UserControlBank> {
-    constructor (principal: api.UserControlBank) {
-        super(principal);
+    constructor (target: api.UserControlBank) {
+        super(target);
         this._extendMethodClassMap({
             'getControl': AutomatableRangedValue,
         });

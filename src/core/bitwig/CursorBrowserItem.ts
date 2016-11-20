@@ -6,8 +6,8 @@ import BrowserItem from './BrowserItem';
 
 
 class CursorBrowserItem extends BrowserItem {
-    constructor (principal: api.CursorBrowserItem) {
-        super(principal);
+    constructor (target: api.CursorBrowserItem) {
+        super(target);
         this._extendMethodClassMap({
             'createSiblingsBank': BrowserItemBank,
         });

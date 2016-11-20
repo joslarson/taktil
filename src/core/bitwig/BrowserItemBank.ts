@@ -5,8 +5,8 @@ import BrowserItem from './BrowserItem';
 
 
 class BrowserItemBank extends ApiProxy<api.BrowserItemBank> {
-    constructor (principal: api.BrowserItemBank) {
-        super(principal);
+    constructor (target: api.BrowserItemBank) {
+        super(target);
         this._extendMethodClassMap({
             'getItem': BrowserItem,
         });

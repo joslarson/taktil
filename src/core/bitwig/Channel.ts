@@ -9,8 +9,8 @@ import SoloValue from './SoloValue';
 
 
 class Channel extends DeviceChain {
-    constructor (principal: api.Channel) {
-        super(principal);
+    constructor (target: api.Channel) {
+        super(target);
         this._extendMethodClassMap({
             'getVolume': AutomatableRangedValue,
             'getPan': AutomatableRangedValue,

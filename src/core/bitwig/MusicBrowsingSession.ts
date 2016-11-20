@@ -6,8 +6,8 @@ import BrowserFilterColumn from './BrowserFilterColumn';
 
 
 class MusicBrowsingSession extends BrowsingSession {
-    constructor (principal: api.MusicBrowsingSession) {
-        super(principal);
+    constructor (target: api.MusicBrowsingSession) {
+        super(target);
         this._extendMethodClassMap({
             'getFileTypeFilter': BrowserFilterColumn,
         });

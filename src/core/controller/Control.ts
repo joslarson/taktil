@@ -4,6 +4,7 @@ import AbstractController from './AbstractController';
 import host from '../../host';
 import * as api from '../../typings/api';
 
+
 export default class Control extends AbstractCollectionItem {
     controller: AbstractController;
     midiInIndex: number;

@@ -5,8 +5,8 @@ import BooleanValue from './BooleanValue';
 
 
 class SourceSelector extends ApiProxy<api.SourceSelector> {
-    constructor (principal: api.SourceSelector) {
-        super(principal);
+    constructor (target: api.SourceSelector) {
+        super(target);
         this._extendMethodClassMap({
             'getHasNoteInputSelected': BooleanValue,
             'getHasAudioInputSelected': BooleanValue,

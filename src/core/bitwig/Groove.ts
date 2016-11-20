@@ -5,8 +5,8 @@ import AutomatableRangedValue from './AutomatableRangedValue';
 
 
 class Groove extends ApiProxy<api.Groove> {
-    constructor (principal: api.Groove) {
-        super(principal);
+    constructor (target: api.Groove) {
+        super(target);
         this._extendMethodClassMap({
             'getEnabled': AutomatableRangedValue,
             'getShuffleAmount': AutomatableRangedValue,

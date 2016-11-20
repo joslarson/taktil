@@ -5,8 +5,8 @@ import BrowserFilterColumn from './BrowserFilterColumn';
 
 
 class BrowserFilterColumnBank extends ApiProxy<api.BrowserFilterColumnBank> {
-    constructor (principal: api.BrowserFilterColumnBank) {
-        super(principal);
+    constructor (target: api.BrowserFilterColumnBank) {
+        super(target);
         this._extendMethodClassMap({
             'getItem': BrowserFilterColumn,
         });

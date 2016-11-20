@@ -6,8 +6,8 @@ import BrowserFilterColumn from './BrowserFilterColumn';
 
 
 class ClipBrowsingSession extends BrowsingSession {
-    constructor (principal: api.ClipBrowsingSession) {
-        super(principal);
+    constructor (target: api.ClipBrowsingSession) {
+        super(target);
         this._extendMethodClassMap({
             'getFileTypeFilter': BrowserFilterColumn,
         });

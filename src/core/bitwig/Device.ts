@@ -17,8 +17,8 @@ import Browser from './Browser';
 
 
 class Device extends ApiProxy<api.Device> {
-    constructor (principal: api.Device) {
-        super(principal);
+    constructor (target: api.Device) {
+        super(target);
         this._extendMethodClassMap({
             'getDeviceChain': DeviceChain,
             'getParameter': AutomatableRangedValue,

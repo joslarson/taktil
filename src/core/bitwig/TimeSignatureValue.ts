@@ -6,8 +6,8 @@ import IntegerValue from './IntegerValue';
 
 
 class TimeSignatureValue extends Value {
-    constructor (principal: api.TimeSignatureValue) {
-        super(principal);
+    constructor (target: api.TimeSignatureValue) {
+        super(target);
         this._extendMethodClassMap({
             'getNumerator': IntegerValue,
             'getDenominator': IntegerValue,

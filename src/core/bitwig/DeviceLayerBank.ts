@@ -6,8 +6,8 @@ import ChannelBank from './ChannelBank';
 
 
 class DeviceLayerBank extends ChannelBank {
-    constructor (principal: api.DeviceLayerBank) {
-        super(principal);
+    constructor (target: api.DeviceLayerBank) {
+        super(target);
         this._extendMethodClassMap({
             'getChannel': DeviceLayer,
         });

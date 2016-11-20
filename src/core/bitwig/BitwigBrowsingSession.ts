@@ -6,8 +6,8 @@ import BrowserFilterColumn from './BrowserFilterColumn';
 
 
 class BitwigBrowsingSession extends BrowsingSession {
-    constructor (principal: api.BitwigBrowsingSession) {
-        super(principal);
+    constructor (target: api.BitwigBrowsingSession) {
+        super(target);
         this._extendMethodClassMap({
             'getCreatorFilter': BrowserFilterColumn,
             'getTagsFilter': BrowserFilterColumn,

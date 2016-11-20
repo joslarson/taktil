@@ -14,8 +14,8 @@ import DeviceBrowsingSession from './DeviceBrowsingSession';
 
 
 class Browser extends ApiProxy<api.Browser> {
-    constructor (principal: api.Browser) {
-        super(principal);
+    constructor (target: api.Browser) {
+        super(target);
         this._extendMethodClassMap({
             'createSessionBank': BrowsingSessionBank,
             'createCursorSession': CursorBrowsingSession,

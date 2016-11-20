@@ -5,8 +5,8 @@ import GenericBrowsingSession from './GenericBrowsingSession';
 
 
 class BrowsingSessionBank extends ApiProxy<api.BrowsingSessionBank> {
-    constructor (principal: api.BrowsingSessionBank) {
-        super(principal);
+    constructor (target: api.BrowsingSessionBank) {
+        super(target);
         this._extendMethodClassMap({
             'getSession': GenericBrowsingSession,
         });

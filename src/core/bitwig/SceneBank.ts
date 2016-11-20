@@ -5,8 +5,8 @@ import Scene from './Scene';
 
 
 class SceneBank extends ApiProxy<api.SceneBank> {
-    constructor (principal: api.SceneBank) {
-        super(principal);
+    constructor (target: api.SceneBank) {
+        super(target);
         this._extendMethodClassMap({
             'getScene': Scene,
         });

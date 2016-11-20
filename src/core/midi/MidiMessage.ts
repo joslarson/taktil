@@ -1,9 +1,16 @@
 import { unsignedInt7ToHex, unsignedInt8ToHex } from '../../utils';
 
 
+export interface SimpleMidiMessage {
+    port: number;
+    status: number;
+    data1: number;
+    data2: number;
+}
+
 export type MidiMessageConstructor = { port?: number, status: number, data1: number, data2: number };
 
-export default class MidiMessage {
+export default class MidiMessage implements SimpleMidiMessage {
     port: number;
     status: number;
     data1: number;

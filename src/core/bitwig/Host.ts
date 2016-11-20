@@ -23,8 +23,8 @@ import Track from './Track';
 
 
 class Host extends ApiProxy<api.Host> {
-    constructor (principal: api.Host) {
-        super(principal);
+    constructor (target: api.Host) {
+        super(target);
         this._extendMethodClassMap({
             'getMidiInPort': MidiIn,
             'getMidiOutPort': MidiOut,

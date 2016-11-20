@@ -6,8 +6,8 @@ import BrowserFilterItem from './BrowserFilterItem';
 
 
 class BrowserFilterItemBank extends BrowserItemBank {
-    constructor (principal: api.BrowserFilterItemBank) {
-        super(principal);
+    constructor (target: api.BrowserFilterItemBank) {
+        super(target);
         this._extendMethodClassMap({
             'getItem': BrowserFilterItem,
         });

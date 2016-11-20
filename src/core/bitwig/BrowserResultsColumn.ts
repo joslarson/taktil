@@ -7,8 +7,8 @@ import BrowserResultsItemBank from './BrowserResultsItemBank';
 
 
 class BrowserResultsColumn extends BrowserColumn {
-    constructor (principal: api.BrowserResultsColumn) {
-        super(principal);
+    constructor (target: api.BrowserResultsColumn) {
+        super(target);
         this._extendMethodClassMap({
             'createCursorItem': BrowserResultsItem,
             'createItemBank': BrowserResultsItemBank,

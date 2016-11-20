@@ -6,8 +6,8 @@ import BrowserResultsItem from './BrowserResultsItem';
 
 
 class BrowserResultsItemBank extends BrowserItemBank {
-    constructor (principal: api.BrowserResultsItemBank) {
-        super(principal);
+    constructor (target: api.BrowserResultsItemBank) {
+        super(target);
         this._extendMethodClassMap({
             'getItem': BrowserResultsItem,
         });

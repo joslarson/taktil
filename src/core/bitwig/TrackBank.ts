@@ -7,8 +7,8 @@ import ClipLauncherScenesOrSlots from './ClipLauncherScenesOrSlots';
 
 
 class TrackBank extends ChannelBank {
-    constructor (principal: api.TrackBank) {
-        super(principal);
+    constructor (target: api.TrackBank) {
+        super(target);
         this._extendMethodClassMap({
             'getChannel': Track,
             'getClipLauncherScenes': ClipLauncherScenesOrSlots,

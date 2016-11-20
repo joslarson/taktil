@@ -5,8 +5,8 @@ import Track from './Track';
 
 
 class Project extends ApiProxy<api.Project> {
-    constructor (principal: api.Project) {
-        super(principal);
+    constructor (target: api.Project) {
+        super(target);
         this._extendMethodClassMap({
             'getRootTrackGroup': Track,
             'getShownTopLevelTrackGroup': Track,

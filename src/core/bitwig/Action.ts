@@ -4,14 +4,11 @@ import * as api from '../../typings/api';
 import ActionCategory from './ActionCategory';
 
 
-class Action extends ApiProxy<api.Action> {
-    constructor (principal: api.Action) {
-        super(principal);
+export default class Action extends ApiProxy<api.Action> {
+    constructor (target: api.Action) {
+        super(target);
         this._extendMethodClassMap({
             'getCategory': ActionCategory,
         });
     }
 }
-
-
-export default Action;

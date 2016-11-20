@@ -6,8 +6,8 @@ import Device from './Device';
 
 
 class DeviceBank extends ApiProxy<api.DeviceBank> {
-    constructor (principal: api.DeviceBank) {
-        super(principal);
+    constructor (target: api.DeviceBank) {
+        super(target);
         this._extendMethodClassMap({
             'getDeviceChain': DeviceChain,
             'getDevice': Device,

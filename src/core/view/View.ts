@@ -8,7 +8,10 @@ import Control from '../controller/Control';
 export default class View extends AbstractCollectionItem {
     initFunc: Function;
     parent: View;
-    componentMap: { [mode: string]: { [controlName: string]: AbstractComponent } } = { 'BASE': {} };
+    componentMap: {
+        view: { [controlName: string]: AbstractComponent },
+        modes: { [mode: string]: { [controlName: string]: AbstractComponent } },
+    } = { view: {}, modes: {} };
     controls: Control[] = [];
 
     private activeModes: string[] = [];
@@ -24,9 +27,11 @@ export default class View extends AbstractCollectionItem {
 
     refresh() {
         for (let control of this.controls) {
+            let component;
             for (let activeMode of this.getActiveModes()) {
-                if (this.componentMap[activeMode] && this.componentMap[activeMode][control.id]) {
-                    let component = this.componentMap[activeMode][control.id];
+                if (!this.componentMap[activeMode]) continue;  // silent
+                const component = this.componentMap[activeMode][control.id];
+                if (component) {
                     component.refresh(control);
                     break;
                 }
@@ -50,29 +55,28 @@ export default class View extends AbstractCollectionItem {
     }
 
     activateMode(mode: string) {
-        var modeIndex = this.activeModes.indexOf(mode);
+        if (mode === 'BASE') return;
+        const modeIndex = this.activeModes.indexOf(mode);
         if (modeIndex > -1) this.activeModes.splice(modeIndex, 1);
         this.activeModes.unshift(mode);  // prepend to activeModes[]
         this.refresh(); // refresh view
     }
 
     deactivateMode(mode: string) {
-        var modeIndex = this.activeModes.indexOf(mode);
+        const modeIndex = this.activeModes.indexOf(mode);
         if (modeIndex > -1) this.activeModes.splice(modeIndex, 1);
         this.refresh();
     }
 
     getActiveModes() {
-        var result = this.activeModes.slice(0);
-        result.push('BASE');
-        return result;
+        return [...this.activeModes, 'BASE'];
     }
 
     onMidi(control: Control, midi: Midi) {
         let mode: string;
         let component: AbstractComponent;
 
-        // if component in an active mode, let the component in the first associates mode handle
+        // if component in an active mode, let the component in the first associated mode handle
         for (let activeMode of this.getActiveModes()) {
             if (this.componentMap[activeMode] && this.componentMap[activeMode][control.id]) {
                 mode = activeMode;

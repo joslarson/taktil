@@ -131,14 +131,14 @@ export class IntervalTask {
         this.interval = interval;
     }
 
-    start (...args) {
+    start(...args) {
         host.scheduleTask(() => {
             if (!this.cancelled) this.callback.apply(this.scope, args);
         }, [], this.interval);
         return this;
     }
 
-    cancel () {
+    cancel() {
         this.cancelled = true;
         return this;
     }

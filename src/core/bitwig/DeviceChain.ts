@@ -6,8 +6,8 @@ import BooleanValue from './BooleanValue';
 
 
 class DeviceChain extends ApiProxy<api.DeviceChain> {
-    constructor (principal: api.DeviceChain) {
-        super(principal);
+    constructor (target: api.DeviceChain) {
+        super(target);
         this._extendMethodClassMap({
             'createDeviceBank': DeviceBank,
         });

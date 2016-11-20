@@ -7,8 +7,8 @@ import BooleanValue from './BooleanValue';
 
 
 class Clip extends ApiProxy<api.Clip> {
-    constructor (principal: api.Clip) {
-        super(principal);
+    constructor (target: api.Clip) {
+        super(target);
         this._extendMethodClassMap({
             'getShuffle': BooleanValue,
             'getAccent': RangedValue,

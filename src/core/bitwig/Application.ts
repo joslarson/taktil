@@ -6,8 +6,8 @@ import Action from './Action';
 
 
 class Application extends ApiProxy<api.Application> {
-    constructor (principal: api.Application) {
-        super(principal);
+    constructor (target: api.Application) {
+        super(target);
         this._extendMethodClassMap({
             'getActions': Action,
             'getAction': Action,

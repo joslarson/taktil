@@ -5,8 +5,8 @@ import BooleanValue from './BooleanValue';
 
 
 class NotificationSettings extends ApiProxy<api.NotificationSettings> {
-    constructor (principal: api.NotificationSettings) {
-        super(principal);
+    constructor (target: api.NotificationSettings) {
+        super(target);
         this._extendMethodClassMap({
             'getUserNotificationsEnabled': BooleanValue,
         });

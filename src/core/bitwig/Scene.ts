@@ -6,8 +6,8 @@ import Value from './Value';
 
 
 class Scene extends ApiProxy<api.Scene> {
-    constructor (principal: api.Scene) {
-        super(principal);
+    constructor (target: api.Scene) {
+        super(target);
         this._extendMethodClassMap({
             'getName': StringValue,
         });

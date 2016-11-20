@@ -6,8 +6,8 @@ import ModulationSource from './ModulationSource';
 
 
 class Macro extends ApiProxy<api.Macro> {
-    constructor (principal: api.Macro) {
-        super(principal);
+    constructor (target: api.Macro) {
+        super(target);
         this._extendMethodClassMap({
             'getAmount': AutomatableRangedValue,
             'getModulationSource': ModulationSource,

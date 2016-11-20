@@ -6,8 +6,8 @@ import BrowserItem from './BrowserItem';
 
 
 class BrowserColumn extends ApiProxy<api.BrowserColumn> {
-    constructor (principal: api.BrowserColumn) {
-        super(principal);
+    constructor (target: api.BrowserColumn) {
+        super(target);
         this._extendMethodClassMap({
             'createCursorItem': BrowserItem,
             'createItemBank': BrowserItemBank,

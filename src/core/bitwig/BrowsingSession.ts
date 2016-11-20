@@ -9,8 +9,8 @@ import BrowserFilterColumnBank from './BrowserFilterColumnBank';
 
 
 class BrowsingSession extends ApiProxy<api.BrowsingSession> {
-    constructor (principal: api.BrowsingSession) {
-        super(principal);
+    constructor (target: api.BrowsingSession) {
+        super(target);
         this._extendMethodClassMap({
             'getResults': BrowserResultsColumn,
             'getCursorResult': CursorBrowserResultItem,

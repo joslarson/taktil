@@ -7,8 +7,8 @@ import BrowserColumn from './BrowserColumn';
 
 
 class BrowserFilterColumn extends BrowserColumn {
-    constructor (principal: api.BrowserFilterColumn) {
-        super(principal);
+    constructor (target: api.BrowserFilterColumn) {
+        super(target);
         this._extendMethodClassMap({
             'getWildcardItem': BrowserFilterItem,
             'createCursorItem': BrowserFilterItem,

@@ -5,8 +5,8 @@ import NoteInput from './NoteInput';
 
 
 class MidiIn extends ApiProxy<api.MidiIn> {
-    constructor (principal: api.MidiIn) {
-        super(principal);
+    constructor (target: api.MidiIn) {
+        super(target);
         this._extendMethodClassMap({
             'createNoteInput': NoteInput,
         });

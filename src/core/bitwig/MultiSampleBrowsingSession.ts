@@ -6,8 +6,8 @@ import BrowserFilterColumn from './BrowserFilterColumn';
 
 
 class MultiSampleBrowsingSession extends BrowsingSession {
-    constructor (principal: api.MultiSampleBrowsingSession) {
-        super(principal);
+    constructor (target: api.MultiSampleBrowsingSession) {
+        super(target);
         this._extendMethodClassMap({
             'getFileTypeFilter': BrowserFilterColumn,
         });

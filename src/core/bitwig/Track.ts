@@ -11,8 +11,8 @@ import CursorDevice from './CursorDevice';
 
 
 class Track extends Channel {
-    constructor (principal: api.Track) {
-        super(principal);
+    constructor (target: api.Track) {
+        super(target);
         this._extendMethodClassMap({
             'getClipLauncherSlots': ClipLauncherSlots,
             'getArm': BooleanValue,

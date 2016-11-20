@@ -8,8 +8,8 @@ import StringValue from './StringValue';
 
 
 class Settings extends ApiProxy<api.Settings> {
-    constructor (principal: api.Settings) {
-        super(principal);
+    constructor (target: api.Settings) {
+        super(target);
         this._extendMethodClassMap({
             'getSignalSetting': Signal,
             'getNumberSetting': RangedValue,

@@ -25,11 +25,11 @@ export default class ApiProxy<Target> {
         }
     }
 
-    private _getTargetResult (methodName: string, args: any[]) {
+    private _getTargetResult(methodName: string, args: any[]) {
         return this.target[methodName].apply(this.target, args);
     }
 
-    private _handleGet (methodName: string, args: any[]) {
+    private _handleGet(methodName: string, args: any[]) {
         let newTargetResult = this._getTargetResult(methodName, args);
         if (typeof newTargetResult !== 'object') return newTargetResult;
 
@@ -48,7 +48,7 @@ export default class ApiProxy<Target> {
         if (ProxyClass !== undefined) {
             return this._methodCallCache[methodCallKey] = new ProxyClass(newTargetResult);
         } else {
-            throw 'No proxy class in methodClassMap for method "${methodName}".';
+            throw `No proxy class in methodClassMap for method "${methodName}".`;
         }
     }
 
@@ -57,7 +57,7 @@ export default class ApiProxy<Target> {
         if (ProxyClass !== undefined) {
             return new ProxyClass(this._getTargetResult(methodName, args));
         } else {
-            throw 'No proxy class in methodClassMap for method "${methodName}".';
+            throw `No proxy class in methodClassMap for method "${methodName}".`;
         }
     }
 
@@ -95,7 +95,7 @@ export default class ApiProxy<Target> {
                 key += '::func';
             } else if (arg instanceof ApiProxy) {
                 key += `::${arg.target.hashCode()}`;
-            } else if (arg.hasCode !== undefined) {  // is java object (or has hashCode implented)
+            } else if (arg.hasCode !== undefined) {  // is java object (or has hashCode implemented)
                 key += `::${arg.hashCode()}`;
             } else if (typeof arg === 'object') {
                 throw 'Error: Not sure how to hash object "${arg}".';

@@ -13,25 +13,27 @@ abstract class AbstractController extends AbstractCollectionItem {
     controls: ControlCollection = new ControlCollection();
     padMIDITable;
 
-    constructor(controllerTemplate: Template) {
+    constructor(...templates: Template[]) {
         super();
-        for (let ioMidiPair of controllerTemplate) {
-            let midiInIndex = ioMidiPair['midiInIndex'];
-            let midiOutIndex = ioMidiPair['midiOutIndex'];
 
-            let midiIn = host.getMidiInPort(midiInIndex);
+        for (let template of templates) {
+            const midiInIndex = template.midiInIndex;
+            const midiOutIndex = template.midiOutIndex;
+
+            const midiIn = host.getMidiInPort(midiInIndex);
             midiIn.setMidiCallback(this.getMidiCallback(midiInIndex));
-            if (ioMidiPair['noteInput']) {
-                let noteInput: api.NoteInput = midiIn.createNoteInput(ioMidiPair['noteInput']);
+
+            if (template.noteInput) {
+                const noteInput = midiIn.createNoteInput(template.noteInput[0], ...template.noteInput.slice(1));
                 // noteInput.setShouldConsumeEvents(false);
-                if (ioMidiPair['shouldConsumeEvents'] !== undefined) {
-                    noteInput.setShouldConsumeEvents(ioMidiPair['shouldConsumeEvents']);
+                if (template.shouldConsumeEvents !== undefined) {
+                    noteInput.setShouldConsumeEvents(template.shouldConsumeEvents);
                 }
                 // TODO: figure out where to store pointer to note input for modifying shouldConsumeEvents
             }
 
-            for (let controlName in ioMidiPair['controls']) {
-                let control = new Control(this, midiInIndex, midiOutIndex, ioMidiPair['controls'][controlName]);
+            for (let controlName in template.controls) {
+                let control = new Control(this, midiInIndex, midiOutIndex, template.controls[controlName]);
                 this.controls.add(controlName, control);
             }
         }
@@ -49,7 +51,7 @@ abstract class AbstractController extends AbstractCollectionItem {
         log(`[${this.getName()}_${String(midiInIndex)}] status: 0x${midi.status.toString(16).toUpperCase()}, data1: ${midi.data1.toString()}, data2: ${midi.data2.toString()}`);
 
         let control = this.controls.midiGet(midiInIndex, midi.status, midi.data1);
- 
+
         if (control === undefined) {
             toast('Control not defined in controller template.');
             return;
@@ -72,6 +74,7 @@ abstract class AbstractController extends AbstractCollectionItem {
         return true;
     }
 
+    // TODO: what does this do for us?
     updateControl(midiInIndex: number, midi: Midi) {
         // ignore all midi accept cc and note messages
         if (!isCc(midi.status) && !isNote(midi.status)) return;
@@ -84,7 +87,6 @@ abstract class AbstractController extends AbstractCollectionItem {
         throw 'Not Implemented';
     }
 
-    // TODO: store color conversion and hardware color update in controller (possibly provide mixins for different manufacturers in contrib)
 }
 
 export default AbstractController;

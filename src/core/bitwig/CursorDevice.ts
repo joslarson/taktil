@@ -7,8 +7,8 @@ import Device from './Device';
 
 
 class CursorDevice extends Cursor {
-    constructor (principal: api.CursorDevice) {
-        super(principal);
+    constructor (target: api.CursorDevice) {
+        super(target);
         this._extendMethodClassMap({
             'getChannel': Channel,
         });

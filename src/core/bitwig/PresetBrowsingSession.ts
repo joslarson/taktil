@@ -6,8 +6,8 @@ import BrowserFilterColumn from './BrowserFilterColumn';
 
 
 class PresetBrowsingSession extends BrowsingSession {
-    constructor (principal: api.PresetBrowsingSession) {
-        super(principal);
+    constructor (target: api.PresetBrowsingSession) {
+        super(target);
         this._extendMethodClassMap({
             'getCategoryFilter': BrowserFilterColumn,
             'getPresetTypeFilter': BrowserFilterColumn,

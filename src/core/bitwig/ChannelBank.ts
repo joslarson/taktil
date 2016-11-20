@@ -5,8 +5,8 @@ import Channel from './Channel';
 
 
 class ChannelBank extends ApiProxy<api.ChannelBank> {
-    constructor (principal: api.ChannelBank) {
-        super(principal);
+    constructor (target: api.ChannelBank) {
+        super(target);
         this._extendMethodClassMap({
             'getChannel': Channel,
         });

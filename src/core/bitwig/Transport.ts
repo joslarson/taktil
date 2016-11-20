@@ -7,8 +7,8 @@ import TimeSignatureValue from './TimeSignatureValue';
 
 
 class Transport extends ApiProxy<api.Transport> {
-    constructor (principal: api.Transport) {
-        super(principal);
+    constructor (target: api.Transport) {
+        super(target);
         this._extendMethodClassMap({
             'getTempo': AutomatableRangedValue,
             'getPosition': BeatTime,
