@@ -35,7 +35,7 @@ abstract class AbstractComponent {
     }
 
     refresh(control:Control) {
-        document.views.active.updateControlState(this, control, this.state);
+        document.activeView.updateControlState(this, control, this.state);
     }
 
     setState(state) {
@@ -46,7 +46,7 @@ abstract class AbstractComponent {
         // update hardware state through view to avoid
         // updating hardware controls not in current view
         for (let control of this.controls) {
-            document.views.active.updateControlState(this, control, state);
+            document.activeView.updateControlState(this, control, state);
         }
     }
 

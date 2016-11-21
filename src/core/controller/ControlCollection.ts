@@ -6,8 +6,8 @@ import { areDeepEqual } from '../../utils';
 export default class ControlCollection extends Collection<Control> {
     private _midiMap: { [key: number]: { [key: number]: { [key: number]: Control } } } = {};
 
-    add(key: string, item: Control): void {
-        super.add(key, item);
+    addView(key: string, item: Control): void {
+        super.addView(key, item);
         // cache reverse lookup midi values in this._midiMap
         if (this._midiMap[`${item.midiInIndex}`] == undefined) {
             this._midiMap[`${item.midiInIndex}`] = {};

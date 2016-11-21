@@ -4,28 +4,28 @@ import { guid } from '../utils';
 
 abstract class AbstractCollectionItem {
     id: string = guid();
-    private collection: Collection<AbstractCollectionItem>;
+    private _collection: Collection<AbstractCollectionItem>;
 
     hasCollection(): boolean {
-        return Boolean(this.collection);
+        return Boolean(this._collection);
     }
 
     getCollection(): Collection<AbstractCollectionItem> {
-        return this.collection;
+        return this._collection;
     }
 
     setCollection(collection: Collection<AbstractCollectionItem>): void {
-        if (this.collection) throw 'Item already belongs to a collection.';
-        this.collection = collection;
+        if (this._collection) throw 'Item already belongs to a collection.';
+        this._collection = collection;
     }
 
     unsetCollection(): void {
-        this.collection = undefined;
-        if (this.collection.has(this)) this.collection.remove(this);
+        this._collection = undefined;
+        if (this._collection.has(this)) this._collection.remove(this);
     }
 
     getName(): string {
-        return this.collection.keyOf(this);
+        return this._collection.keyOf(this);
     }
 }
 

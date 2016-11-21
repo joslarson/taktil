@@ -19,7 +19,7 @@ export default class Collection<ItemType extends AbstractCollectionItem> {
         return result;
     }
 
-    add(key: string, item: ItemType): void {
+    addView(key: string, item: ItemType): void {
         if (this.has(key)) this.remove(key);
         this._items.push(item);
         this._keys.push(key);

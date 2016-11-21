@@ -34,7 +34,7 @@ abstract class AbstractController extends AbstractCollectionItem {
 
             for (let controlName in template.controls) {
                 let control = new Control(this, midiInIndex, midiOutIndex, template.controls[controlName]);
-                this.controls.add(controlName, control);
+                this.controls.addView(controlName, control);
             }
         }
     }
@@ -57,7 +57,7 @@ abstract class AbstractController extends AbstractCollectionItem {
             return;
         }
 
-        document.views.active.onMidi(control, midi);
+        document.activeView.onMidi(control, midi);
 
         this.updateControl(midiInIndex, midi);
     }
