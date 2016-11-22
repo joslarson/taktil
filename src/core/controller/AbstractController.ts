@@ -1,5 +1,5 @@
 import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
-import Midi from '../../helpers/Midi';
+import MidiMessage from '../midi/MidiMessage';
 import { isCc, isNote } from '../../utils';
 import Template from './Template';
 import Control from './Control';
@@ -7,21 +7,21 @@ import ControlCollection from './ControlCollection';
 import host from '../../host';
 import document from '../../document';
 import * as api from '../../typings/api';
+import logger from '../../logger';
 
 
-abstract class AbstractController extends AbstractCollectionItem {
+abstract class AbstractController {
     controls: ControlCollection = new ControlCollection();
     padMIDITable;
 
     constructor(...templates: Template[]) {
-        super();
-
+        if (!__is_init__) throw "Controller objects can only be instantiated during the init phase.";
         for (let template of templates) {
             const midiInIndex = template.midiInIndex;
             const midiOutIndex = template.midiOutIndex;
 
             const midiIn = host.getMidiInPort(midiInIndex);
-            midiIn.setMidiCallback(this.getMidiCallback(midiInIndex));
+            midiIn.setMidiCallback(this._getMidiCallback(midiInIndex));
 
             if (template.noteInput) {
                 const noteInput = midiIn.createNoteInput(template.noteInput[0], ...template.noteInput.slice(1));
@@ -34,32 +34,42 @@ abstract class AbstractController extends AbstractCollectionItem {
 
             for (let controlName in template.controls) {
                 let control = new Control(this, midiInIndex, midiOutIndex, template.controls[controlName]);
-                this.controls.addView(controlName, control);
+                this.controls.add(controlName, control);
             }
         }
     }
 
-    private getMidiCallback(midiInIndex) {
+    getName() {
+        const controllers = document.getControllers();
+        for (let controllerName in controllers) {
+            if (controllers[controllerName] === this) return controllerName;
+        }
+        throw 'Unable to find registration name for controller';
+    }
+
+    private _getMidiCallback(midiInIndex) {
         return (status:number, data1:number, data2:number) => {
-            let midi = {status, data1, data2};
-            this.onMidi(midiInIndex, midi);
+            let midi = new MidiMessage({port: midiInIndex, status, data1, data2});
+            this.onMidi(midi);
         };
     }
 
-    onMidi(midiInIndex:number, midi:Midi) {
-        if (!isCc(midi.status) && !isNote(midi.status)) return;
-        log(`[${this.getName()}_${String(midiInIndex)}] status: 0x${midi.status.toString(16).toUpperCase()}, data1: ${midi.data1.toString()}, data2: ${midi.data2.toString()}`);
+    onMidi(midi: MidiMessage) {
+        if (!isCc(midi.status) && !isNote(midi.status)) return;  // TODO: what else do we need to allow through here?
+        logger.debug(`${this.getName()}(IN ${String(midi.port)}) => { status: 0x${midi.status.toString(16).toUpperCase()}, data1: ${midi.data1.toString()}, data2: ${midi.data2.toString()} }`);
 
-        let control = this.controls.midiGet(midiInIndex, midi.status, midi.data1);
+        let control = this.controls.midiGet(midi.port, midi.status, midi.data1);
+        let activeView = document.getActiveView();
 
         if (control === undefined) {
             toast('Control not defined in controller template.');
             return;
         }
 
-        document.activeView.onMidi(control, midi);
-
-        this.updateControl(midiInIndex, midi);
+        if (activeView) {
+            activeView.onMidi(control, midi);
+            this.updateControl(midi);
+        }
     }
 
     onSysex (midiInIndex:number, data) {
@@ -75,10 +85,10 @@ abstract class AbstractController extends AbstractCollectionItem {
     }
 
     // TODO: what does this do for us?
-    updateControl(midiInIndex: number, midi: Midi) {
+    updateControl(midi: MidiMessage) {
         // ignore all midi accept cc and note messages
         if (!isCc(midi.status) && !isNote(midi.status)) return;
-        let control = this.controls.midiGet(midiInIndex, midi.status, midi.data1);
+        let control = this.controls.midiGet(midi.port, midi.status, midi.data1);
         control.data2 = midi.data2;
     }
 
@@ -86,7 +96,6 @@ abstract class AbstractController extends AbstractCollectionItem {
         // implemented in child classes
         throw 'Not Implemented';
     }
-
 }
 
 export default AbstractController;

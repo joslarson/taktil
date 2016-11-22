@@ -1,7 +1,8 @@
 import AbstractComponent from './AbstractComponent';
 import Control from '../controller/Control';
 import * as utils from '../../utils';
-import Midi from '../../helpers/Midi';
+import MidiMessage from '../midi/MidiMessage';
+import document from '../../document';
 
 
 export default class Knob extends AbstractComponent {
@@ -26,8 +27,12 @@ export default class Knob extends AbstractComponent {
     }
 
     setControlState(control: Control, state) {
-        control.midiOut
-            .sendMidi(control.status, control.data1, this.state);
+        document.midiOut.sendMidi({
+            port: control.midiOutPort,
+            status: control.status,
+            data1: control.data1,
+            data2: this.state,
+        });
     }
 
     setMeter(data2) {
@@ -35,24 +40,28 @@ export default class Knob extends AbstractComponent {
         data2 = data2 > 126 ? 126 : data2;
         data2 = data2 < 1 ? 1 : data2;
         for (let control of this.controls) {
-            control.midiOut
-                .sendMidi(control.status, control.data1, data2);
+            document.midiOut.sendMidi({
+                port: control.midiOutPort,
+                status: control.status,
+                data1: control.data1,
+                data2,
+            });
         }
     }
 
-    onMidi(control: Control, midi: Midi) {
-        this.handleState(control, midi);
-        this.handleChange(midi);
+    onMidi(control: Control, midi: MidiMessage) {
+        this._handleState(control, midi);
+        this._handleChange(midi);
     }
 
-    private handleChange(midi: Midi) {
+    private _handleChange(midi: MidiMessage) {
         // if not implemented, ignore it
         if (!this.eventHandlers['change']) return;
         // handle single change
         this.callCallback('change', midi.data2);
     }
 
-    private handleState(controller, midi: Midi) {
+    private _handleState(controller, midi: MidiMessage) {
         if (this.state == undefined) return;
         let newData2 = midi.data2;
         let newKnobState = midi.data2;
@@ -64,8 +73,12 @@ export default class Knob extends AbstractComponent {
 
         if (this.meter) {
             for (let control of this.controls) {
-                control.midiOut
-                    .sendMidi(control.status, control.data1, this.state);
+                document.midiOut.sendMidi({
+                    port: control.midiOutPort,
+                    status: control.status,
+                    data1: control.data1,
+                    data2: this.state,
+                });
             }
             this.meter = false;
             return;
@@ -77,8 +90,12 @@ export default class Knob extends AbstractComponent {
         if (newData2 == 127) newData2 = 126;
 
         for (let control of this.controls) {
-            control.midiOut
-                .sendMidi(control.status, control.data1, newData2);
+            document.midiOut.sendMidi({
+                port: control.midiOutPort,
+                status: control.status,
+                data1: control.data1,
+                data2: newData2,
+            });
         }
     }
 }

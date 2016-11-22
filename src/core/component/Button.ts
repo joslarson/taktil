@@ -1,9 +1,12 @@
 import config from  '../../config';
+import document from  '../../document';
 import AbstractComponent from './AbstractComponent';
 import { msgType, IntervalTask } from '../../utils';
 import Control from '../controller/Control';
-import Midi from '../../helpers/Midi';
+import MidiMessage from '../midi/MidiMessage';
 
+
+const midiOut = document.midiOut;
 
 enum Brightness {
     ON = 127,
@@ -36,14 +39,34 @@ export default class Button extends AbstractComponent {
     }
 
     setControlState(control: Control, state) {
-        let midiOut = control.midiOut;
+        // TODO: remove Maschine specific code (implement sendcolor method)
         if (this.isColor) {
-            midiOut.sendMidi(msgType(control.status) + 0, control.data1, this.state.h);
-            midiOut.sendMidi(msgType(control.status) + 1, control.data1, this.state.s);
-            midiOut.sendMidi(msgType(control.status) + 2, control.data1, state.b);
+            midiOut.sendMidi({
+                port: control.midiOutPort,
+                status: msgType(control.status) + 0,
+                data1: control.data1,
+                data2: this.state.h,
+            });
+            midiOut.sendMidi({
+                port: control.midiOutPort,
+                status: msgType(control.status) + 1,
+                data1: control.data1,
+                data2: this.state.s,
+            });
+            midiOut.sendMidi({
+                port: control.midiOutPort,
+                status: msgType(control.status) + 2,
+                data1: control.data1,
+                data2: state.b,
+            });
         } else {
             const { ON, OFF } = Brightness;
-            midiOut.sendMidi(control.status, control.data1, state ? ON : OFF);
+            midiOut.sendMidi({
+                port: control.midiOutPort,
+                status: control.status,
+                data1: control.data1,
+                data2: state ? ON : OFF
+            });
         }
     }
 
@@ -51,41 +74,41 @@ export default class Button extends AbstractComponent {
         return super.on(eventName, callback);
     }
 
-    onMidi(control: Control, midi: Midi) {
+    onMidi(control: Control, midi: MidiMessage) {
         if (this.mode === 'TOGGLE') {
-            this.handleToggle(midi);
+            this._handleToggle(midi);
         } else {
-            this.handleState(midi);
-            this.handlePress(midi);
-            this.handleLongPress(midi);
-            this.handleDoublePress(midi);
-            this.handleRelease(midi);
-            this.handleDoubleRelease(midi);
+            this._handleState(midi);
+            this._handlePress(midi);
+            this._handleLongPress(midi);
+            this._handleDoublePress(midi);
+            this._handleRelease(midi);
+            this._handleDoubleRelease(midi);
         }
     }
 
-    private isPress(midi: Midi) {
+    private _isPress(midi: MidiMessage) {
         return midi.data2 > 0;
     }
 
-    private isDoublePress(midi: Midi) {
-        return this.memory['doublePress'] && this.isPress(midi);
+    private _isDoublePress(midi: MidiMessage) {
+        return this.memory['doublePress'] && this._isPress(midi);
     }
 
-    private isRelease(midi: Midi) {
+    private _isRelease(midi: MidiMessage) {
         return midi.data2 == 0;
     }
 
-    private isDoubleRelease(midi: Midi) {
-        return this.memory['doubleRelease'] && this.isRelease(midi);
+    private _isDoubleRelease(midi: MidiMessage) {
+        return this.memory['doubleRelease'] && this._isRelease(midi);
     }
 
-    private handleToggle(midi: Midi) {
+    private _handleToggle(midi: MidiMessage) {
         if (!this.eventHandlers['toggleOn'] || !this.eventHandlers['toggleOff']) {
             throw 'Must implement "toggleOn" and "toggleOff" callbacks.';
         }
 
-        if (!this.isPress(midi)) return;
+        if (!this._isPress(midi)) return;
 
         if (!this.state) {
             this.setState(true);
@@ -96,19 +119,19 @@ export default class Button extends AbstractComponent {
         }
     }
 
-    private handlePress(midi: Midi) {
+    private _handlePress(midi: MidiMessage) {
         // if it's not a press, not implemented or is a doublePress, ignore it
-        if (!this.isPress(midi) || !this.eventHandlers['press'] || this.memory['doublePress']) return;
+        if (!this._isPress(midi) || !this.eventHandlers['press'] || this.memory['doublePress']) return;
         // handle single press
         this.callCallback('press');
     }
 
-    private handleDoublePress(midi: Midi) {
+    private _handleDoublePress(midi: MidiMessage) {
         // if it's not a press or not implemented, ignore it
-        if (!this.isPress(midi) || !this.eventHandlers['doublePress']) return;
+        if (!this._isPress(midi) || !this.eventHandlers['doublePress']) return;
 
         // if is doublePress
-        if (this.isDoublePress(midi)) {
+        if (this._isDoublePress(midi)) {
             this.callCallback('doublePress');
         } else {
             // setup interval task to remove self after DOUBLE_PRESS_DURATION
@@ -119,12 +142,12 @@ export default class Button extends AbstractComponent {
         }
     }
 
-    private handleLongPress(midi: Midi) {
+    private _handleLongPress(midi: MidiMessage) {
         // if it's a doublePress or is not implemented, ignore it
-        if (this.isDoublePress(midi) || !this.eventHandlers['longPress']) return;
+        if (this._isDoublePress(midi) || !this.eventHandlers['longPress']) return;
 
         // if it's a press schedule the callback
-        if (this.isPress(midi)) {
+        if (this._isPress(midi)) {
             // schedule callback
             this.memory['longPress'] = new IntervalTask(this, function() {
                 this.callCallback('longPress');
@@ -135,19 +158,19 @@ export default class Button extends AbstractComponent {
         }
     }
 
-    private handleRelease(midi: Midi) {
+    private _handleRelease(midi: MidiMessage) {
         // if it's not a release, not implemented or is a doubleRelease, ignore it
-        if (!this.isRelease(midi) || !this.eventHandlers['release'] || this.memory['doubleRelease']) return;
+        if (!this._isRelease(midi) || !this.eventHandlers['release'] || this.memory['doubleRelease']) return;
         // handle single release
         this.callCallback('release');
     }
 
-    private handleDoubleRelease(midi: Midi) {
+    private _handleDoubleRelease(midi: MidiMessage) {
         // if it's not a release or not implemented, ignore it
-        if (!this.isRelease(midi) || !this.eventHandlers['doubleRelease']) return;
+        if (!this._isRelease(midi) || !this.eventHandlers['doubleRelease']) return;
 
         // if is doubleRelease
-        if (this.isDoubleRelease(midi)) {
+        if (this._isDoubleRelease(midi)) {
             this.callCallback('doubleRelease');
         } else {
             // setup interval task to remove self after DOUBLE_PRESS_DURATION
@@ -158,12 +181,12 @@ export default class Button extends AbstractComponent {
         }
     }
 
-    private handleState(midi: Midi) {
+    private _handleState(midi: MidiMessage) {
         if (this.state == undefined) return;
 
-        if (this.isPress(midi) && (this.mode == 'GATE' || this.mode == 'PRESS')) {
+        if (this._isPress(midi) && (this.mode == 'GATE' || this.mode == 'PRESS')) {
             this.setState(true);
-        } else if (this.isRelease(midi) && this.mode == 'GATE') {
+        } else if (this._isRelease(midi) && this.mode == 'GATE') {
             this.setState(false);
         }
     }

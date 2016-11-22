@@ -1,8 +1,9 @@
-import Midi from '../../helpers/Midi';
+import SimpleMidiMessage from './MidiMessage';
 import host from '../../host';
+import logger from '../../logger';
 
 
-export interface MidiOutControlState extends Midi {
+export interface MidiOutControlState extends SimpleMidiMessage {
     port: number,
     urgent: boolean,
 }
@@ -13,6 +14,10 @@ export default class MidiOutProxy {
     private _midiQueue: string[] = [];  // TODO: can this really be trusted to be in sync if it only knows about the outflow of midi data?
     private _sysexQueue: { port: number, data: string }[] = [];
 
+    constructor(document) {
+        document.on('flush', () => this.flushQueues());
+    }
+
     sendMidi({ port = 0, status, data1, data2, urgent = false }: { port?: number, status: number, data1: number, data2: number, urgent?: boolean }) {
         const key = `${port}:${status}:${data1}`;
         // quick exit if there's no change to data2 value
@@ -20,7 +25,12 @@ export default class MidiOutProxy {
         // TODO: replace with object spread in typescript 2.1
         this._state = Object.assign({}, this._state, { [key]: { port, status, data1, data2 } });
         // if urgent, fire midi message immediately, otherwise queue it up for next flush
-        urgent ? host.getMidiOutPort(port).sendMidi(status, data1, data2) : this._midiQueue.push(key);
+        if (urgent) {
+            logger.debug(`(OUT ${String(port)}) => { status: 0x${status.toString(16).toUpperCase()}, data1: ${data1.toString()}, data2: ${data2.toString()} }`);
+            host.getMidiOutPort(port).sendMidi(status, data1, data2);
+        } else {
+            this._midiQueue.push(key);
+        }
     }
 
     sendSysex({ port = 0, data, urgent = false }: { port?: number, data: string, urgent: boolean }) {
@@ -62,6 +72,7 @@ export default class MidiOutProxy {
         // 1. flush queued midi messages
         while (this._midiQueue.length > 0) {
             const { port, status, data1, data2 } = this._state[this._midiQueue.shift()];
+            logger.debug(`(OUT ${String(port)}) => { status: 0x${status.toString(16).toUpperCase()}, data1: ${data1.toString()}, data2: ${data2.toString()} }`);            
             host.getMidiOutPort(port).sendMidi(status, data1, data2);
         }
         // 2. flush queued sysex messages

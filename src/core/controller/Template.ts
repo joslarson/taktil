@@ -1,4 +1,4 @@
-import Midi from '../../helpers/Midi';
+import { SimpleMidiMessage } from '../midi/MidiMessage';
 import * as api from '../../typings/api';
 
 

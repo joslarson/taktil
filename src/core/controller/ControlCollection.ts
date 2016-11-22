@@ -6,23 +6,23 @@ import { areDeepEqual } from '../../utils';
 export default class ControlCollection extends Collection<Control> {
     private _midiMap: { [key: number]: { [key: number]: { [key: number]: Control } } } = {};
 
-    addView(key: string, item: Control): void {
-        super.addView(key, item);
+    add(key: string, item: Control): void {
+        super.add(key, item);
         // cache reverse lookup midi values in this._midiMap
-        if (this._midiMap[`${item.midiInIndex}`] == undefined) {
-            this._midiMap[`${item.midiInIndex}`] = {};
+        if (this._midiMap[`${item.midiInPort}`] == undefined) {
+            this._midiMap[`${item.midiInPort}`] = {};
         }
-        if (this._midiMap[`${item.midiInIndex}`][item.status] == undefined) {
-            this._midiMap[`${item.midiInIndex}`][item.status] = {};
+        if (this._midiMap[`${item.midiInPort}`][item.status] == undefined) {
+            this._midiMap[`${item.midiInPort}`][item.status] = {};
         }
-        this._midiMap[`${item.midiInIndex}`][item.status][item.data1] = item;
+        this._midiMap[`${item.midiInPort}`][item.status][item.data1] = item;
     }
 
     remove(keyOrItem: string | Control): void {
         super.remove(keyOrItem);
         let item = this._items[this.indexOf(keyOrItem)];
         // cleanup cache in this._midiMap
-        delete this._midiMap[`${item.midiIn}`][item.status][item.data1];
+        delete this._midiMap[item.midiInPort][item.status][item.data1];
     }
 
     // enables looking up with incoming midi

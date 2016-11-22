@@ -2,13 +2,12 @@ import { unsignedInt7ToHex, unsignedInt8ToHex } from '../../utils';
 
 
 export interface SimpleMidiMessage {
-    port: number;
     status: number;
     data1: number;
     data2: number;
 }
 
-export type MidiMessageConstructor = { port?: number, status: number, data1: number, data2: number };
+export type MidiMessageConstructorType = { port?: number, status: number, data1: number, data2: number };
 
 export default class MidiMessage implements SimpleMidiMessage {
     port: number;
@@ -16,7 +15,7 @@ export default class MidiMessage implements SimpleMidiMessage {
     data1: number;
     data2: number;
 
-    constructor({ port = 0, status, data1, data2 }: MidiMessageConstructor) {
+    constructor({ port = 0, status, data1, data2 }: MidiMessageConstructorType) {
         this.port = port;
         this.status = status;
         this.data1 = data1;

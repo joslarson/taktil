@@ -1,13 +1,43 @@
-export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
+import host from './host';
+import document from './document';
 
-declare const host;
+
+export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
 
 export class Logger {
     private _levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
-    level: Level = 'INFO';
+    private _level: Level = 'INFO';
+    private _levelSetting;
+    private _filter = '';
+    private _filterSetting;
 
-    constructor(level: Level = 'DEBUG') {
-        this.level = level;
+    constructor() {
+        document.on('init', () => {
+            this._levelSetting = host.getPreferences().getEnumSetting(
+                'Log Level', 'Development', this._levels, this._level
+            );
+            
+            this._levelSetting.addValueObserver(level => this._level = level);
+
+            this._filterSetting = host.getPreferences().getStringSetting('Log filter', 'Development', 0, this._filter);
+            this._filterSetting.addValueObserver(value => this._filter = value);
+        });
+    }
+
+    setLevel(level: Level) {
+        if (this._levelSetting) {
+            this._levelSetting.set(level);
+        } else {
+            this._level = level;
+        }
+    }
+
+    setFilter(value) {
+        if (this._filterSetting) {
+            this._filterSetting.set(value);
+        } else {
+            this._filter = value;
+        }
     }
 
     error(...messages) {
@@ -27,14 +57,9 @@ export class Logger {
     }
 
     private _log(level, ...messages) {
-        try {
-            this.level = host.getPreferences().getEnumSetting('Log Level', 'Development', ['ERROR', 'WARN', 'INFO', 'DEBUG'], this.level);
-        } catch (e) {
-            // pass
-        }
-        if (this._levels.indexOf(level) > this._levels.indexOf(this.level)) return;
+        if (this._levels.indexOf(level) > this._levels.indexOf(this._level)) return;
         const message = `[${level.toUpperCase()}] ${messages.join(' ')}`;
-        level === 'ERROR' ? console.error(message) : console.log(message);  // eslint-disable-line no-console
+        level === 'ERROR' ? console.error(message) : console.log(message);
     }
 }
 
