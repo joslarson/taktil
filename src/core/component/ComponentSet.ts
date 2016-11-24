@@ -1,5 +1,5 @@
 import AbstractComponent from './AbstractComponent';
-import AbstractView from '../view/AbstractView';
+import View from '../view/View';
 import Control from '../controller/Control';
 import MidiMessage from '../midi/MidiMessage';
 
@@ -8,7 +8,7 @@ export default class ComponentSet extends AbstractComponent {
     componentMap: { [key: string]: AbstractComponent } = {};
     createComponent: (index) => AbstractComponent;
 
-    register(controls: Control[], view: AbstractView) {
+    register(controls: Control[], view: View) {
         super.register(controls, view);
 
         for (let i = 0; i < controls.length; i++) {
@@ -22,19 +22,14 @@ export default class ComponentSet extends AbstractComponent {
         }
     }
 
-    render(control: Control) {
-        // pass on refresh to corresponding control
-        this.componentMap[control.getName()].render(control);
-    }
-
     setCreateComponentCallback(callback: (index) => AbstractComponent) {
         this.createComponent = callback;
         return this;
     }
 
-    setControlState(control: Control, state) {
+    renderControl(control: Control) {
         // pass on state to corresponding control
-        this.componentMap[control.getName()].setControlState(control, state);
+        this.componentMap[control.getName()].renderControl(control);
     }
 
     onMidi(control: Control, midi: MidiMessage) {

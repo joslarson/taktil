@@ -67,18 +67,21 @@ export default class MidiOutProxy {
     }
 
     // TODO: do I need to throttle this? do I need to make sure flushQueue function is only being run once at a given time
-    // TODO: look into making midi and sysex flushes asynchronous
     flushQueues() {
-        // 1. flush queued midi messages
-        while (this._midiQueue.length > 0) {
-            const { port, status, data1, data2 } = this._state[this._midiQueue.shift()];
-            logger.debug(`(OUT ${String(port)}) => { status: 0x${status.toString(16).toUpperCase()}, data1: ${data1.toString()}, data2: ${data2.toString()} }`);            
-            host.getMidiOutPort(port).sendMidi(status, data1, data2);
-        }
-        // 2. flush queued sysex messages
-        while (this._sysexQueue.length > 0) {
-            const { port, data } = this._sysexQueue.shift();
-            host.getMidiOutPort(port).sendSysex(data)
-        }
+        // 1. async flush queued midi messages
+        setTimeout(() => {
+            while (this._midiQueue.length > 0) {
+                const { port, status, data1, data2 } = this._state[this._midiQueue.shift()];
+                logger.debug(`(OUT ${String(port)}) => { status: 0x${status.toString(16).toUpperCase()}, data1: ${data1.toString()}, data2: ${data2.toString()} }`);            
+                host.getMidiOutPort(port).sendMidi(status, data1, data2);
+            }
+        }, 0);
+        // 2. async flush queued sysex messages
+        setTimeout(() => {
+            while (this._sysexQueue.length > 0) {
+                const { port, data } = this._sysexQueue.shift();
+                host.getMidiOutPort(port).sendSysex(data)
+            }
+        }, 0);
     }
 }

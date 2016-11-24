@@ -1,7 +1,7 @@
-import AbstractView from '../view/AbstractView';
+import View from '../view/View';
 import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import MidiMessage from '../midi/MidiMessage';
-import { areDeepEqual, IntervalTask } from '../../utils';
+import { areDeepEqual, TimeoutTask } from '../../utils';
 import document from '../../document';
 import AbstractController from '../controller/AbstractController';
 import Control from '../controller/Control';
@@ -14,11 +14,10 @@ abstract class AbstractComponent {
     controls: Control[] = [];
     registered: boolean = false;
     registrations: Object[] = [];
-    views: AbstractView[] = [];
+    views: View[] = [];
     eventHandlers: { [key: string]: Function[] } = {};
     memory: { [key: string]: any } = {};
     state: any; // depends on control type
-
 
     constructor(name:string) {
         this.name = name;
@@ -26,17 +25,13 @@ abstract class AbstractComponent {
 
     // called when button is registered to a view for the first time
     // allows running of code that is only aloud in the api's init function
-    register(controls: Control[], view: AbstractView) {
+    register(controls: Control[], view: View) {
         this.registrations.push({'view': view, 'controls': controls});
         this.controls = this.controls.concat(controls);
         this.views.push(view);
         if (this.eventHandlers['register'] && !this.registered) {
             this.callCallback('register');
         }
-    }
-
-    render(control: Control) {
-        document.getActiveView().updateControlState(this, control, this.state);
     }
 
     setState(state) {
@@ -47,12 +42,13 @@ abstract class AbstractComponent {
         // update hardware state through view to avoid
         // updating hardware controls not in current view
         for (let control of this.controls) {
-            document.getActiveView().updateControlState(this, control, state);
+            document.getActiveView().renderControl(control);
         }
     }
 
-    setControlState(control: Control, state) {
+    renderControl(control: Control) {
         // implemented in child classes
+        throw 'Not Implemented';
     }
 
     // registers event handlers
@@ -66,6 +62,7 @@ abstract class AbstractComponent {
     // handles midi messages routed to control
     onMidi(control: Control, midi: MidiMessage) {
         // implemented in subclasses
+        throw 'Not Implemented';
     }
 
     callCallback(eventName: string, ...args) {
@@ -79,7 +76,7 @@ abstract class AbstractComponent {
 
     cancelCallback(callbackName: string) {
         var memory = this.memory[callbackName];
-        if (memory instanceof IntervalTask) memory.cancel();
+        if (memory instanceof TimeoutTask) memory.cancel();
         delete this.memory[callbackName];
     }
 }

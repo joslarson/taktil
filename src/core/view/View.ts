@@ -1,19 +1,17 @@
-import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
-import Collection from '../../helpers/Collection';
 import MidiMessage from '../midi/MidiMessage';
-import AbstractComponent from '../component/AbstractComponent';
+import AbstractComponent from '../component/button/AbstractComponent';
 import Control from '../controller/Control';
 import document from '../../document';
 
 
-abstract class AbstractView {
-    parent: AbstractView;
+export default class View {
+    parent: View;
     componentMap: {
         [mode: string]: { [controlId: string]: AbstractComponent }
     } = {};
 
     constructor() {
-        if (!__is_init__) throw "View objects can only be instantiated during the init phase.";
+        // if (!__is_init__) throw "View objects can only be instantiated during the init phase.";
     }
 
     renderControl(control: Control) {
@@ -22,7 +20,7 @@ abstract class AbstractView {
             if (!this.componentMap[activeMode]) continue;  // mode not used in view
             const component = this.componentMap[activeMode][control.id];
             if (component) {
-                component.render(control);
+                component.renderControl(control);
                 return;
             }
         }
@@ -34,14 +32,14 @@ abstract class AbstractView {
         }
     }
 
-    registerComponent(component: AbstractComponent, controls: Control[]|Control, mode?: string) {
+    registerComponent(ComponentClass: new () => AbstractComponent, controls: Control[]|Control, mode = '__BASE__') {
         controls = controls instanceof Control ? [<Control>controls] : controls;
-        mode = mode === undefined ? '__BASE__' : mode;
+        const component = new ComponentClass();
 
         // register controls w/ component
         component.register(<Control[]>controls, this);
         for (let control of controls as Control[]) {
-            const registeredControls = document.getRegisteredControls();
+            const registeredControls = document.controls;
             // register control with view/mode
             if (!this.componentMap[mode]) this.componentMap[mode] = {};
             this.componentMap[mode][control.id] = component;
@@ -73,27 +71,4 @@ abstract class AbstractView {
             }
         }
     }
-
-    updateControlState(component: AbstractComponent, control: Control, state: any): void {
-        let componentInView = false;
-
-        for (let activeMode of document.getActiveModes()) {
-            if (this.componentMap[activeMode] && this.componentMap[activeMode][control.id]) {
-                let modeComponent = this.componentMap[activeMode][control.id];
-                if(modeComponent == component || modeComponent == component.parent) {
-                    component.setControlState(control, state);
-                }
-
-                componentInView = true;
-                break;
-            }
-        }
-        // if current view doesn't handle component in available modes, send up to parent
-        if (!componentInView && this.parent) {
-            this.parent.updateControlState(component, control, state);
-        }
-    }
 }
-
-
-export default AbstractView

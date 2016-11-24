@@ -4,7 +4,7 @@ import * as api from '../../typings/api';
 import ActionCategory from './ActionCategory';
 
 
-export default class Action extends ApiProxy<api.Action> {
+class Action extends ApiProxy<api.Action> {
     constructor (target: api.Action) {
         super(target);
         this._extendMethodClassMap({
@@ -12,3 +12,10 @@ export default class Action extends ApiProxy<api.Action> {
         });
     }
 }
+
+interface Action extends ApiProxy<api.Action>, api.Action {};
+
+declare const action: Action;
+
+
+export default Action;

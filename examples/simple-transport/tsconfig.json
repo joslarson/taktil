@@ -1,0 +1,18 @@
+{
+    "compilerOptions": {
+        "target": "es2015",  // runs through es3 transpiler after rollup (see gulpfile)
+        "module": "es2015",
+        "rootDir": "src",
+        "baseUrl": "./src",
+        "sourceMap": false,
+        "moduleResolution": "node",
+        "allowJs": true
+    },
+    "compileOnSave": true,
+    "include": [
+        "src/**/*.ts"
+    ],
+    "exclude": [
+        "node_modules"
+    ]
+}

@@ -11,11 +11,14 @@ import logger from '../../logger';
 
 
 abstract class AbstractController {
-    controls: ControlCollection = new ControlCollection();
+    private _controlCollection: ControlCollection = new ControlCollection();
+    controls;
     padMIDITable;
 
-    constructor(...templates: Template[]) {
+    constructor(template: Template, controls) {
         if (!__is_init__) throw "Controller objects can only be instantiated during the init phase.";
+        const templates = [template];
+        this.controls = controls;
         for (let template of templates) {
             const midiInIndex = template.midiInIndex;
             const midiOutIndex = template.midiOutIndex;
@@ -32,15 +35,16 @@ abstract class AbstractController {
                 // TODO: figure out where to store pointer to note input for modifying shouldConsumeEvents
             }
 
-            for (let controlName in template.controls) {
-                let control = new Control(this, midiInIndex, midiOutIndex, template.controls[controlName]);
-                this.controls.add(controlName, control);
-            }
+        }
+        for (let controlName in this.controls) {
+            const control: Control = this.controls[controlName];
+            control.controller = this;
+            this._controlCollection.add(controlName, control);
         }
     }
 
     getName() {
-        const controllers = document.getControllers();
+        const controllers = document.controllers;
         for (let controllerName in controllers) {
             if (controllers[controllerName] === this) return controllerName;
         }
@@ -58,7 +62,7 @@ abstract class AbstractController {
         if (!isCc(midi.status) && !isNote(midi.status)) return;  // TODO: what else do we need to allow through here?
         logger.debug(`${this.getName()}(IN ${String(midi.port)}) => { status: 0x${midi.status.toString(16).toUpperCase()}, data1: ${midi.data1.toString()}, data2: ${midi.data2.toString()} }`);
 
-        let control = this.controls.midiGet(midi.port, midi.status, midi.data1);
+        let control = this._controlCollection.midiGet(midi.port, midi.status, midi.data1);
         let activeView = document.getActiveView();
 
         if (control === undefined) {
@@ -88,7 +92,7 @@ abstract class AbstractController {
     updateControl(midi: MidiMessage) {
         // ignore all midi accept cc and note messages
         if (!isCc(midi.status) && !isNote(midi.status)) return;
-        let control = this.controls.midiGet(midi.port, midi.status, midi.data1);
+        let control = this._controlCollection.midiGet(midi.port, midi.status, midi.data1);
         control.data2 = midi.data2;
     }
 

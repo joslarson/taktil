@@ -1,7 +1,6 @@
 import config from '../config';
-import Collection from '../helpers/Collection';
 import { AbstractController, Control } from '../core/controller';
-import AbstractView from '../core/view/AbstractView';
+import View from '../core/view/View';
 import * as api from '../typings/api';
 import host from '../host';
 import MidiOutProxy from './midi/MidiOutProxy';
@@ -9,12 +8,12 @@ import logger from '../logger';
 
 
 export default class Document {
-    private _controllers: { [name: string]: AbstractController } = {};
-    private _registeredControls: Control[] = [];
+    controllers: { [name: string]: AbstractController } = {};
+    controls: Control[] = [];
 
-    private _views: {[name: string]: AbstractView} = {};
+    private _views: {[name: string]: View} = {};
     private _activeModes: string[] = [];
-    private _activeView: AbstractView;
+    private _activeView: View;
 
     private _eventHandlers: { [key: string]: Function[] } = {};
 
@@ -30,15 +29,15 @@ export default class Document {
         };
 
         global.flush = () => {
-            logger.debug('flush start...');
+            // logger.debug('flush start...');
             this._callEventCallbacks('flush');
-            logger.debug('flush end.');
+            // logger.debug('flush end.');
         };
 
         global.exit = () => {
             // blank controllers
-            for (let controllerName in this._controllers) {
-                this._controllers[controllerName].blankController();
+            for (let controllerName in this.controllers) {
+                this.controllers[controllerName].blankController();
             }
             // call the document exit callbacks
             this._callEventCallbacks('exit');
@@ -77,24 +76,16 @@ export default class Document {
     // Controllers
     //////////////////////////////
 
-    getControllers(): { [name: string]: AbstractController } {
-        return Object.assign({}, this._controllers);
-    } 
-
     registerController(name: string, controller: AbstractController) {
-        this._controllers[name] = controller;
+        this.controllers[name] = controller;
     }
 
     // Controls
     //////////////////////////////
 
-    getRegisteredControls() {
-        return [...this._registeredControls];
-    }
-
     renderControls() {
         if (!this._activeView) return;  // can't do anything until we have an active view
-        for (let control of this._registeredControls) {
+        for (let control of this.controls) {
             this._activeView.renderControl(control);
         }
     }
@@ -102,11 +93,11 @@ export default class Document {
     // Views
     //////////////////////////////
 
-    getViews(): { [name: string]: AbstractView } {
+    getViews(): { [name: string]: View } {
         return Object.assign({}, this._views);
     }
 
-    registerView(name: string, view: AbstractView): void {
+    registerView(name: string, view: View): void {
         this._views[name] = view;
     }
 

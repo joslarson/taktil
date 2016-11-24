@@ -1,6 +1,7 @@
 import Collection from '../../helpers/Collection';
 import Control from './Control';
 import { areDeepEqual } from '../../utils';
+import logger from '../../logger';
 
 
 export default class ControlCollection extends Collection<Control> {

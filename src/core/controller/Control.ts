@@ -5,7 +5,7 @@ import host from '../../host';
 import * as api from '../../typings/api';
 
 
-export default class Control extends AbstractCollectionItem {
+export default class Control extends AbstractCollectionItem implements SimpleMidiMessage {
     controller: AbstractController;
     midiInPort: number;
     midiOutPort: number;
@@ -13,13 +13,14 @@ export default class Control extends AbstractCollectionItem {
     data1: number;
     data2: number;
 
-    constructor(controller: AbstractController, midiInIndex: number, midiOutIndex: number, midi: SimpleMidiMessage) {
+    constructor({ controller, midiInPort = 0, midiOutPort = 0, status, data1 = 0, data2 = 0 }: { controller?: AbstractController, midiInPort?: number, midiOutPort?: number, status: number, data1?: number, data2?: number }) {
         super();
+
         this.controller = controller;
-        this.midiInPort = midiInIndex;
-        this.midiOutPort = midiOutIndex;
-        this.status = midi.status;
-        this.data1 = midi.data1;
-        this.data2 = midi.data2;
+        this.midiInPort = midiInPort;
+        this.midiOutPort = midiOutPort;
+        this.status = status;
+        this.data1 = data1;
+        this.data2 = data2;
     }
 }

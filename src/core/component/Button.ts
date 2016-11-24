@@ -1,7 +1,7 @@
 import config from  '../../config';
 import document from  '../../document';
 import AbstractComponent from './AbstractComponent';
-import { msgType, IntervalTask } from '../../utils';
+import { msgType, TimeoutTask } from '../../utils';
 import Control from '../controller/Control';
 import MidiMessage from '../midi/MidiMessage';
 
@@ -14,16 +14,16 @@ enum Brightness {
     OFF = 0
 }
 
-export type ButtonMode = 'GATE'|'TOGGLE'|'PRESS'|'MANUAL';
+export type ButtonType = 'GATE'|'TOGGLE'|'PRESS'|'MANUAL';
 export type ButtonEvent = 'register'|'toggleOn'|'toggleOff'|'press'|'longPress'|'doublePress'|'release'|'doubleRelease';
 
 export default class Button extends AbstractComponent {
-    mode: ButtonMode;
+    type: ButtonType;
     isColor: boolean;
 
-    constructor(name: string, mode: ButtonMode = 'GATE', isColor = false) {
+    constructor({ name, type = 'GATE', isColor = false }: { name: string, type?: ButtonType, isColor?: boolean }) {
         super(name);
-        this.mode = mode;
+        this.type = type;
         this.isColor = isColor;
         this.state = this.isColor ? { h: 0, s: 0, b: Brightness.ON } : false;
     }
@@ -38,7 +38,7 @@ export default class Button extends AbstractComponent {
         super.setState(state);
     }
 
-    setControlState(control: Control, state) {
+    renderControl(control: Control) {
         // TODO: remove Maschine specific code (implement sendcolor method)
         if (this.isColor) {
             midiOut.sendMidi({
@@ -57,7 +57,7 @@ export default class Button extends AbstractComponent {
                 port: control.midiOutPort,
                 status: msgType(control.status) + 2,
                 data1: control.data1,
-                data2: state.b,
+                data2: this.state.b,
             });
         } else {
             const { ON, OFF } = Brightness;
@@ -65,7 +65,7 @@ export default class Button extends AbstractComponent {
                 port: control.midiOutPort,
                 status: control.status,
                 data1: control.data1,
-                data2: state ? ON : OFF
+                data2: this.state ? ON : OFF
             });
         }
     }
@@ -75,7 +75,7 @@ export default class Button extends AbstractComponent {
     }
 
     onMidi(control: Control, midi: MidiMessage) {
-        if (this.mode === 'TOGGLE') {
+        if (this.type === 'TOGGLE') {
             this._handleToggle(midi);
         } else {
             this._handleState(midi);
@@ -135,7 +135,7 @@ export default class Button extends AbstractComponent {
             this.callCallback('doublePress');
         } else {
             // setup interval task to remove self after DOUBLE_PRESS_DURATION
-            var task = new IntervalTask(this, function() {
+            var task = new TimeoutTask(this, function() {
                 delete this.memory['doublePress'];
             }, config['DOUBLE_PRESS_DURATION']).start();
             this.memory['doublePress'] = task;
@@ -149,7 +149,7 @@ export default class Button extends AbstractComponent {
         // if it's a press schedule the callback
         if (this._isPress(midi)) {
             // schedule callback
-            this.memory['longPress'] = new IntervalTask(this, function() {
+            this.memory['longPress'] = new TimeoutTask(this, function() {
                 this.callCallback('longPress');
             }, config['LONG_PRESS_DURATION']).start();
         } else { // otherwise cancel existing scheduled callback
@@ -174,7 +174,7 @@ export default class Button extends AbstractComponent {
             this.callCallback('doubleRelease');
         } else {
             // setup interval task to remove self after DOUBLE_PRESS_DURATION
-            var task = new IntervalTask(this, function() {
+            var task = new TimeoutTask(this, function() {
                 delete this.memory['doubleRelease'];
             }, config['DOUBLE_PRESS_DURATION']).start();
             this.memory['doubleRelease'] = task;
@@ -184,9 +184,9 @@ export default class Button extends AbstractComponent {
     private _handleState(midi: MidiMessage) {
         if (this.state == undefined) return;
 
-        if (this._isPress(midi) && (this.mode == 'GATE' || this.mode == 'PRESS')) {
+        if (this._isPress(midi) && (this.type == 'GATE' || this.type == 'PRESS')) {
             this.setState(true);
-        } else if (this._isRelease(midi) && this.mode == 'GATE') {
+        } else if (this._isRelease(midi) && this.type == 'GATE') {
             this.setState(false);
         }
     }

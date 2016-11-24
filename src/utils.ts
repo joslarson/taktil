@@ -119,7 +119,7 @@ export function any (testArray: any[]) {
     return result;
 };
 
-export class IntervalTask {
+export class TimeoutTask {
     scope: any;
     callback: Function;
     interval: number;

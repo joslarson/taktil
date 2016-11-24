@@ -19,14 +19,14 @@ export default class Knob extends AbstractComponent {
     setState(state) {
         this.meter = false;
         this.cancelCallback('meter');
-        this.memory['meter'] = new utils.IntervalTask(this, function() {
+        this.memory['meter'] = new utils.TimeoutTask(this, function() {
             this.meter = true;
         }, 600).start();
 
         super.setState(state);
     }
 
-    setControlState(control: Control, state) {
+    renderControl(control: Control) {
         document.midiOut.sendMidi({
             port: control.midiOutPort,
             status: control.status,
@@ -67,7 +67,7 @@ export default class Knob extends AbstractComponent {
         let newKnobState = midi.data2;
 
         this.cancelCallback('meter');
-        this.memory['meter'] = new utils.IntervalTask(this, function() {
+        this.memory['meter'] = new utils.TimeoutTask(this, function() {
             this.meter = true;
         }, 600).start();
 

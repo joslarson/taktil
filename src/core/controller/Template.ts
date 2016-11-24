@@ -7,8 +7,7 @@ interface Template {
     midiOutIndex?: number;
     noteInput?: string[];
     shouldConsumeEvents?: boolean;
-    controls?: { [CONTROL_NAME: string]: { status: number, data1: number, data2: number } };
+    controls?;
 }
-
 
 export default Template;
