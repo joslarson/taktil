@@ -92,7 +92,7 @@ gulp.task('templates', () => gulp.src('src/templates/*.nc*')
 
 // docs
 gulp.task('docs', () => gulp.src('src/**/*.md')
-    .pipe(gulp.dest('build'))
+    .pipe(gulp.dest('dist'))
     .pipe(gulp.dest('local_build'))
 );
 

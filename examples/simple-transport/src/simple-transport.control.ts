@@ -19,12 +19,12 @@ document.on('init', () => {
     store.init(); // TODO: clean this up, this shouldn't need to be here
 
     // add controllers to document before registering views
-    document.registerController('TRANSPORT', new TransportController());
+    document.registerController(TransportController);
 
     // add views to document
-    document.registerView('BASE', new BaseView());
+    document.registerView(BaseView);
     // ... register more views here
 
     // set the active view to trigger initial render of Controls
-    document.setActiveView('BASE');
+    document.setActiveView(BaseView);
 });

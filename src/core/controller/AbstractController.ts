@@ -8,62 +8,66 @@ import host from '../../host';
 import document from '../../document';
 import * as api from '../../typings/api';
 import logger from '../../logger';
-
+import MidiIn from '../../typings/api/MidiIn';
+import MidiOut from '../../typings/api/MidiOut';
 
 abstract class AbstractController {
+    static instance: AbstractController;
+
     private _controlCollection: ControlCollection = new ControlCollection();
-    controls;
+
+    name = this.constructor.name;
+    templates: any[] = [];
+    controls: {} = {};
     padMIDITable;
 
-    constructor(template: Template, controls) {
+    protected constructor() {}
+
+    static getInstance() {
+        // inheritance safe singleton pattern (each child class will have its own singleton)
+        const Controller = this as any as { new (): AbstractController, instance: AbstractController };
+        let instance = Controller.instance;
+
+        if (instance instanceof Controller) return instance;
+
         if (!__is_init__) throw "Controller objects can only be instantiated during the init phase.";
-        const templates = [template];
-        this.controls = controls;
-        for (let template of templates) {
-            const midiInIndex = template.midiInIndex;
-            const midiOutIndex = template.midiOutIndex;
 
-            const midiIn = host.getMidiInPort(midiInIndex);
-            midiIn.setMidiCallback(this._getMidiCallback(midiInIndex));
+        instance = new Controller();
+        Controller.instance = instance;
 
-            if (template.noteInput) {
-                const noteInput = midiIn.createNoteInput(template.noteInput[0], ...template.noteInput.slice(1));
-                // noteInput.setShouldConsumeEvents(false);
-                if (template.shouldConsumeEvents !== undefined) {
-                    noteInput.setShouldConsumeEvents(template.shouldConsumeEvents);
-                }
-                // TODO: figure out where to store pointer to note input for modifying shouldConsumeEvents
+        const handledMidiInPorts = [];
+        for (let controlName in instance.controls) {
+            const control: Control = instance.controls[controlName];
+            // build unique list of midi-in ports the controller needs to handle
+            if (handledMidiInPorts.indexOf(control.midiInPort) === -1) {
+                handledMidiInPorts.push(control.midiInPort);
             }
+            // add control to control collection
+            control.controller = instance;
+            instance._controlCollection.add(controlName, control);
+        }
 
+        for (let midiInPort of handledMidiInPorts) {
+            const midiIn = host.getMidiInPort(midiInPort);
+            midiIn.setMidiCallback(instance._getMidiCallback(midiInPort));
         }
-        for (let controlName in this.controls) {
-            const control: Control = this.controls[controlName];
-            control.controller = this;
-            this._controlCollection.add(controlName, control);
-        }
+
+        return instance;
     }
 
-    getName() {
-        const controllers = document.controllers;
-        for (let controllerName in controllers) {
-            if (controllers[controllerName] === this) return controllerName;
-        }
-        throw 'Unable to find registration name for controller';
-    }
-
-    private _getMidiCallback(midiInIndex) {
+    private _getMidiCallback(midiInPort) {
         return (status:number, data1:number, data2:number) => {
-            let midi = new MidiMessage({port: midiInIndex, status, data1, data2});
+            let midi = new MidiMessage({port: midiInPort, status, data1, data2});
             this.onMidi(midi);
         };
     }
 
     onMidi(midi: MidiMessage) {
         if (!isCc(midi.status) && !isNote(midi.status)) return;  // TODO: what else do we need to allow through here?
-        logger.debug(`${this.getName()}(IN ${String(midi.port)}) => { status: 0x${midi.status.toString(16).toUpperCase()}, data1: ${midi.data1.toString()}, data2: ${midi.data2.toString()} }`);
+        logger.debug(`${this.name}(IN ${String(midi.port)}) => { status: 0x${midi.status.toString(16).toUpperCase()}, data1: ${midi.data1.toString()}, data2: ${midi.data2.toString()} }`);
 
         let control = this._controlCollection.midiGet(midi.port, midi.status, midi.data1);
-        let activeView = document.getActiveView();
+        let activeView = document.getActiveView().getInstance();
 
         if (control === undefined) {
             toast('Control not defined in controller template.');
@@ -76,7 +80,7 @@ abstract class AbstractController {
         }
     }
 
-    onSysex (midiInIndex:number, data) {
+    onSysex (midiInPort:number, data) {
     }
 
     arePressed(...controls: Control[]) {

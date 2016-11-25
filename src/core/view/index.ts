@@ -1,6 +1,6 @@
-import View from './View';
+import AbstractView from './AbstractView';
 
 
 export {
-    View,
+    AbstractView,
 };

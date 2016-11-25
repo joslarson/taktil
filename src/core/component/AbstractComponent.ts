@@ -1,4 +1,4 @@
-import View from '../view/View';
+import AbstractView from '../view/AbstractView';
 import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import MidiMessage from '../midi/MidiMessage';
 import { areDeepEqual, TimeoutTask } from '../../utils';
@@ -14,7 +14,7 @@ abstract class AbstractComponent {
     controls: Control[] = [];
     registered: boolean = false;
     registrations: Object[] = [];
-    views: View[] = [];
+    views: AbstractView[] = [];
     eventHandlers: { [key: string]: Function[] } = {};
     memory: { [key: string]: any } = {};
     state: any; // depends on control type
@@ -25,7 +25,7 @@ abstract class AbstractComponent {
 
     // called when button is registered to a view for the first time
     // allows running of code that is only aloud in the api's init function
-    register(controls: Control[], view: View) {
+    register(controls: Control[], view: AbstractView) {
         this.registrations.push({'view': view, 'controls': controls});
         this.controls = this.controls.concat(controls);
         this.views.push(view);
@@ -42,7 +42,8 @@ abstract class AbstractComponent {
         // update hardware state through view to avoid
         // updating hardware controls not in current view
         for (let control of this.controls) {
-            document.getActiveView().renderControl(control);
+            const activeView =  document.getActiveView().getInstance();
+            activeView.renderControl(control);
         }
     }
 

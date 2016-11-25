@@ -1,5 +1,5 @@
 import AbstractComponent from './AbstractComponent';
-import View from '../view/View';
+import AbstractView from '../view/AbstractView';
 import Control from '../controller/Control';
 import MidiMessage from '../midi/MidiMessage';
 
@@ -8,7 +8,7 @@ export default class ComponentSet extends AbstractComponent {
     componentMap: { [key: string]: AbstractComponent } = {};
     createComponent: (index) => AbstractComponent;
 
-    register(controls: Control[], view: View) {
+    register(controls: Control[], view: AbstractView) {
         super.register(controls, view);
 
         for (let i = 0; i < controls.length; i++) {

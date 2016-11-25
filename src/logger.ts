@@ -6,7 +6,7 @@ export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
 
 export class Logger {
     private _levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
-    private _level: Level = 'INFO';
+    private _level: Level = 'DEBUG';
     private _levelSetting;
     private _filter = '';
     private _filterSetting;

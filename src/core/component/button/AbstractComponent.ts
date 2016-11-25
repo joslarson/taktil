@@ -1,4 +1,4 @@
-import View from '../../view/View';
+import AbstractView from '../../view/AbstractView';
 import AbstractCollectionItem from '../../../helpers/AbstractCollectionItem';
 import MidiMessage from '../../midi/MidiMessage';
 import { areDeepEqual, TimeoutTask } from '../../../utils';
@@ -11,30 +11,37 @@ import logger from '../../../logger';
 let instance: AbstractComponent;
 
 abstract class AbstractComponent {
-    static instance: AbstractComponent;
+    private static instance: AbstractComponent;
+
     name = this.constructor.name;
-    parent?: typeof AbstractComponent;
+    parent: typeof AbstractComponent;
     controls: Control[] = [];
     registrations: Object[] = [];
-    views: View[] = [];
+    views: AbstractView[] = [];
     memory: { [key: string]: any } = {};
     state: any; // depends on control type
 
-    constructor() {
-        // inheritance safe singleton pattern (each child class will have it's own singleton)
-        const ComponentClass = this.constructor as typeof AbstractComponent;
-        const instance = ComponentClass.instance;
+    protected constructor() {}
 
-        if (instance instanceof this.constructor) {
-            return instance;
-        } else {
-            ComponentClass.instance = this;
-        }
+    static getInstance() {
+        // inheritance safe singleton pattern (each child class will have it's own singleton)
+        const Component = this as any as { new (): AbstractComponent, instance: AbstractComponent };
+        let instance = Component.instance;
+
+        if (instance instanceof Component) return instance;
+
+        instance = new Component();
+        Component.instance = instance;
+        return instance;
     }
- 
+
+    getParent(): AbstractComponent {
+        return this.parent && this.parent.getInstance();
+    }
+
     // called when button is registered to a view for the first time
     // allows running of code that is only aloud in the api's init function
-    register(controls: Control[], view: View) {
+    register(controls: Control[], view: AbstractView) {
         this.registrations.push({'view': view, 'controls': controls});
         this.controls = [...this.controls, ...controls];
         if (this.views.indexOf(view) === -1) this.views.push(view);
@@ -54,7 +61,8 @@ abstract class AbstractComponent {
         // update hardware state through view to avoid
         // updating hardware controls not in current view
         for (let control of this.controls) {
-            document.getActiveView().renderControl(control);
+            const activeView =  document.getActiveView().getInstance();
+            activeView.renderControl(control);
         }
     }
 

@@ -1,9 +1,9 @@
-export default class ApiProxy<Target> {
-    target: Target;
+export default class ApiProxy {
+    target;
     protected _methodClassMap: { [key:string]: { new(...args: any[]) } } = {};
     protected _methodCallCache: {} = {};
 
-    constructor(target: Target) {
+    constructor(target) {
         this.target = target;
     }
 
