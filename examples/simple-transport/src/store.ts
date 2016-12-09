@@ -1,5 +1,5 @@
 import { config, host, document } from 'typewig';
-import * as api from 'typewig/typings/api';
+import * as api from 'typewig/core/api-proxy';
 
 
 export class Store {
@@ -15,15 +15,15 @@ export class Store {
         this.application = host.createApplication();
         this.project = host.getProject();
         this.transport = host.createTransport();
-        this.cursorTrack = host.createArrangerCursorTrack(0, config['SCENE_COUNT']);
+        this.cursorTrack = host.createArrangerCursorTrack(0, 16);
         this.cursorTrack.addPositionObserver(position => {});
-        this.sceneBank = host.createSceneBank(config['SCENE_COUNT']);
+        this.sceneBank = host.createSceneBank(16);
         this.master = host.createMasterTrack(0);
         
         // trackBank setup
         this.trackBank = this.project
             .getShownTopLevelTrackGroup()
-            .createMainTrackBank(config['TRACK_COUNT'], 0, config['SCENE_COUNT'], false);
+            .createMainTrackBank(8, 0, 16, false);
         
         // tempo observer
         this.transport.getTempo().addRawValueObserver((tempo) => {});
@@ -33,7 +33,8 @@ export class Store {
         
         // metronome state observer
         this.transport.addClickObserver((isOn) => {});
-        
+
+        // preroll state observer
         this.transport.addPreRollObserver((state) => {});
         
         // overdub state observer
@@ -45,13 +46,13 @@ export class Store {
         // layout observer
         this.application.addPanelLayoutObserver((layout) => {}, 1000);
         
-        // trackBank scrolll= position observer
+        // trackBank scroll position observer
         this.trackBank.addChannelScrollPositionObserver((position) => {}, 0);
         
         // channel count observer
         this.trackBank.addChannelCountObserver((count) => {});
         
-        for (let i=0; i < config['TRACK_COUNT']; i++) {
+        for (let i=0; i < 8; i++) {
             let track = this.trackBank.getChannel(i);
             (() => { // enclosure
                 const trackIndex = i;

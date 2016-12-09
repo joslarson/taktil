@@ -25,7 +25,7 @@ export class Logger {
                 if (value) {
                     const message = ` Log filter regex set to \\${value}\\gi `;
                     console.log(`╭───┬${'─'.repeat(message.length)}╮`);
-                    console.log(`│ i │${message}│`);
+                    console.log(`│ i │${message}` +               '│');
                     console.log(`╰───┴${'─'.repeat(message.length)}╯`);
                 }
             });

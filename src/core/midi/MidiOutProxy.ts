@@ -1,11 +1,11 @@
-import SimpleMidiMessage from './MidiMessage';
+import { SimpleMidiMessage } from './MidiMessage';
 import host from '../../host';
 import logger from '../../logger';
 
 
 export interface MidiOutControlState extends SimpleMidiMessage {
     port: number,
-    urgent: boolean,
+    urgent?: boolean,
 }
 
 
@@ -22,8 +22,7 @@ export default class MidiOutProxy {
         const key = `${port}:${status}:${data1}`;
         // quick exit if there's no change to data2 value
         if (this._state[key] !== undefined && this._state[key].data2 === data2) return;
-        // TODO: replace with object spread in typescript 2.1
-        this._state = Object.assign({}, this._state, { [key]: { port, status, data1, data2 } });
+        this._state = { ...this._state, [key]: { port, status, data1, data2 } };
         // if urgent, fire midi message immediately, otherwise queue it up for next flush
         if (urgent) {
             logger.debug(`(OUT ${String(port)}) => { status: 0x${status.toString(16).toUpperCase()}, data1: ${data1.toString()}, data2: ${data2.toString()} }`);

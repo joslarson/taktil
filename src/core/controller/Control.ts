@@ -2,7 +2,6 @@ import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import { SimpleMidiMessage } from '../midi/MidiMessage';
 import AbstractController from './AbstractController';
 import host from '../../host';
-import * as api from '../../typings/api';
 
 
 export default class Control extends AbstractCollectionItem implements SimpleMidiMessage {

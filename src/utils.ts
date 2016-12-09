@@ -11,25 +11,6 @@ export function guid () {
     });
 }
 
-export function isInArray (array:any[], searchValue): boolean {
-    for (var i = array.length - 1; i >= 0; i--) {
-        if (array[i] == searchValue) return true;
-    }
-    return false;
-}
-
-export function isCc (status:number): boolean {
-    return (status & 0xf0) == 0xb0;
-}
-
-export function isNote (status:number): boolean {
-    return ((status & 0xf0) == 0x80) || ((status & 0xf0) == 0x90);
-}
-
-export function midiChannel (status:number): number {
-	return (status & 0x0f) + 1;
-}
-
 export function msgType (status:number): number {
     return (status & 0xf0);
 }
@@ -95,29 +76,6 @@ export function initCountingArray (startValue:number, length:number): number[] {
     return array;
 }
 
-export function all (testArray: any[]) {
-    var result = true;
-    for (var i = 0; i < testArray.length; i++) {
-        var test = testArray[i];
-        if (!test) {
-            result = false;
-            break;
-        }
-    };
-    return result;
-};
-
-export function any (testArray: any[]) {
-    var result = false;
-    for (var i = 0; i < testArray.length; i++) {
-        var test = testArray[i];
-        if (test) {
-            result = true;
-            break;
-        }
-    };
-    return result;
-};
 
 export class TimeoutTask {
     scope: any;
@@ -145,7 +103,7 @@ export class TimeoutTask {
 }
 
 
-export function areDeepEqual (obj1, obj2) {
+export function areDeepEqual(obj1: {}, obj2: {}): boolean {
     let i, l, leftChain, rightChain;
 
     function compare2Objects (x, y) {
@@ -197,7 +155,7 @@ export function areDeepEqual (obj1, obj2) {
             return false;
         }
 
-        // Quick checking of one object beeing a subset of another.
+        // Quick checking of one object being a subset of another.
         // todo: cache the structure of arguments[0] for performance
         for (p in y) {
             if (y.hasOwnProperty(p) !== x.hasOwnProperty(p)) {

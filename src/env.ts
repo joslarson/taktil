@@ -46,6 +46,6 @@ if (typeof Object.assign != 'function') {
     })();
 }
 
-// allows us to provide better error messages and to catch errors early to prevent full on crashing
+// allows us to provide better error messages and to catch errors early
 // when code that is only allowed to run inside init is place outside.
 global.__is_init__ = false;

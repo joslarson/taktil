@@ -41,7 +41,7 @@ import commonjs from 'rollup-plugin-commonjs';
 // );
 const tsProject = gts.createProject('tsconfig.json', { typescript });
 gulp.task('js', () => {
-    const tsResult = tsProject.src().pipe(gts(tsProject));
+    const tsResult = tsProject.src().pipe(tsProject());
     return merge([
         tsResult.dts.pipe(gulp.dest('dist')),
         tsResult.js

@@ -1,15 +1,12 @@
 import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import MidiMessage from '../midi/MidiMessage';
-import { isCc, isNote } from '../../utils';
-import Template from './Template';
 import Control from './Control';
 import ControlCollection from './ControlCollection';
 import host from '../../host';
 import document from '../../document';
-import * as api from '../../typings/api';
 import logger from '../../logger';
-import MidiIn from '../../typings/api/MidiIn';
-import MidiOut from '../../typings/api/MidiOut';
+import { MidiIn, MidiOut } from '../api-proxy';
+
 
 abstract class AbstractController {
     static instance: AbstractController;
@@ -63,7 +60,7 @@ abstract class AbstractController {
     }
 
     onMidi(midi: MidiMessage) {
-        if (!isCc(midi.status) && !isNote(midi.status)) return;  // TODO: what else do we need to allow through here?
+        if (!midi.isChannelController() && !midi.isNote()) return;  // TODO: what else do we need to allow through here?
         logger.debug(`${this.name}(IN ${String(midi.port)}) => { status: 0x${midi.status.toString(16).toUpperCase()}, data1: ${midi.data1.toString()}, data2: ${midi.data2.toString()} }`);
 
         let control = this._controlCollection.midiGet(midi.port, midi.status, midi.data1);
@@ -95,7 +92,7 @@ abstract class AbstractController {
     // TODO: what does this do for us?
     updateControl(midi: MidiMessage) {
         // ignore all midi accept cc and note messages
-        if (!isCc(midi.status) && !isNote(midi.status)) return;
+        if (!midi.isChannelController() && !midi.isNote()) return;
         let control = this._controlCollection.midiGet(midi.port, midi.status, midi.data1);
         control.data2 = midi.data2;
     }

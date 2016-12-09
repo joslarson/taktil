@@ -2,8 +2,8 @@ import ApiProxy from './ApiProxy';
 import Channel from './Channel';
 
 
-// class DeviceLayer extends Channel {
-class DeviceLayer {
+class DeviceLayer extends Channel {
+// class DeviceLayer {
 
 }
 

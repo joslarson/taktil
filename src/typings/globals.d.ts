@@ -5,5 +5,4 @@ declare var load;
 declare var __is_init__: boolean;
 
 declare function toast(msg: string);
-// declare function log(...msg);
 declare function dump(obj);

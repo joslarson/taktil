@@ -1,4 +1,3 @@
-import config from  '../../../config';
 import document from  '../../../document';
 import BaseButton from './BaseButton';
 import { msgType, TimeoutTask } from '../../../utils';
@@ -6,15 +5,8 @@ import Control from '../../controller/Control';
 import MidiMessage from '../../midi/MidiMessage';
 
 
-enum Brightness {
-    ON = 127,
-    DIM = config['DIM_VALUE'],
-    OFF = 0
-}
-
-
 abstract class ManualButton extends BaseButton {
-    state: any = false;
+    DURATION = { LONG: 350, DOUBLE: 450 };
 
     onMidi(control: Control, midi: MidiMessage) {
         this._handlePress(midi);
@@ -44,16 +36,8 @@ abstract class ManualButton extends BaseButton {
         // optionally implemented in child class as override
     }
 
-    protected isPress(midi: MidiMessage) {
-        return midi.data2 > 0;
-    }
-
     protected isDoublePress(midi: MidiMessage) {
         return this.memory['doublePress'] && this.isPress(midi);
-    }
-
-    protected isRelease(midi: MidiMessage) {
-        return midi.data2 === 0;
     }
 
     protected isDoubleRelease(midi: MidiMessage) {
@@ -78,7 +62,7 @@ abstract class ManualButton extends BaseButton {
             // setup interval task to remove self after DOUBLE_PRESS_DURATION
             var task = new TimeoutTask(this, function() {
                 delete this.memory['doublePress'];
-            }, config['DOUBLE_PRESS_DURATION']).start();
+            }, this.DURATION.DOUBLE).start();
             this.memory['doublePress'] = task;
         }
     }
@@ -92,7 +76,7 @@ abstract class ManualButton extends BaseButton {
             // schedule callback
             this.memory['longPress'] = new TimeoutTask(this, function() {
                 this.onLongPress();
-            }, config['LONG_PRESS_DURATION']).start();
+            }, this.DURATION.LONG).start();
         } else { // otherwise cancel existing scheduled callback
             // cancel longPress task if button released too early
             if (this.memory['longPress']) this.cancelTimeoutTask('longPress');
@@ -117,7 +101,7 @@ abstract class ManualButton extends BaseButton {
             // setup interval task to remove self after DOUBLE_PRESS_DURATION
             var task = new TimeoutTask(this, function() {
                 delete this.memory['doubleRelease'];
-            }, config['DOUBLE_PRESS_DURATION']).start();
+            }, this.DURATION.DOUBLE).start();
             this.memory['doubleRelease'] = task;
         }
     }

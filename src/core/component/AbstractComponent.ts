@@ -8,30 +8,49 @@ import Control from '../controller/Control';
 import logger from '../../logger';
 
 
+let instance: AbstractComponent;
+
 abstract class AbstractComponent {
-    name: string;
-    parent: AbstractComponent;
+    private static instance: AbstractComponent;
+
+    name = this.constructor.name;
+    parent: typeof AbstractComponent;
     controls: Control[] = [];
-    registered: boolean = false;
     registrations: Object[] = [];
     views: AbstractView[] = [];
-    eventHandlers: { [key: string]: Function[] } = {};
     memory: { [key: string]: any } = {};
     state: any; // depends on control type
 
-    constructor(name:string) {
-        this.name = name;
+    protected constructor() {}
+
+    static getInstance() {
+        // inheritance safe singleton pattern (each child class will have it's own singleton)
+        const Component = this as any as { new (): AbstractComponent, instance: AbstractComponent };
+        let instance = Component.instance;
+
+        if (instance instanceof Component) return instance;
+
+        instance = new Component();
+        Component.instance = instance;
+        return instance;
+    }
+
+    getParent(): AbstractComponent {
+        return this.parent && this.parent.getInstance();
     }
 
     // called when button is registered to a view for the first time
     // allows running of code that is only aloud in the api's init function
     register(controls: Control[], view: AbstractView) {
         this.registrations.push({'view': view, 'controls': controls});
-        this.controls = this.controls.concat(controls);
-        this.views.push(view);
-        if (this.eventHandlers['register'] && !this.registered) {
-            this.callCallback('register');
-        }
+        this.controls = [...this.controls, ...controls];
+        if (this.views.indexOf(view) === -1) this.views.push(view);
+        // call onRegister()
+        this.onRegister();
+    }
+
+    onRegister() {
+        // optionally implemented in child class
     }
 
     setState(state) {
@@ -48,37 +67,20 @@ abstract class AbstractComponent {
     }
 
     renderControl(control: Control) {
-        // implemented in child classes
+        // required: implemented in child classes
         throw 'Not Implemented';
-    }
-
-    // registers event handlers
-    on(eventName: string, callback: Function) {
-        if (!this.eventHandlers[eventName]) this.eventHandlers[eventName] = [];
-
-        this.eventHandlers[eventName].push(callback);
-        return this;
     }
 
     // handles midi messages routed to control
     onMidi(control: Control, midi: MidiMessage) {
-        // implemented in subclasses
+        // required: implemented in subclasses
         throw 'Not Implemented';
     }
 
-    callCallback(eventName: string, ...args) {
-        logger.debug(eventName + ' ' + this.name);
-        let callbackList = this.eventHandlers[eventName];
-        for (let callback of callbackList) {
-            if (this.memory[eventName]) this.cancelCallback(eventName);
-            callback.apply(this, args);
-        }
-    }
-
-    cancelCallback(callbackName: string) {
-        var memory = this.memory[callbackName];
+    cancelTimeoutTask(taskName: string) {
+        var memory = this.memory[taskName];
         if (memory instanceof TimeoutTask) memory.cancel();
-        delete this.memory[callbackName];
+        delete this.memory[taskName];
     }
 }
 

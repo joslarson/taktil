@@ -2,8 +2,8 @@ import ApiProxy from './ApiProxy';
 import DeviceChain from './DeviceChain';
 
 
-// class DeviceSlot extends DeviceChain {
-class DeviceSlot {
+class DeviceSlot extends DeviceChain {
+// class DeviceSlot {
 
 }
 

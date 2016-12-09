@@ -1,7 +1,6 @@
 import config from './config';
 import { AbstractController, Control } from './core/controller';
 import AbstractView from './core/view/AbstractView';
-import * as api from './typings/api';
 import host from './host';
 import MidiOutProxy from './core/midi/MidiOutProxy';
 import logger from './logger';
@@ -115,6 +114,7 @@ export class Document {
         if (instance.parent && views.indexOf(instance.parent) === -1) throw `Invalid view registration order: Parent view "${instance.parent.name}" must be registered before child view "${View.name}".`;
 
         if (views.indexOf(View) === -1) this._views = [...views, View];
+        instance.onRegister();
     }
 
     getViews() {

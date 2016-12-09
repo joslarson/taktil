@@ -1,7 +1,4 @@
-import { Template } from 'typewig';
-
-
-let template: Template = {
+let template = {
     midiInIndex: 0,  // int or null
     midiOutIndex: 0,  // int or null
     noteInput: [

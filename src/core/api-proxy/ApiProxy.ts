@@ -1,5 +1,6 @@
 export default class ApiProxy {
     target;
+    cache: any = {};
     protected _methodClassMap: { [key:string]: { new(...args: any[]) } } = {};
     protected _methodCallCache: {} = {};
 
@@ -74,11 +75,11 @@ export default class ApiProxy {
             // replace callback with custom callback that calls our handled list of callbacks
             targetArgs.splice(callbackArgIndex, 1, (...callbackArgs) => {
                 // addSomethingCoolObserver => somethingCool
-                // TODO: property name would be the same for methodcalls with the same methodName,
+                // TODO: property name would be the same for method calls with the same methodName,
                 // but different args, how do we handle this?
                 let propertyName = methodName.slice(3, 4)
                     .toLowerCase().concat(methodName.slice(4, -8));
-                this[propertyName] = callbackArgs.length === 1 ? callbackArgs[0] : callbackArgs;
+                this.cache[propertyName] = callbackArgs.length === 1 ? callbackArgs[0] : callbackArgs;
                 for (let callback of this._methodCallCache[methodCallKey]['callbacks']) {
                     callback(...callbackArgs);
                 }
@@ -97,8 +98,9 @@ export default class ApiProxy {
                 key += `::${arg.target.hashCode()}`;
             } else if (arg.hasCode !== undefined) {  // is java object (or has hashCode implemented)
                 key += `::${arg.hashCode()}`;
-            } else if (typeof arg === 'object') {
-                throw 'Error: Not sure how to hash object "${arg}".';
+            // TODO: implement hashing protocol for object args
+            // } else if (typeof arg === 'object') {
+            //     throw `Error: Not sure how to hash object "${arg}" for method "${methodName}" on ${this.target.name}.`;
             } else {
                 key += `::${arg}`;
             }

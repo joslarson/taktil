@@ -6,13 +6,14 @@ import * as components from '../components';
 
 export default class BaseView extends AbstractView {
     // parent = BaseView;
-    registrations = [
-        { component: components.PlayToggle, control: controls.PLAY },
-        { component: components.MetronomeToggle, control: controls.PLAY, mode: 'SHIFT' },
-        { component: components.PreRollToggle, control: controls.REC, mode: 'SHIFT' },
-        { component: components.RestartButton, control: controls.RESTART },
-        { component: components.OverwriteToggle, control: controls.REC },
-        { component: components.ShiftModeGate, control: controls.SHIFT },
-        { component: components.LoopToggle, control: controls.RESTART, mode: 'SHIFT' },
-    ];
+
+    onRegister() {
+        this.registerComponent(components.PlayToggle, controls.PLAY);
+        this.registerComponent(components.MetronomeToggle, controls.PLAY, 'SHIFT');
+        this.registerComponent(components.PreRollToggle, controls.REC, 'SHIFT');
+        this.registerComponent(components.RestartButton, controls.RESTART);
+        this.registerComponent(components.OverwriteToggle, controls.REC);
+        this.registerComponent(components.ShiftModeGate, controls.SHIFT);
+        this.registerComponent(components.LoopToggle, controls.RESTART, 'SHIFT');
+    }
 }

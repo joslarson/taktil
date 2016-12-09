@@ -1,29 +1,21 @@
 import config from  '../../../config';
 import document from  '../../../document';
-import AbstractComponent from './AbstractComponent';
+import AbstractComponent from '../AbstractComponent';
 import { msgType, TimeoutTask } from '../../../utils';
 import Control from '../../controller/Control';
 import MidiMessage from '../../midi/MidiMessage';
 
 
-enum Brightness {
-    ON = 127,
-    DIM = config['DIM_VALUE'],
-    OFF = 0
-}
-
 
 abstract class BaseButton extends AbstractComponent {
+    BRIGHTNESS = { ON: 127, OFF: 0 };
+
     state: any = false;
 
     renderControl(control: Control) {
-        const { ON, OFF } = Brightness;
-        document.midiOut.sendMidi({
-            port: control.midiOutPort,
-            status: control.status,
-            data1: control.data1,
-            data2: this.state ? ON : OFF
-        });
+        const { ON, OFF } = this.BRIGHTNESS;
+        const { midiOutPort: port, status, data1 } = control;
+        document.midiOut.sendMidi({ port, status, data1, data2: this.state ? ON : OFF });
     }
 
     protected isPress(midi: MidiMessage) {

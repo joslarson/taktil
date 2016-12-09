@@ -1,13 +1,14 @@
 import ApiProxy from './ApiProxy';
 import DeviceLayer from './DeviceLayer';
+import Channel from './Channel';
 import ChannelBank from './ChannelBank';
-
 
 class DeviceLayerBank extends ChannelBank {
     constructor(target) {
         super(target);
         this._extendMethodClassMap({
-            'getChannel': DeviceLayer,
+            // 'getChannel': DeviceLayer,
+            'getChannel': Channel,
         });
     }
 }

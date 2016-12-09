@@ -1,5 +1,5 @@
 import MidiMessage from '../midi/MidiMessage';
-import AbstractComponent from '../component/button/AbstractComponent';
+import AbstractComponent from '../component/AbstractComponent';
 import Control from '../controller/Control';
 import document from '../../document';
 import logger from '../../logger';
@@ -32,27 +32,14 @@ abstract class AbstractView {
         instance = new View();
         View.instance = instance;
 
-        for (let registration of instance.registrations) {
-            if (!registration.control && !registration.controls) throw 'Must specify either "control" or "controls" in view component registration list.'
-            const controls = registration.control ? [registration.control] : registration.controls;
-            const { component, mode } = registration;
-            instance.registerComponent(component, controls, mode);
-        }
-
         return instance;
     }
 
-    getParent(): AbstractView {
-        return this.parent && this.parent.getInstance();
+    onRegister() {
+        // implemented in child class
     }
 
-    // constructor() {
-    //     // if (!__is_init__) throw "View objects can only be instantiated during the init phase.";
-    // }
-
     renderControl(control: Control) {
-        const parent = this.getParent();
-
         // check view modes in order for component/control registration
         for (let activeMode of document.getActiveModes()) {
             if (!this.componentMap[activeMode]) continue;  // mode not used in view
@@ -63,8 +50,9 @@ abstract class AbstractView {
             }
         }
         // component not found in view? send to parent
-        if (parent) {
-            parent.renderControl(control);
+        if (this.parent) {
+            const parentInstance = this.parent.getInstance();
+            parentInstance.renderControl(control);
         } else {
             // TODO toast? maybe send 0 to data2?
         }
@@ -103,10 +91,9 @@ abstract class AbstractView {
         if (mode && component) {
             this.componentMap[mode][control.id].onMidi(control, midi);
         } else {
-            const parent = this.getParent();  
-
-            if (parent) {
-                parent.onMidi(control, midi);
+            if (this.parent) {
+                const parentInstance = this.parent.getInstance();
+                parentInstance.onMidi(control, midi);
             } else {
                 toast(`Control not implemented in current view/mode stack.`);
             }
