@@ -1,4 +1,3 @@
-import config from './config';
 import { AbstractController, Control } from './core/controller';
 import AbstractView from './core/view/AbstractView';
 import host from './host';
@@ -38,19 +37,6 @@ export class Document {
             // call the document exit callbacks
             this._callEventCallbacks('exit');
         };
-    }
-
-    loadConfig(localConfig: Object) {
-        // extend config default with localConfig
-        config.extend(localConfig);
-
-        host.defineController(
-            config['VENDOR'],  // hardware manufacturer / script creator
-            config['NAME'],  // hardware model name / script name
-            config['VERSION'],  // version number
-            config['UUID'],  // script UUID
-            config['AUTHOR']  // author
-        );
     }
 
     on(eventName: string, callback: Function) {

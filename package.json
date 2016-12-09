@@ -16,7 +16,7 @@
     "typescript"
   ],
   "bin": {
-    "typewig": "./bin/typewig.js"
+    "typewig": "node ./bin/typewig.js"
   },
   "//": "default babel setup for gulpfile.babel.js",
   "babel": {

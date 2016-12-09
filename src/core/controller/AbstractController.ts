@@ -15,7 +15,7 @@ abstract class AbstractController {
 
     name = this.constructor.name;
     templates: any[] = [];
-    controls: {} = {};
+    abstract controls: { [key: string ]: Control };
     padMIDITable;
 
     protected constructor() {}

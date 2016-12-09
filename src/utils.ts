@@ -1,4 +1,3 @@
-import HSB from './helpers/HSB';
 import host from './host';
 
 
@@ -15,8 +14,8 @@ export function msgType (status:number): number {
     return (status & 0xf0);
 }
 
-export function rgb2hsb (r:number, g:number, b:number): HSB {
-    var result: HSB = {h: undefined, s: undefined, b: undefined};
+export function rgb2hsb (r:number, g:number, b:number) {
+    var result = {h: undefined, s: undefined, b: undefined};
 
     var minVal = Math.min(r, g, b);
     var maxVal = Math.max(r, g, b);

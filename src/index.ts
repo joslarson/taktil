@@ -1,4 +1,3 @@
-import config from './config';
 import host from './host';
 import document from './document';
 import * as utils from './utils';
@@ -7,7 +6,7 @@ import { AbstractController, Control, ControlCollection } from './core/controlle
 import { AbstractComponent, ComponentSet, Knob } from './core/component';
 
 
-export { document, config, host, utils };
+export { document, host, utils };
 export { AbstractController, Control, ControlCollection };
 export { AbstractView };
 export { AbstractComponent, ComponentSet, Knob };

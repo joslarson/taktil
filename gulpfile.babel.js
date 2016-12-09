@@ -12,33 +12,6 @@ import nodeResolve from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 
 
-// js
-// gulp.task('js', () =>
-//     rollup({
-//         entry: 'src/index.ts',
-//         plugins: [
-//             rollupTypescript({ typescript: typescript }),
-//             nodeResolve({
-//                 jsnext: true,
-//                 main: true,
-//                 extensions: [
-//                     '.js',
-//                 ]
-//             }),
-//             commonjs({
-//                 include: 'node_modules/**',
-//                 extensions: [
-//                     '.js'
-//                 ]
-//             }),
-//         ],
-//         context: 'global',
-//     })
-//     // give the file the name you want to output with
-//     .pipe(source('index.js'))
-//     // save to build dirs
-//     .pipe(gulp.dest('dist'))
-// );
 const tsProject = gts.createProject('tsconfig.json', { typescript });
 gulp.task('js', () => {
     const tsResult = tsProject.src().pipe(tsProject());
@@ -56,19 +29,15 @@ gulp.task('copy', () =>
         .pipe(gulp.dest('dist'))
 );
 
-// copy .d.ts files
-gulp.task('copy-typings', ['js'], () => merge([
-    gulp.src('src/typings/api/*')
-        .pipe(gulp.dest('dist/typings/api')),
-    gulp.src('src/core/bitwig/**/*.d.ts')
-        .pipe(gulp.dest('dist/core/bitwig')),
-]));
+// copy cli
+gulp.task('copy-cli', ['js'], () => gulp.src('src/bin/**/*').pipe(gulp.dest('dist/bin')));
 
 // gulp watch
-gulp.task('watch', ['js', 'copy', 'copy-typings'], () => {
+gulp.task('watch', ['js', 'copy', 'copy-cli'], () => {
     gulp.watch('src/**/*.ts', ['js']);
     gulp.watch(['README.md', 'LICENSE', 'package.json'], ['copy']);
+    gulp.watch('src/bin/**/*', ['copy-cli']);
 });
 
 // default task
-gulp.task('default', ['js', 'copy', 'copy-typings']);
+gulp.task('default', ['js', 'copy', 'copy-cli']);

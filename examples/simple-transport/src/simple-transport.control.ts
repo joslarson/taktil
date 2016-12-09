@@ -1,14 +1,19 @@
 import 'typewig/env'; // must be first in entry file (sets polyfills + globals)
 import { host, document } from 'typewig';
 
-import config from './config';
 import store from './store';
 import TransportController from './controllers/TransportController';
 import BaseView from './views/BaseView';
 
 
-// load config
-document.loadConfig(config);
+// define controller script
+host.defineController(
+    'Typewig Examples',  // vendor
+    'Simple Transport',  // name
+    '1.0.0',  // version
+    'f7ccec7e-b1cc-11e6-80f5-76304dec7eb7',  // uuid
+    'Joseph Larson',  // author
+);
 
 // setup and Discover Midi Controllers
 host.defineMidiPorts(1, 1);  // number of midi inputs, outputs
