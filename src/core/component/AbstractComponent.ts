@@ -8,18 +8,17 @@ import Control from '../controller/Control';
 import logger from '../../logger';
 
 
-let instance: AbstractComponent;
-
 abstract class AbstractComponent {
     private static instance: AbstractComponent;
 
-    name = this.constructor.name;
     parent: typeof AbstractComponent;
+    name = this.constructor.name;
     controls: Control[] = [];
     registrations: Object[] = [];
     views: AbstractView[] = [];
     memory: { [key: string]: any } = {};
-    state: any; // depends on control type
+
+    abstract state: any; // depends on control type
 
     protected constructor() {}
 
@@ -33,10 +32,6 @@ abstract class AbstractComponent {
         instance = new Component();
         Component.instance = instance;
         return instance;
-    }
-
-    getParent(): AbstractComponent {
-        return this.parent && this.parent.getInstance();
     }
 
     // called when button is registered to a view for the first time
@@ -61,24 +56,20 @@ abstract class AbstractComponent {
         // update hardware state through view to avoid
         // updating hardware controls not in current view
         for (let control of this.controls) {
-            const activeView =  document.getActiveView().getInstance();
+            const activeView = document.getActiveView().getInstance();
             activeView.renderControl(control);
         }
     }
 
-    renderControl(control: Control) {
-        // required: implemented in child classes
-        throw 'Not Implemented';
-    }
+    // renders component state to hardware control
+    abstract renderControl(control: Control): void;
 
     // handles midi messages routed to control
-    onMidi(control: Control, midi: MidiMessage) {
-        // required: implemented in subclasses
-        throw 'Not Implemented';
-    }
+    abstract onMidi?(control: Control, midi: MidiMessage): void;
+    abstract onSysex?(control: Control, msg: string): void;
 
     cancelTimeoutTask(taskName: string) {
-        var memory = this.memory[taskName];
+        const memory = this.memory[taskName];
         if (memory instanceof TimeoutTask) memory.cancel();
         delete this.memory[taskName];
     }

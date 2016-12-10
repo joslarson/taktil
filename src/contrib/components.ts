@@ -3,7 +3,7 @@ import document from '../document';
 import * as api from '../core/api-proxy';
 
 export abstract class ModeGate extends GateButton {
-    mode: string;
+    abstract mode: string;
 
     onPress() {
         document.activateMode(this.mode);

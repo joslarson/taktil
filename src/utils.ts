@@ -1,78 +1,13 @@
 import host from './host';
 
 
-export function guid () {
+export function guid() {
     let date = new Date().getTime();
      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (date + Math.random() * 16) % 16 | 0;
+        const r = (date + Math.random() * 16) % 16 | 0;
         date = Math.floor(date/16);
         return (c=='x' ? r : (r&0x3|0x8)).toString(16);
     });
-}
-
-export function msgType (status:number): number {
-    return (status & 0xf0);
-}
-
-export function rgb2hsb (r:number, g:number, b:number) {
-    var result = {h: undefined, s: undefined, b: undefined};
-
-    var minVal = Math.min(r, g, b);
-    var maxVal = Math.max(r, g, b);
-    var delta = maxVal - minVal;
-
-    result.b = maxVal;
-
-    if (delta == 0) {
-        result.h = 0;
-        result.s = 0;
-    } else {
-        result.s = delta / maxVal;
-
-        var del_R = (((maxVal - r) / 6) + (delta / 2)) / delta;
-        var del_G = (((maxVal - g) / 6) + (delta / 2)) / delta;
-        var del_B = (((maxVal - b) / 6) + (delta / 2)) / delta;
-
-        if (r == maxVal) { result.h = del_B - del_G; }
-        else if (g == maxVal) { result.h = (1 / 3) + del_R - del_B; }
-        else if (b == maxVal) { result.h = (2 / 3) + del_G - del_R; }
-
-        if (result.h < 0) { result.h += 1; }
-        if (result.h > 1) { result.h -= 1; }
-    }
-
-    result.h = Math.round(result.h * 360);
-    result.s = Math.round(result.s * 1);
-    result.b = Math.round(result.b * 1);
-
-    result.h = Math.floor (result.h * 127.0 / 360.0);
-    result.s = Math.floor ((1 - Math.pow (1 - result.s, 2)) * 127.0);
-    result.b = Math.floor (result.b * 127.0);
-
-    return result;
-}
-
-export function unsignedInt8ToHex(x) {
-   const upper = (x >> 4) & 0xF;
-   const lower = x & 0xF;
-
-   return upper.toString(16) + lower.toString(16) + " ";
-}
-
-export function unsignedInt7ToHex(x) {
-   const upper = (x >> 4) & 0x7;
-   const lower = x & 0xF;
-
-   return upper.toString(16) + lower.toString(16) + " ";
-}
-
-export function initCountingArray (startValue:number, length:number): number[] {
-    let array: number[] = [];
-    array.length = length;
-    for (let x = 0; x < array.length; x++) {
-        array[x] = x;
-    }
-    return array;
 }
 
 
@@ -102,11 +37,27 @@ export class TimeoutTask {
 }
 
 
+export function unsignedInt8ToHex(x) {
+   const upper = (x >> 4) & 0xF;
+   const lower = x & 0xF;
+
+   return upper.toString(16) + lower.toString(16) + " ";
+}
+
+
+export function unsignedInt7ToHex(x) {
+   const upper = (x >> 4) & 0x7;
+   const lower = x & 0xF;
+
+   return upper.toString(16) + lower.toString(16) + " ";
+}
+
+
 export function areDeepEqual(obj1: {}, obj2: {}): boolean {
     let i, l, leftChain, rightChain;
 
     function compare2Objects (x, y) {
-        var p;
+        let p;
 
         // remember that NaN === NaN returns false
         // and isNaN(undefined) returns true

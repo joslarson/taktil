@@ -1,6 +1,6 @@
 import document from  '../../../document';
 import BaseButton from './BaseButton';
-import { msgType, TimeoutTask } from '../../../utils';
+import { TimeoutTask } from '../../../utils';
 import Control from '../../controller/Control';
 import MidiMessage from '../../midi/MidiMessage';
 
@@ -60,7 +60,7 @@ abstract class ManualButton extends BaseButton {
             this.onDoublePress();
         } else {
             // setup interval task to remove self after DOUBLE_PRESS_DURATION
-            var task = new TimeoutTask(this, function() {
+            const task = new TimeoutTask(this, function() {
                 delete this.memory['doublePress'];
             }, this.DURATION.DOUBLE).start();
             this.memory['doublePress'] = task;
@@ -98,8 +98,8 @@ abstract class ManualButton extends BaseButton {
         if (this.isDoubleRelease(midi)) {
             this.onDoubleRelease();
         } else {
-            // setup interval task to remove self after DOUBLE_PRESS_DURATION
-            var task = new TimeoutTask(this, function() {
+            // setup timeout task to remove self after this.DURATION.DOUBLE
+            const task = new TimeoutTask(this, function() {
                 delete this.memory['doubleRelease'];
             }, this.DURATION.DOUBLE).start();
             this.memory['doubleRelease'] = task;

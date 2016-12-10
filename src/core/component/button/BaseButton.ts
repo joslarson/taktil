@@ -1,6 +1,6 @@
 import document from  '../../../document';
 import AbstractComponent from '../AbstractComponent';
-import { msgType, TimeoutTask } from '../../../utils';
+import { TimeoutTask } from '../../../utils';
 import Control from '../../controller/Control';
 import MidiMessage from '../../midi/MidiMessage';
 

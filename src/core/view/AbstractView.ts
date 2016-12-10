@@ -53,9 +53,8 @@ abstract class AbstractView {
         if (this.parent) {
             const parentInstance = this.parent.getInstance();
             parentInstance.renderControl(control);
-        } else {
-            // TODO toast? maybe send 0 to data2?
         }
+        // no parent? nothing to render.
     }
 
     registerComponent(ComponentClass: typeof AbstractComponent, controls: Control[]|Control, mode = '__BASE__') {

@@ -1,4 +1,4 @@
-import { config, host, document } from 'typewig';
+import { host, document } from 'typewig';
 import * as api from 'typewig/core/api-proxy';
 
 

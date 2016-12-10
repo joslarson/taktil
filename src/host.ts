@@ -2,8 +2,8 @@ import Host from './core/api-proxy/Host';
 
 
 declare const host;
-const proxy = new Host(host);
-global.hostproxy = proxy;
+const hostproxy = new Host(host);
+global.hostproxy = hostproxy;
 
 
-export default proxy;
+export default hostproxy;

@@ -11,12 +11,10 @@ import { MidiIn, MidiOut } from '../api-proxy';
 abstract class AbstractController {
     static instance: AbstractController;
 
-    private _controlCollection: ControlCollection = new ControlCollection();
-
     name = this.constructor.name;
-    templates: any[] = [];
     abstract controls: { [key: string ]: Control };
-    padMIDITable;
+
+    private _controlCollection: ControlCollection = new ControlCollection();
 
     protected constructor() {}
 
@@ -60,7 +58,6 @@ abstract class AbstractController {
     }
 
     onMidi(midi: MidiMessage) {
-        if (!midi.isChannelController() && !midi.isNote()) return;  // TODO: what else do we need to allow through here?
         logger.debug(`${this.name}(IN ${String(midi.port)}) => { status: 0x${midi.status.toString(16).toUpperCase()}, data1: ${midi.data1.toString()}, data2: ${midi.data2.toString()} }`);
 
         let control = this._controlCollection.midiGet(midi.port, midi.status, midi.data1);
@@ -80,19 +77,7 @@ abstract class AbstractController {
     onSysex (midiInPort:number, data) {
     }
 
-    arePressed(...controls: Control[]) {
-        for (let control of controls) {
-            if (!control.data2) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    // TODO: what does this do for us?
     updateControl(midi: MidiMessage) {
-        // ignore all midi accept cc and note messages
-        if (!midi.isChannelController() && !midi.isNote()) return;
         let control = this._controlCollection.midiGet(midi.port, midi.status, midi.data1);
         control.data2 = midi.data2;
     }

@@ -1,8 +1,8 @@
-declare var global;
-declare var loadAPI;
-declare var load;
+declare const global;
+declare const loadAPI;
+declare const load;
 
-declare var __is_init__: boolean;
+declare const __is_init__: boolean;
 
 declare function toast(msg: string);
 declare function dump(obj);

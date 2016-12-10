@@ -420,8 +420,8 @@ declare interface Host {
      * Returns an object that represents the cursor device in devices selections made by the user in Bitwig Studio.
      * Calling this method is equal to the following code:
      * {@code
-     * var cursorTrack = createArrangerCursorTrack(numSends, numScenes);
-     * var cursorDevice = cursorTrack.createCursorDevice();
+     * const cursorTrack = createArrangerCursorTrack(numSends, numScenes);
+     * const cursorDevice = cursorTrack.createCursorDevice();
      * }
      * To create a custom device selection that is not connected to the main device selection in the user interface,
      * call {@link Track#createCursorDevice(String) cursorTrack.createCursorDevice(String name)}.
@@ -436,8 +436,8 @@ declare interface Host {
      * Returns an object that represents the cursor device in devices selections made by the user in Bitwig Studio.
      * Calling this method is equal to the following code:
      * {@code
-     * var cursorTrack = createArrangerCursorTrack(numSends, numScenes);
-     * var cursorDevice = cursorTrack.createCursorDevice();
+     * const cursorTrack = createArrangerCursorTrack(numSends, numScenes);
+     * const cursorDevice = cursorTrack.createCursorDevice();
      * }
      * To create a custom device selection that is not connected to the main device selection in the user interface,
      * call {@link Track#createCursorDevice(String) cursorTrack.createCursorDevice(String name)}.
