@@ -1,6 +1,6 @@
 import { GateButton, ToggleButton } from '../core/component/button';
 import document from '../document';
-import * as api from '../core/api-proxy';
+import * as api from 'bitwig-api-proxy';
 
 export abstract class ModeGate extends GateButton {
     abstract mode: string;

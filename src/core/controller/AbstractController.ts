@@ -5,7 +5,7 @@ import ControlCollection from './ControlCollection';
 import host from '../../host';
 import document from '../../document';
 import logger from '../../logger';
-import { MidiIn, MidiOut } from '../api-proxy';
+import { MidiIn, MidiOut } from 'bitwig-api-proxy';
 
 
 abstract class AbstractController {

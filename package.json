@@ -15,9 +15,6 @@
     "framework",
     "typescript"
   ],
-  "bin": {
-    "typewig": "./bin/typewig.js"
-  },
   "//": "default babel setup for gulpfile.babel.js",
   "babel": {
     "presets": [
@@ -32,17 +29,9 @@
     "babel-preset-es3": "^1.0.1",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
-    "gulp-replace": "^0.5.4",
     "gulp-typescript": "^3.0.2",
-    "gulp-util": "^3.0.7",
     "merge2": "^1.0.2",
-    "rollup-plugin-commonjs": "^5.0.5",
-    "rollup-plugin-node-resolve": "^2.0.0",
-    "rollup-plugin-typescript": "^0.8.1",
-    "rollup-stream": "^1.14.0",
-    "tslint": "^3.15.1",
-    "typescript": "^2.1.4",
-    "vinyl-source-stream": "^1.1.0"
+    "typescript": "^2.1.4"
   },
   "scripts": {},
   "engines": {

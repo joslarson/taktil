@@ -1,4 +1,4 @@
-import Host from './core/api-proxy/Host';
+import { Host } from 'bitwig-api-proxy';
 
 
 declare const host;
