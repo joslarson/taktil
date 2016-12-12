@@ -2,8 +2,8 @@ import 'typewig/env'; // must be first in entry file (sets polyfills + globals)
 import { host, document } from 'typewig';
 
 import store from './store';
-import TransportController from './controllers/TransportController';
-import BaseView from './views/BaseView';
+import TransportController from './controller';
+import { BaseView } from './views';
 
 
 // define controller script

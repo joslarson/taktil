@@ -1,10 +1,10 @@
 import { document, AbstractView } from 'typewig';
-import { controls } from '../controllers/TransportController';
+import { controls } from './controller';
 
-import * as components from '../components';
+import * as components from './components';
 
 
-export default class BaseView extends AbstractView {
+export class BaseView extends AbstractView {
     // parent = BaseView;
 
     onRegister() {

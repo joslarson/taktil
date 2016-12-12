@@ -16,7 +16,7 @@ abstract class ComponentSet extends AbstractComponent {
             // create/add component
             let component: AbstractComponent = this.createComponent.apply(this, [i]);
             component.parent = this.constructor as typeof AbstractComponent;
-            this.componentMap[control.getName()] = component;
+            this.componentMap[control.id] = component;
             // register component
             component.register([control], view);
         }
@@ -29,12 +29,12 @@ abstract class ComponentSet extends AbstractComponent {
 
     renderControl(control: Control) {
         // pass on state to corresponding control
-        this.componentMap[control.getName()].renderControl(control);
+        this.componentMap[control.id].renderControl(control);
     }
 
     onMidi(control: Control, midi: MidiMessage) {
         // pass on midi to corresponding control
-        this.componentMap[control.getName()].onMidi(control, midi);
+        this.componentMap[control.id].onMidi(control, midi);
     }
 }
 

@@ -1,11 +1,11 @@
 import AbstractComponent from './AbstractComponent';
 import ComponentSet from './ComponentSet';
-import Knob from './Knob';
+import Range from './Range';
 
 export {
     AbstractComponent,
     ComponentSet,
-    Knob,
+    Range,
 }
 
 export * from './button';

@@ -1,7 +1,5 @@
-import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import MidiMessage from '../midi/MidiMessage';
 import Control from './Control';
-import ControlCollection from './ControlCollection';
 import host from '../../host';
 import document from '../../document';
 import logger from '../../logger';
@@ -13,8 +11,7 @@ abstract class AbstractController {
 
     name = this.constructor.name;
     abstract controls: { [key: string ]: Control };
-
-    private _controlCollection: ControlCollection = new ControlCollection();
+    private _controlMidiMap: { [key: number]: { [key: number]: { [key: number]: Control } } } = {};
 
     protected constructor() {}
 
@@ -33,13 +30,17 @@ abstract class AbstractController {
         const handledMidiInPorts = [];
         for (let controlName in instance.controls) {
             const control: Control = instance.controls[controlName];
+            const { midiInPort, status, data1, data2 } = control;
+            // name the control instance according to map
+            control.name = controlName;
             // build unique list of midi-in ports the controller needs to handle
-            if (handledMidiInPorts.indexOf(control.midiInPort) === -1) {
-                handledMidiInPorts.push(control.midiInPort);
+            if (handledMidiInPorts.indexOf(midiInPort) === -1) {
+                handledMidiInPorts.push(midiInPort);
             }
             // add control to control collection
             control.controller = instance;
-            instance._controlCollection.add(controlName, control);
+            // add to _controlMidiMap
+            instance._addControlToMidiMap(control);
         }
 
         for (let midiInPort of handledMidiInPorts) {
@@ -48,6 +49,25 @@ abstract class AbstractController {
         }
 
         return instance;
+    }
+
+    private _addControlToMidiMap(control: Control) {
+        // cache reverse lookup midi values in this._midiMap
+        if (this._controlMidiMap[`${control.midiInPort}`] == undefined) {
+            this._controlMidiMap[`${control.midiInPort}`] = {};
+        }
+        if (this._controlMidiMap[`${control.midiInPort}`][control.status] == undefined) {
+            this._controlMidiMap[`${control.midiInPort}`][control.status] = {};
+        }
+        this._controlMidiMap[`${control.midiInPort}`][control.status][control.data1] = control;
+    }
+
+    midiGetControl(midiInIndex: number, status: number, data1: number) {
+        try {
+            return this._controlMidiMap[midiInIndex][status][data1];
+        } catch (e) {
+            return undefined;
+        }
     }
 
     private _getMidiCallback(midiInPort) {
@@ -60,7 +80,7 @@ abstract class AbstractController {
     onMidi(midi: MidiMessage) {
         logger.debug(`${this.name}(IN ${String(midi.port)}) => { status: 0x${midi.status.toString(16).toUpperCase()}, data1: ${midi.data1.toString()}, data2: ${midi.data2.toString()} }`);
 
-        let control = this._controlCollection.midiGet(midi.port, midi.status, midi.data1);
+        let control = this.midiGetControl(midi.port, midi.status, midi.data1);
         let activeView = document.getActiveView().getInstance();
 
         if (control === undefined) {
@@ -78,13 +98,16 @@ abstract class AbstractController {
     }
 
     updateControl(midi: MidiMessage) {
-        let control = this._controlCollection.midiGet(midi.port, midi.status, midi.data1);
+        let control = this.midiGetControl(midi.port, midi.status, midi.data1);
         control.data2 = midi.data2;
     }
 
     blankController() {
-        // implemented in child classes
-        throw 'Not Implemented';
+        for (let controlName in this.controls) {
+            const control = this.controls[controlName];
+            const { midiOutPort: port, status, data1 } = control, data2 = 0;
+            document.midiOut.sendMidi({ port, status, data1, data2 });
+        }
     }
 }
 

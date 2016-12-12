@@ -1,5 +1,4 @@
 import AbstractView from '../view/AbstractView';
-import AbstractCollectionItem from '../../helpers/AbstractCollectionItem';
 import MidiMessage from '../midi/MidiMessage';
 import { areDeepEqual, TimeoutTask } from '../../utils';
 import document from '../../document';
@@ -65,8 +64,13 @@ abstract class AbstractComponent {
     abstract renderControl(control: Control): void;
 
     // handles midi messages routed to control
-    abstract onMidi?(control: Control, midi: MidiMessage): void;
-    abstract onSysex?(control: Control, msg: string): void;
+    onMidi(control: Control, midi: MidiMessage): void {
+        throw 'Not Implemented';
+    }
+
+    onSysex(control: Control, msg: string): void  {
+        throw 'Not Implemented';
+    }
 
     cancelTimeoutTask(taskName: string) {
         const memory = this.memory[taskName];

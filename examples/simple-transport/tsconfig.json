@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es2015",  // runs through es3 transpiler after rollup (see gulpfile)
+        "target": "es3",  // runs through es3 transpiler after rollup (see gulpfile)
         "module": "es2015",
         "rootDir": "src",
         "baseUrl": "./src",
