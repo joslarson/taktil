@@ -1,7 +1,7 @@
 import AbstractView from '../view/AbstractView';
 import MidiMessage from '../midi/MidiMessage';
 import { areDeepEqual, TimeoutTask } from '../../utils';
-import document from '../../document';
+import session from '../../session';
 import AbstractController from '../controller/AbstractController';
 import Control from '../controller/Control';
 import logger from '../../logger';
@@ -55,7 +55,7 @@ abstract class AbstractComponent {
         // update hardware state through view to avoid
         // updating hardware controls not in current view
         for (let control of this.controls) {
-            const activeView = document.getActiveView().getInstance();
+            const activeView = session.getActiveView().getInstance();
             activeView.renderControl(control);
         }
     }

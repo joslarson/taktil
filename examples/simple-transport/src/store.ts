@@ -1,5 +1,5 @@
-import { host, document } from 'typewig';
-import * as api from 'typewig/core/api-proxy';
+import { host } from 'typewig';
+import * as api from 'bitwig-api-proxy';
 
 
 export class Store {

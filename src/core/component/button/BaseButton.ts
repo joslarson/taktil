@@ -1,4 +1,4 @@
-import document from  '../../../document';
+import session from  '../../../session';
 import AbstractComponent from '../AbstractComponent';
 import { TimeoutTask } from '../../../utils';
 import Control from '../../controller/Control';
@@ -11,7 +11,7 @@ abstract class BaseButton extends AbstractComponent {
 
     renderControl(control: Control) {
         const { midiOutPort: port, status, data1 } = control;
-        document.midiOut.sendMidi({ port, status, data1, data2: this.state ? 127 : 0 });
+        session.midiOut.sendMidi({ port, status, data1, data2: this.state ? 127 : 0 });
     }
 
     protected isPress(midi: MidiMessage) {

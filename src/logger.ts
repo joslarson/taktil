@@ -1,5 +1,5 @@
 import host from './host';
-import document from './document';
+import session from './session';
 
 
 export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
@@ -12,7 +12,7 @@ export class Logger {
     private _filterSetting;
 
     constructor() {
-        document.on('init', () => {
+        session.on('init', () => {
             this._levelSetting = host.getPreferences().getEnumSetting(
                 'Log Level', 'Development', this._levels, this._level
             );

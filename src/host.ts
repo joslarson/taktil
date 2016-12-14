@@ -1,9 +1,7 @@
-import { Host } from 'bitwig-api-proxy';
+import { host } from 'bitwig-api-proxy';
 
 
-declare const host;
-const hostproxy = new Host(host);
-global.hostproxy = hostproxy;
+global.hostproxy = host;
 
 
-export default hostproxy;
+export default host;

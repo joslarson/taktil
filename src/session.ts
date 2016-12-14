@@ -2,10 +2,9 @@ import { AbstractController, Control } from './core/controller';
 import AbstractView from './core/view/AbstractView';
 import host from './host';
 import MidiOutProxy from './core/midi/MidiOutProxy';
-import logger from './logger';
 
 
-export class Document {
+export class Session {
     private _views: typeof AbstractView[] = [];
     private _activeView: typeof AbstractView;
     private _activeModes: string[] = [];
@@ -24,9 +23,7 @@ export class Document {
         };
 
         global.flush = () => {
-            // logger.debug('flush start...');
             this._callEventCallbacks('flush');
-            // logger.debug('flush end.');
         };
 
         global.exit = () => {
@@ -141,7 +138,7 @@ export class Document {
     }
 }
 
-let document = new Document();
+let session = new Session();
 
 
-export default document;
+export default session;

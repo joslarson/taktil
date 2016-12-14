@@ -2,7 +2,7 @@ import AbstractComponent from './AbstractComponent';
 import Control from '../controller/Control';
 import * as utils from '../../utils';
 import MidiMessage from '../midi/MidiMessage';
-import document from '../../document';
+import session from '../../session';
 
 
 abstract class Range extends AbstractComponent {
@@ -10,7 +10,7 @@ abstract class Range extends AbstractComponent {
 
     renderControl(control: Control) {
         const { midiOutPort: port, status, data1, data2 } = control;
-        document.midiOut.sendMidi({  port, status, data1, data2: this.state });
+        session.midiOut.sendMidi({  port, status, data1, data2: this.state });
     }
 
     onMidi(control: Control, midi: MidiMessage) {

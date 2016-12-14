@@ -9,7 +9,8 @@
         "baseUrl": "./src",
         "moduleResolution": "node",
         // "watch": true,
-        "outDir": "./dist"
+        "outDir": "./dist",
+        "lib": ["DOM", "ES6", "DOM.Iterable", "ScriptHost"]
     },
     "compileOnSave": false,
     "include": [
@@ -17,7 +18,6 @@
     ],
     "exclude": [
         "node_modules/**/*",
-        "dist",
-        "src/core/bitwig_old"
+        "dist"
     ]
 }

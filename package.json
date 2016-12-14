@@ -22,6 +22,7 @@
     ]
   },
   "dependencies": {
+    "bitwig-api-proxy": "^0.1.2",
     "bitwig-es-polyfill": "^0.2.0"
   },
   "devDependencies": {

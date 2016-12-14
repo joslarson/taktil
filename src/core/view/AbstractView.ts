@@ -1,7 +1,7 @@
 import MidiMessage from '../midi/MidiMessage';
 import AbstractComponent from '../component/AbstractComponent';
 import Control from '../controller/Control';
-import document from '../../document';
+import session from '../../session';
 import logger from '../../logger';
 
 
@@ -9,12 +9,6 @@ abstract class AbstractView {
     protected static instance: AbstractView;
 
     name = this.constructor.name;
-    registrations: {
-        component: typeof AbstractComponent,
-        control?: Control,
-        controls?: Control[],
-        mode?: string,
-    }[] = [];
     parent: typeof AbstractView;
     componentMap: {
         [mode: string]: { [controlId: string]: AbstractComponent }
@@ -41,7 +35,7 @@ abstract class AbstractView {
 
     renderControl(control: Control) {
         // check view modes in order for component/control registration
-        for (let activeMode of document.getActiveModes()) {
+        for (let activeMode of session.getActiveModes()) {
             if (!this.componentMap[activeMode]) continue;  // mode not used in view
             const component = this.componentMap[activeMode][control.id];
             if (component) {
@@ -65,12 +59,12 @@ abstract class AbstractView {
         // register controls w/ component
         component.register(<Control[]>controls, this);
         for (let control of controls as Control[]) {
-            const registeredControls = document.getRegisteredControls();
+            const registeredControls = session.getRegisteredControls();
             // register control with view/mode
             if (!this.componentMap[mode]) this.componentMap[mode] = {};
             this.componentMap[mode][control.id] = component;
             // add control to registered control list (if it's not already there)
-            if (registeredControls.indexOf(control) === -1) document.registerControl(control);
+            if (registeredControls.indexOf(control) === -1) session.registerControl(control);
         }
     }
 
@@ -79,7 +73,7 @@ abstract class AbstractView {
         let component: AbstractComponent;
 
         // if component in an active mode, let the component in the first associated mode handle
-        for (let activeMode of document.getActiveModes()) {
+        for (let activeMode of session.getActiveModes()) {
             if (this.componentMap[activeMode] && this.componentMap[activeMode][control.id]) {
                 mode = activeMode;
                 component = this.componentMap[activeMode][control.id];

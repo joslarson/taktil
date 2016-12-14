@@ -1,4 +1,3 @@
-import document from  '../../../document';
 import BaseButton from './BaseButton';
 import { TimeoutTask } from '../../../utils';
 import Control from '../../controller/Control';

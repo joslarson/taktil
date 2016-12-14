@@ -1,7 +1,7 @@
 import MidiMessage from '../midi/MidiMessage';
 import Control from './Control';
 import host from '../../host';
-import document from '../../document';
+import session from '../../session';
 import logger from '../../logger';
 import { MidiIn, MidiOut } from 'bitwig-api-proxy';
 
@@ -81,7 +81,7 @@ abstract class AbstractController {
         logger.debug(`${this.name}(IN ${String(midi.port)}) => { status: 0x${midi.status.toString(16).toUpperCase()}, data1: ${midi.data1.toString()}, data2: ${midi.data2.toString()} }`);
 
         let control = this.midiGetControl(midi.port, midi.status, midi.data1);
-        let activeView = document.getActiveView().getInstance();
+        let activeView = session.getActiveView().getInstance();
 
         if (control === undefined) {
             toast('Control not defined in controller template.');
@@ -106,7 +106,7 @@ abstract class AbstractController {
         for (let controlName in this.controls) {
             const control = this.controls[controlName];
             const { midiOutPort: port, status, data1 } = control, data2 = 0;
-            document.midiOut.sendMidi({ port, status, data1, data2 });
+            session.midiOut.sendMidi({ port, status, data1, data2 });
         }
     }
 }

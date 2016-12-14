@@ -24,7 +24,7 @@ gulp.task('copy', () =>
 
 // gulp watch
 gulp.task('watch', ['js', 'copy'], () => {
-    gulp.watch('src/**/*.ts', ['js']);
+    gulp.watch(['src/**/*.ts', 'node_modules/bitwig-api-proxy/lib/index.js'], ['js']);
     gulp.watch(['README.md', 'LICENSE', 'package.json'], ['copy']);
 });
 

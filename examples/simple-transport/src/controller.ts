@@ -1,4 +1,4 @@
-import { document, host, AbstractController, Control } from 'typewig';
+import { session, host, AbstractController, Control } from 'typewig';
 
 
 export const controls = {
@@ -15,7 +15,7 @@ export default class TransportController extends AbstractController {
         for (let controlName in this.controls) {
             const control = this.controls[controlName];
             const { midiOutPort: port, status, data1 } = control, data2 = 0;
-            document.midiOut.sendMidi({ port, status, data1, data2 });
+            session.midiOut.sendMidi({ port, status, data1, data2 });
         }
     }
 }

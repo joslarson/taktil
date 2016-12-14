@@ -1,16 +1,17 @@
 import { GateButton, ToggleButton } from '../core/component/button';
-import document from '../document';
+import session from '../session';
 import * as api from 'bitwig-api-proxy';
+
 
 export abstract class ModeGate extends GateButton {
     abstract mode: string;
 
     onPress() {
-        document.activateMode(this.mode);
+        session.activateMode(this.mode);
     }
 
     onRelease() {
-        document.deactivateMode(this.mode);
+        session.deactivateMode(this.mode);
     }
 }
 

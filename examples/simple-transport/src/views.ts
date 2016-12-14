@@ -1,6 +1,5 @@
-import { document, AbstractView } from 'typewig';
+import { AbstractView } from 'typewig';
 import { controls } from './controller';
-
 import * as components from './components';
 
 
