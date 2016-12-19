@@ -1,4 +1,4 @@
-import { document} from 'typewig';
+import { session} from 'typewig';
 import * as components from 'typewig/contrib/components'
 import store from './store';
 

@@ -1,6 +1,1 @@
-import AbstractView from './AbstractView';
-
-
-export {
-    AbstractView,
-};
+export { default as AbstractView } from './AbstractView';

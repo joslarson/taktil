@@ -1,12 +1,8 @@
 {
   "name": "typewig",
-  "description": "Typescript Bitwig controller script framework.",
-  "version": "1.0.0",
-  "homepage": "https://github.com/joslarson/typewig",
-  "repository": "joslarson/typewig",
-  "bugs": {
-    "url": "https://github.com/joslarson/typewig/issues"
-  },
+  "description": "Typewig is a lightweight framework and integrated build tool designed to simplify the process of developing Bitwig controller scripts.",
+  "version": "0.0.1",
+  "repository": "typewig/typewig",
   "author": "Joseph Larson",
   "tags": [
     "bitwig",
@@ -22,7 +18,7 @@
     ]
   },
   "dependencies": {
-    "bitwig-api-proxy": "^0.1.2",
+    "bitwig-api-proxy": "^0.1.5",
     "bitwig-es-polyfill": "^0.2.0"
   },
   "devDependencies": {
@@ -34,9 +30,15 @@
     "merge2": "^1.0.2",
     "typescript": "^2.1.4"
   },
-  "scripts": {},
-  "engines": {
-    "node": ">= 4.2"
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "license": "BSD-3-Clause"
+  "engines": {
+    "node": ">= 6.4"
+  },
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/typewig/typewig/issues"
+  },
+  "homepage": "https://github.com/typewig/typewig#readme"
 }

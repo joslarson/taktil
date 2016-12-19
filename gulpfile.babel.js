@@ -17,10 +17,8 @@ gulp.task('js', () => {
 });
 
 // copy
-gulp.task('copy', () =>
-    gulp.src(['README.md', 'LICENSE', 'package.json'])
-        .pipe(gulp.dest('dist'))
-);
+gulp.task('copy', () => gulp.src(['README.md', 'LICENSE', 'package.json'])
+     .pipe(gulp.dest('dist')));
 
 // gulp watch
 gulp.task('watch', ['js', 'copy'], () => {

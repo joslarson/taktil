@@ -17,7 +17,7 @@ export class Session {
     constructor() {
         global.init = () => {
             global.__is_init__ = true;
-            // call the document init callbacks
+            // call the session init callbacks
             this._callEventCallbacks('init');
             global.__is_init__ = false;
         };
@@ -31,7 +31,7 @@ export class Session {
             for (let Controller of this._controllers) {
                 Controller.getInstance().blankController();
             }
-            // call the document exit callbacks
+            // call the session exit callbacks
             this._callEventCallbacks('exit');
         };
     }

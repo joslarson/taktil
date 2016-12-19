@@ -4,7 +4,7 @@ import * as components from './components';
 
 
 export class BaseView extends AbstractView {
-    // parent = BaseView;
+    // parent = ParentView
 
     onRegister() {
         this.registerComponent(components.PlayToggle, controls.PLAY);

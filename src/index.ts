@@ -1,10 +1,11 @@
-import host from './host';
-import session from './session';
-import logger from './logger';
 import * as utils from './utils';
 
 
-export { session, host, logger, utils };
+export { utils };
+export { default as session } from './session';
+export { default as host } from './host';
+export { default as logger } from './logger';
 export * from './core/view';
+export * from './core/midi';
 export * from './core/controller';
 export * from './core/component';

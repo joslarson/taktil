@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.html",
   "dependencies": {
-    "bitwig-api-proxy": "^0.1.2",
+    "bitwig-api-proxy": "^0.1.5",
     "typewig": "^0.1.0"
   },
   "scripts": {},
@@ -15,8 +15,8 @@
     "outDir": "./dist",
     "copy": [
       {
-        "src": "",
-        "dest": ""
+        "src": "./src/README.md",
+        "dest": "./dist"
       }
     ]
   }
