@@ -1,7 +1,7 @@
 {
   "name": "typewig",
   "description": "Typewig is a lightweight framework and integrated build tool designed to simplify the process of developing Bitwig controller scripts.",
-  "version": "0.0.1",
+  "version": "0.1.1",
   "repository": "typewig/typewig",
   "author": "Joseph Larson",
   "tags": [
