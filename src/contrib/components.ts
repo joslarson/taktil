@@ -1,9 +1,9 @@
-import { GateButton, ToggleButton } from '../core/component/button';
+import { AbstractGateButton, AbstractToggleButton } from '../core/component/button';
 import session from '../session';
 import * as api from 'bitwig-api-proxy';
 
 
-export abstract class ModeGate extends GateButton {
+export abstract class AbstractModeGate extends AbstractGateButton {
     abstract mode: string;
 
     onPress() {
@@ -16,7 +16,7 @@ export abstract class ModeGate extends GateButton {
 }
 
 
-export abstract class PlayToggle extends ToggleButton {
+export abstract class AbstractPlayToggle extends AbstractToggleButton {
     abstract transport: api.Transport;
 
     onRegister() {
@@ -35,7 +35,7 @@ export abstract class PlayToggle extends ToggleButton {
 }
 
 
-export abstract class MetronomeToggle extends ToggleButton {
+export abstract class AbstractMetronomeToggle extends AbstractToggleButton {
     abstract transport: api.Transport;
 
     onRegister() {
@@ -54,7 +54,7 @@ export abstract class MetronomeToggle extends ToggleButton {
 }
 
 
-export abstract class PreRollToggle extends ToggleButton {
+export abstract class AbstractPreRollToggle extends AbstractToggleButton {
     abstract transport: api.Transport;
 
     onRegister() {
@@ -73,7 +73,7 @@ export abstract class PreRollToggle extends ToggleButton {
 }
 
 
-export abstract class RestartButton extends GateButton {
+export abstract class AbstractRestartButton extends AbstractGateButton {
     abstract transport: api.Transport;
 
     onPress() {
@@ -82,7 +82,7 @@ export abstract class RestartButton extends GateButton {
 }
 
 
-export abstract class OverwriteToggle extends ToggleButton {
+export abstract class AbstractOverwriteToggle extends AbstractToggleButton {
     abstract transport: api.Transport;
 
     onRegister() {
@@ -101,7 +101,7 @@ export abstract class OverwriteToggle extends ToggleButton {
 }
 
 
-export abstract class LoopToggle extends ToggleButton {
+export abstract class AbstractLoopToggle extends AbstractToggleButton {
     abstract transport: api.Transport;
 
     onRegister() {

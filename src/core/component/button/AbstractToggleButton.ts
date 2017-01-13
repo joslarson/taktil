@@ -1,11 +1,11 @@
-import BaseButton from './BaseButton';
+import AbstractButtonBase from './AbstractButtonBase';
 import MidiMessage from '../../midi/MidiMessage';
-import Control from '../../controller/Control';
+import MidiControl from '../../midi/MidiControl';
 import logger from '../../../logger';
 
 
-abstract class ToggleButton extends BaseButton {
-    onMidi(control: Control, midi: MidiMessage) {
+abstract class ToggleButton extends AbstractButtonBase {
+    onMidi(midiControl: MidiControl, midi: MidiMessage) {
         if (!this.isPress(midi)) return;
 
         if (!this.state) {

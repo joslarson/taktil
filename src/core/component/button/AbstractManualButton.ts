@@ -1,13 +1,13 @@
-import BaseButton from './BaseButton';
+import AbstractButtonBase from './AbstractButtonBase';
 import { TimeoutTask } from '../../../utils';
-import Control from '../../controller/Control';
+import MidiControl from '../../midi/MidiControl';
 import MidiMessage from '../../midi/MidiMessage';
 
 
-abstract class ManualButton extends BaseButton {
+abstract class ManualButton extends AbstractButtonBase {
     DURATION = { LONG: 350, DOUBLE: 450 };
 
-    onMidi(control: Control, midi: MidiMessage) {
+    onMidi(midiControl: MidiControl, midi: MidiMessage) {
         this._handlePress(midi);
         this._handleLongPress(midi);
         this._handleDoublePress(midi);

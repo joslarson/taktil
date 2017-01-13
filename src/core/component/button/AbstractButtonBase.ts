@@ -1,16 +1,16 @@
 import session from  '../../../session';
-import AbstractComponent from '../AbstractComponent';
+import AbstractComponentBase from '../AbstractComponentBase';
 import { TimeoutTask } from '../../../utils';
-import Control from '../../controller/Control';
+import MidiControl from '../../midi/MidiControl';
 import MidiMessage from '../../midi/MidiMessage';
 
 
 
-abstract class BaseButton extends AbstractComponent {
+abstract class AbstractButtonBase extends AbstractComponentBase {
     state: any = false;
 
-    renderControl(control: Control) {
-        const { midiOutPort: port, status, data1 } = control;
+    renderMidiControl(midiControl: MidiControl) {
+        const { midiOutPort: port, status, data1 } = midiControl;
         session.midiOut.sendMidi({ port, status, data1, data2: this.state ? 127 : 0 });
     }
 
@@ -24,4 +24,4 @@ abstract class BaseButton extends AbstractComponent {
 }
 
 
-export default BaseButton;
+export default AbstractButtonBase;

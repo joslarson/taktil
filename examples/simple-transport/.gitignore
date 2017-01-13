@@ -2,4 +2,5 @@ local_build
 node_modules
 *.pyc
 .DS_Store
-dist/
+/dist
+.vscode

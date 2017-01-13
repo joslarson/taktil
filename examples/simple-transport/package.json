@@ -12,12 +12,8 @@
   "license": "ISC",
   "typewig": {
     "entries": "src/*.control.@(js|ts)",
-    "outDir": "./dist",
     "copy": [
-      {
-        "src": "./src/README.md",
-        "dest": "./dist"
-      }
+      "./src/README.md"
     ]
   }
 }

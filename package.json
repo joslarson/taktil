@@ -18,6 +18,7 @@
     ]
   },
   "dependencies": {
+    "typewig": "^0.1.1",
     "bitwig-api-proxy": "^0.1.5",
     "bitwig-es-polyfill": "^0.2.0"
   },
@@ -34,7 +35,7 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
-    "node": ">= 6.4"
+    "node": ">= 4.4.2"
   },
   "license": "BSD-3-Clause",
   "bugs": {

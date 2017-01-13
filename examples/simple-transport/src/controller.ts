@@ -2,10 +2,10 @@ import { session, host, AbstractController, Control } from 'typewig';
 
 
 export const controls = {
-    RESTART: new Control({ status: 0xB4, data1: 21 }),
-    PLAY:    new Control({ status: 0xB4, data1: 25 }),
-    REC:     new Control({ status: 0xB4, data1: 26 }),
-    SHIFT:   new Control({ status: 0xB4, data1: 24 }),
+    RESTART: new Control({ status: 0xB4, data1: 0x15 }),
+    PLAY:    new Control({ status: 0xB4, data1: 0x19 }),
+    REC:     new Control({ status: 0xB4, data1: 0x1A }),
+    SHIFT:   new Control({ status: 0xB4, data1: 0x18 }),
 };
 
 export default class TransportController extends AbstractController {

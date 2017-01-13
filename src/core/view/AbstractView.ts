@@ -1,6 +1,6 @@
 import MidiMessage from '../midi/MidiMessage';
-import AbstractComponent from '../component/AbstractComponent';
-import Control from '../controller/Control';
+import AbstractComponentBase from '../component/AbstractComponentBase';
+import MidiControl from '../midi/MidiControl';
 import session from '../../session';
 import logger from '../../logger';
 
@@ -11,7 +11,7 @@ abstract class AbstractView {
     name = this.constructor.name;
     parent: typeof AbstractView;
     componentMap: {
-        [mode: string]: { [controlId: string]: AbstractComponent }
+        [mode: string]: { [midiControlId: string]: AbstractComponentBase }
     } = {};
 
     protected constructor() {}
@@ -33,60 +33,60 @@ abstract class AbstractView {
         // implemented in child class
     }
 
-    renderControl(control: Control) {
-        // check view modes in order for component/control registration
+    renderMidiControl(midiControl: MidiControl) {
+        // check view modes in order for component/midiControl registration
         for (let activeMode of session.getActiveModes()) {
             if (!this.componentMap[activeMode]) continue;  // mode not used in view
-            const component = this.componentMap[activeMode][control.id];
+            const component = this.componentMap[activeMode][midiControl.id];
             if (component) {
-                component.renderControl(control);
+                component.renderMidiControl(midiControl);
                 return;
             }
         }
         // component not found in view? send to parent
         if (this.parent) {
             const parentInstance = this.parent.getInstance();
-            parentInstance.renderControl(control);
+            parentInstance.renderMidiControl(midiControl);
         }
         // no parent? nothing to render.
     }
 
-    registerComponent(ComponentClass: typeof AbstractComponent, controls: Control[]|Control, mode = '__BASE__') {
-        type ComponentClassType = new () => AbstractComponent;
-        controls = controls instanceof Control ? [<Control>controls] : controls;
+    registerComponent(ComponentClass: typeof AbstractComponentBase, midiControls: MidiControl[]|MidiControl, mode = '__BASE__') {
+        type ComponentClassType = new () => AbstractComponentBase;
+        midiControls = midiControls instanceof MidiControl ? [<MidiControl>midiControls] : midiControls;
         const component = new (ComponentClass as any as ComponentClassType)();
 
-        // register controls w/ component
-        component.register(<Control[]>controls, this);
-        for (let control of controls as Control[]) {
+        // register midiControls w/ component
+        component.register(<MidiControl[]>midiControls, this);
+        for (let midiControl of midiControls as MidiControl[]) {
             const registeredControls = session.getRegisteredControls();
-            // register control with view/mode
+            // register midiControl with view/mode
             if (!this.componentMap[mode]) this.componentMap[mode] = {};
-            this.componentMap[mode][control.id] = component;
-            // add control to registered control list (if it's not already there)
-            if (registeredControls.indexOf(control) === -1) session.registerControl(control);
+            this.componentMap[mode][midiControl.id] = component;
+            // add midiControl to registered midiControl list (if it's not already there)
+            if (registeredControls.indexOf(midiControl) === -1) session.registerControl(midiControl);
         }
     }
 
-    onMidi(control: Control, midi: MidiMessage) {
+    onMidi(midiControl: MidiControl, midi: MidiMessage) {
         let mode: string;
-        let component: AbstractComponent;
+        let component: AbstractComponentBase;
 
         // if component in an active mode, let the component in the first associated mode handle
         for (let activeMode of session.getActiveModes()) {
-            if (this.componentMap[activeMode] && this.componentMap[activeMode][control.id]) {
+            if (this.componentMap[activeMode] && this.componentMap[activeMode][midiControl.id]) {
                 mode = activeMode;
-                component = this.componentMap[activeMode][control.id];
+                component = this.componentMap[activeMode][midiControl.id];
                 break;
             }
         }
 
         if (mode && component) {
-            this.componentMap[mode][control.id].onMidi(control, midi);
+            this.componentMap[mode][midiControl.id].onMidi(midiControl, midi);
         } else {
             if (this.parent) {
                 const parentInstance = this.parent.getInstance();
-                parentInstance.onMidi(control, midi);
+                parentInstance.onMidi(midiControl, midi);
             } else {
                 toast(`Control not implemented in current view/mode stack.`);
             }

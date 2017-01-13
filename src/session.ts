@@ -1,4 +1,4 @@
-import { AbstractController, Control } from './core/controller';
+import { AbstractMidiController, MidiControl } from './core/midi';
 import AbstractView from './core/view/AbstractView';
 import host from './host';
 import MidiOutProxy from './core/midi/MidiOutProxy';
@@ -8,8 +8,8 @@ export class Session {
     private _views: typeof AbstractView[] = [];
     private _activeView: typeof AbstractView;
     private _activeModes: string[] = [];
-    private _controllers: typeof AbstractController[] = [];
-    private _registeredControls: Control[] = [];
+    private _midiControllers: typeof AbstractMidiController[] = [];
+    private _registeredMidiControls: MidiControl[] = [];
     private _eventHandlers: { [key: string]: Function[] } = {};
 
     midiOut: MidiOutProxy = new MidiOutProxy(this);
@@ -27,9 +27,9 @@ export class Session {
         };
 
         global.exit = () => {
-            // blank controllers
-            for (let Controller of this._controllers) {
-                Controller.getInstance().blankController();
+            // blank midiControllers
+            for (let MidiController of this._midiControllers) {
+                MidiController.getInstance().blankMidiController();
             }
             // call the session exit callbacks
             this._callEventCallbacks('exit');
@@ -52,37 +52,37 @@ export class Session {
         }
     }
 
-    // Controllers
+    // MidiControllers
     //////////////////////////////
 
-    registerController(Controller: typeof AbstractController) {
-        if (!global.__is_init__) throw 'Untimely controller registration: controllers can only be registered from within the init callback.';
-        Controller.getInstance(); // getInstance must be called here to instantiate during init
+    registerMidiController(MidiController: typeof AbstractMidiController) {
+        if (!global.__is_init__) throw 'Untimely midiController registration: midiControllers can only be registered from within the init callback.';
+        MidiController.getInstance(); // getInstance must be called here to instantiate during init
 
-        const controllers = this.getControllers();
-        if (controllers.indexOf(Controller) === -1) this._controllers = [...controllers, Controller];
+        const midiControllers = this.getControllers();
+        if (midiControllers.indexOf(MidiController) === -1) this._midiControllers = [...midiControllers, MidiController];
     }
 
     getControllers() {
-        return this._controllers;
+        return this._midiControllers;
     }
 
     // Controls
     //////////////////////////////
 
-    registerControl(control: Control) {
-        if (this._registeredControls.indexOf(control) === -1) this._registeredControls.push(control);
+    registerControl(midiControl: MidiControl) {
+        if (this._registeredMidiControls.indexOf(midiControl) === -1) this._registeredMidiControls.push(midiControl);
     }
 
     getRegisteredControls() {
-        return [...this._registeredControls];
+        return [...this._registeredMidiControls];
     }
 
-    renderControls() {
+    renderMidiControls() {
         if (!this.getActiveView()) return;  // can't do anything until we have an active view
 
-        for (let control of this.getRegisteredControls()) {
-            this.getActiveView().getInstance().renderControl(control);
+        for (let midiControl of this.getRegisteredControls()) {
+            this.getActiveView().getInstance().renderMidiControl(midiControl);
         }
     }
 
@@ -107,7 +107,7 @@ export class Session {
     setActiveView(View: typeof AbstractView) {
         if (this.getViews().indexOf(View) === -1) throw `${View.name} mus first be registered before being set as the active view.`
         this._activeView = View;
-        this.renderControls();
+        this.renderMidiControls();
     }
 
     getActiveView(): typeof AbstractView {
@@ -126,14 +126,14 @@ export class Session {
         const modeIndex = this._activeModes.indexOf(mode);
         if (modeIndex > -1) this._activeModes.splice(modeIndex, 1);
         this._activeModes.unshift(mode);  // prepend to modes
-        this.renderControls(); // call refresh
+        this.renderMidiControls(); // call refresh
     }
 
     deactivateMode(mode: string) {
         const modeIndex = this._activeModes.indexOf(mode);
         if (modeIndex > -1) {
             this._activeModes.splice(modeIndex, 1);
-            this.renderControls(); // call refresh
+            this.renderMidiControls(); // call refresh
         }
     }
 }

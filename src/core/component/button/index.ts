@@ -1,8 +1,4 @@
-import BaseButton from './BaseButton';
-import GateButton from './GateButton';
-import ManualButton from './ManualButton';
-import PushButton from './PushButton';
-import ToggleButton from './ToggleButton';
-
-
-export { BaseButton, GateButton, ManualButton, PushButton, ToggleButton };
+export { default as AbstractGateButton } from './AbstractGateButton';
+export { default as AbstractManualButton } from './AbstractManualButton';
+export { default as AbstractPushButton } from './AbstractPushButton';
+export { default as AbstractToggleButton } from './AbstractToggleButton';
