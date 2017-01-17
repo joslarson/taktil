@@ -24,7 +24,7 @@ session.on('init', () => {
     store.init();
 
     // add controllers to session before registering views
-    session.registerController(TransportController);
+    session.registerMidiController(TransportController);
 
     // add views to session
     session.registerView(BaseView);

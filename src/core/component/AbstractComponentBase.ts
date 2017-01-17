@@ -7,80 +7,80 @@ import MidiControl from '../midi/MidiControl';
 import logger from '../../logger';
 
 
+// abstract class AbstractComponentBase {
+//     private static instance: AbstractComponentBase;
+
+//     parent: typeof AbstractComponentBase;
+//     name = this.constructor.name;
+//     midiControls: MidiControl[] = [];
+//     registrations: Object[] = [];
+//     views: AbstractView[] = [];
+//     memory: { [key: string]: any } = {};
+
+//     abstract state: any; // depends on midiControl type
+
+//     protected constructor() {}
+
+//     static getInstance() {
+//         // inheritance safe singleton pattern (each child class will have it's own singleton)
+//         const Component = this as any as { new (): AbstractComponentBase, instance: AbstractComponentBase };
+//         let instance = Component.instance;
+
+//         if (instance instanceof Component) return instance;
+
+//         instance = new Component();
+//         Component.instance = instance; 
+//         return instance;
+//     }
+
+//     // called when button is registered to a view for the first time
+//     // allows running of code that is only aloud in the api's init function
+//     register(midiControls: MidiControl[], view: AbstractView) {
+//         this.registrations.push({'view': view, 'midiControls': midiControls});
+//         this.midiControls = [...this.midiControls, ...midiControls];
+//         if (this.views.indexOf(view) === -1) this.views.push(view);
+//         // call onRegister()
+//         this.onRegister();
+//     }
+
+//     onRegister() {
+//         // optionally implemented in child class
+//     }
+
+//     setState(state) {
+//         // if the state isn't changing, there's nothing to do.
+//         if (areDeepEqual(state, this.state)) return;
+//         // update object state
+//         this.state = state;
+//         // update hardware state through view to avoid
+//         // updating hardware midiControls not in current view
+//         for (let midiControl of this.midiControls) {
+//             const activeView = session.getActiveView().getInstance();
+//             activeView.renderComponent(midiControl);
+//         }
+//     }
+
+//     // renders component state to hardware midiControl
+//     abstract renderMidiControl(midiControl: MidiControl): void;
+
+//     // handles midi messages routed to midiControl
+//     onMidi(midiControl: MidiControl, midi: MidiMessage): void {
+//         throw 'Not Implemented';
+//     }
+
+//     onSysex(midiControl: MidiControl, msg: string): void  {
+//         throw 'Not Implemented';
+//     }
+
+//     cancelTimeoutTask(taskName: string) {
+//         const memory = this.memory[taskName];
+//         if (memory instanceof TimeoutTask) memory.cancel();
+//         delete this.memory[taskName];
+//     }
+// }
+
+
 abstract class AbstractComponentBase {
-    private static instance: AbstractComponentBase;
-
-    parent: typeof AbstractComponentBase;
-    name = this.constructor.name;
-    midiControls: MidiControl[] = [];
-    registrations: Object[] = [];
-    views: AbstractView[] = [];
-    memory: { [key: string]: any } = {};
-
-    abstract state: any; // depends on midiControl type
-
-    protected constructor() {}
-
-    static getInstance() {
-        // inheritance safe singleton pattern (each child class will have it's own singleton)
-        const Component = this as any as { new (): AbstractComponentBase, instance: AbstractComponentBase };
-        let instance = Component.instance;
-
-        if (instance instanceof Component) return instance;
-
-        instance = new Component();
-        Component.instance = instance;
-        return instance;
-    }
-
-    // called when button is registered to a view for the first time
-    // allows running of code that is only aloud in the api's init function
-    register(midiControls: MidiControl[], view: AbstractView) {
-        this.registrations.push({'view': view, 'midiControls': midiControls});
-        this.midiControls = [...this.midiControls, ...midiControls];
-        if (this.views.indexOf(view) === -1) this.views.push(view);
-        // call onRegister()
-        this.onRegister();
-    }
-
-    onRegister() {
-        // optionally implemented in child class
-    }
-
-    setState(state) {
-        // if the state isn't changing, there's nothing to do.
-        if (areDeepEqual(state, this.state)) return;
-        // update object state
-        this.state = state;
-        // update hardware state through view to avoid
-        // updating hardware midiControls not in current view
-        for (let midiControl of this.midiControls) {
-            const activeView = session.getActiveView().getInstance();
-            activeView.renderMidiControl(midiControl);
-        }
-    }
-
-    // renders component state to hardware midiControl
-    abstract renderMidiControl(midiControl: MidiControl): void;
-
-    // handles midi messages routed to midiControl
-    onMidi(midiControl: MidiControl, midi: MidiMessage): void {
-        throw 'Not Implemented';
-    }
-
-    onSysex(midiControl: MidiControl, msg: string): void  {
-        throw 'Not Implemented';
-    }
-
-    cancelTimeoutTask(taskName: string) {
-        const memory = this.memory[taskName];
-        if (memory instanceof TimeoutTask) memory.cancel();
-        delete this.memory[taskName];
-    }
-}
-
-
-abstract class ComponentBase {
     private static instance: AbstractComponentBase;
     static getInstance() {
         // inheritance safe singleton pattern (each child class will have it's own singleton)
@@ -97,7 +97,7 @@ abstract class ComponentBase {
     name = this.constructor.name;
     abstract filter: string | RegExp | ((midiMessage: MidiMessage) => boolean);
     protected __views: AbstractView[] = [];
-    protected abstract __state: any; // depends on midiControl type
+    protected abstract __state: any; // depends on component
     protected constructor() {}
 
     // called when button is registered to a view for the first time
@@ -110,7 +110,7 @@ abstract class ComponentBase {
     abstract render(): void;
 
     // handles midi messages routed to component
-    onMidi(midi: MidiMessage): void {
+    onMidi(pattern: string, midi: MidiMessage): void {
         throw 'Not Implemented';
     }
 
@@ -126,39 +126,9 @@ abstract class ComponentBase {
         // update hardware state through view to avoid
         // updating hardware controls not in current view
         const activeView = session.getActiveView().getInstance();
-        activeView.renderComponent(this);
+        // activeView.renderComponent(this);
     }
 }
 
 
 export default AbstractComponentBase;
-
-
-declare const cache;
-
-'101111'
-'110111'
-'111011'
-'111101'
-'111110'
-'000000'
-'010000'
-'011000'
-'011100'
-'011110'
-'011111'
-'001000'
-'000100'
-'000010'
-'000001'
-'100000'
-'110000'
-'111000'
-'111100'
-'111110'
-'111111'
-
-
-const cachey = {
-    'B4????': {},
-}
