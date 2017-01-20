@@ -10,7 +10,7 @@ abstract class AbstractButtonBase extends AbstractComponentBase {
     state: any = false;
 
     renderMidiControl(midiControl: MidiControl) {
-        const { midiOutPort: port, status, data1 } = midiControl;
+        const { output: port, status, data1 } = midiControl;
         session.midiOut.sendMidi({ port, status, data1, data2: this.state ? 127 : 0 });
     }
 

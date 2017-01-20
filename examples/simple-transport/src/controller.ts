@@ -2,10 +2,10 @@ import { session, host, AbstractMidiController, MidiControl } from 'typewig';
 
 
 export const midiControls = {
-    RESTART: new MidiControl({ status: 0xB1, data1: 0x1E }),
-    PLAY:    new MidiControl({ status: 0xB1, data1: 0x1F }),
-    REC:     new MidiControl({ status: 0xB1, data1: 0x20 }),
-    SHIFT:   new MidiControl({ status: 0xB1, data1: 0x21 }),
+    RESTART: new MidiControl('B11E??'),
+    PLAY:    new MidiControl('B11F??'),
+    REC:     new MidiControl('B120??'),
+    SHIFT:   new MidiControl('B121??'),
 };
 
 export default class TransportController extends AbstractMidiController {

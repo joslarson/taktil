@@ -58,12 +58,12 @@ import logger from '../../logger';
 //         // register midiControls w/ component
 //         component.register(<MidiControl[]>midiControls, this);
 //         for (let midiControl of midiControls as MidiControl[]) {
-//             const registeredControls = session.getRegisteredControls();
+//             const registeredControls = session.getRegisteredMidiControls();
 //             // register midiControl with view/mode
 //             if (!this.__componentMap[mode]) this.__componentMap[mode] = {};
 //             this.__componentMap[mode][midiControl.id] = component;
 //             // add midiControl to registered midiControl list (if it's not already there)
-//             if (registeredControls.indexOf(midiControl) === -1) session.registerControl(midiControl);
+//             if (registeredControls.indexOf(midiControl) === -1) session.registerMidiControl(midiControl);
 //         }
 //     }
 
@@ -110,45 +110,31 @@ abstract class AbstractView {
 
     name = this.constructor.name;
     parent: typeof AbstractView;
-    __componentMap: { [mode: string]: AbstractComponentBase[] } = {};
-    __patternMap: { [mode: string]: { [pattern: string]: AbstractComponentBase }[] } = {};
+    _componentMap: { [mode: string]: { midiControls: MidiControl[], components: AbstractComponentBase[] } } = {};
 
     protected constructor() {}
 
-    onRegister() {
-        // implemented in child class
+    getComponent(midiControl: MidiControl, mode: string, ifDoesNotExists = undefined) {
+        if (this._componentMap[mode] === undefined) return ifDoesNotExists;
+        const componentMapIndex = this._componentMap[mode].midiControls.indexOf(midiControl);
+        if (componentMapIndex === -1) return ifDoesNotExists;
+        return this._componentMap[mode].components[componentMapIndex];
     }
 
-    renderComponent(component: AbstractComponentBase) {
+    renderMidiControl(midiControl: MidiControl) {
         // check view modes in order for component/midiControl registration
-        for (let mode of session.getActiveModes()) {
-            if (!this.__componentMap[mode]) continue;  // mode not used in view
-            // if the component exist in the current view, render it
-            if (this.__componentMap[mode].indexOf(component) > -1) {
-                component.render();
+        for (let activeMode of session.getActiveModes()) {
+            if (!this._componentMap[activeMode]) continue;  // mode not used in view
+            const component = this.getComponent(midiControl, activeMode);
+            if (component) {
+                component.renderMidiControl(midiControl);
                 return;
-            }
-            // check for conflicting patterns in view before sending to parent
-            for (let midiInIndex in this.__patternMap[mode]) {
-                for (let viewPattern in this.__patternMap[mode][midiInIndex]) {
-                    for (let componentPattern of component.patterns) {
-                        let isMatch = true;
-                        for (let i = 0; i < 6; i++) {
-                            if (viewPattern[i] !== '?' && componentPattern[i] !== '?' && viewPattern[i] !== componentPattern[i]) {
-                                isMatch = false;
-                                break;
-                            }
-                        }
-                        if (isMatch) return;  // component pattern is overridden in current view
-                        // TODO: can't return here because there might be another pattern for a different control that isn't overridden
-                    }
-                }
             }
         }
         // component not found in view? send to parent
         if (this.parent) {
             const parentInstance = this.parent.getInstance();
-            parentInstance.renderComponent(component);
+            parentInstance.renderMidiControl(midiControl);
         }
         // no parent? nothing to render.
     }
@@ -161,45 +147,46 @@ abstract class AbstractView {
         // register midiControls w/ component
         component.register(<MidiControl[]>midiControls, this);
         for (let midiControl of midiControls as MidiControl[]) {
-            const registeredControls = session.getRegisteredControls();
-            const { pattern } = midiControl;
             // register midiControl with view/mode
-            if (!this.__patternMap[mode]) this.__patternMap[mode] = {};
-            for (let str of pattern) {
-                // TODO: check parent views as well ad also check for conflicting patterns that are not exactly equal
-                if (this.__patternMap[mode][str] !== undefined) throw new Error(`Pattern "${str}" already registered to view.`)
-                this.__patternMap[mode][str] = component;
-            }
+            if (!this._componentMap[mode]) this._componentMap[mode] = { midiControls: [], components: [] };
+
+            // if midiControl already registered in view mode, throw error
+            if (this._componentMap[mode].midiControls.indexOf(midiControl) > -1) throw Error('Duplicate MidiControl registration in view mode.');
+
+            // add midiControl and component pair to component map
+            this._componentMap[mode].midiControls.push(midiControl);
+            this._componentMap[mode].components.push(component);
+
             // add midiControl to registered midiControl list (if it's not already there)
-            if (registeredControls.indexOf(midiControl) === -1) session.registerControl(midiControl);
+            if (session.getRegisteredMidiControls().indexOf(midiControl) === -1) session.registerMidiControl(midiControl);
         }
     }
 
-    onMidi(midiMessage: MidiMessage) {
-        const { port } = midiMessage;
+    onMidi(midiControl: MidiControl, midiMessage: MidiMessage) {
         let mode: string;
         let component: AbstractComponentBase;
 
         // if component in an active mode, let the component in the first associated mode handle
         for (let activeMode of session.getActiveModes()) {
-            if (this.__patternMap[activeMode] && this.__patternMap[activeMode][port][midiControl.id]) {
+            component = this.getComponent(midiControl, activeMode);
+            if (component) {
                 mode = activeMode;
-                component = this.__patternMap[activeMode][midiControl.id];
                 break;
             }
         }
 
         if (mode && component) {
-            this.__patternMap[mode][midiControl.id].onMidi(midiControl, midiMessage);
+            component.onMidi(midiControl, midiMessage);
         } else {
             if (this.parent) {
                 const parentInstance = this.parent.getInstance();
                 parentInstance.onMidi(midiControl, midiMessage);
             } else {
-                toast(`Control not implemented in current view/mode stack.`);
+                toast(`MidiControl not implemented in current view.`);
             }
         }
     }
+
     onSysex(sysex: Sysex) {
         const { port } = sysex;
         let mode: string;

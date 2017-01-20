@@ -7,10 +7,11 @@ import host from './host';
 
 
 export class Session {
-    private _components: AbstractComponentBase[];
+    private _midiControls: MidiControl[];
     private _views: typeof AbstractView[] = [];
     private _activeView: typeof AbstractView;
     private _activeModes: string[] = [];
+    private _registeredMidiControls: MidiControl[] = [];
     private _eventHandlers: { [key: string]: Function[] } = {};
 
     midiOut: MidiOutProxy = new MidiOutProxy(this);
@@ -44,6 +45,9 @@ export class Session {
         };
     }
 
+    // Midi
+    //////////////////////////////
+
     getMidiInPorts(): api.MidiIn[] {
         const midiInPorts = [];
         for (let i = 0; true; i++) {
@@ -56,10 +60,25 @@ export class Session {
         return midiInPorts;
     }
 
+    midiMessageToHex(midiMessage: MidiMessage): string {
+        return (
+            midiMessage.status.toString(16)
+            + midiMessage.status.toString(16)
+            + midiMessage.status.toString(16)
+        ).toUpperCase();
+    }
+
     onMidi(midiMessage: MidiMessage) {
-        logger.debug(`(IN ${String(midiMessage.port)}) => ${midiMessage.status.toString(16).toUpperCase()}${midiMessage.data1.toString(16).toUpperCase()}${midiMessage.data2.toString(16).toUpperCase()}`);
+        logger.debug(`(IN ${String(midiMessage.port)}) => ${this.midiMessageToHex(midiMessage)}`);
+
         const activeView = this.getActiveView().getInstance();
-        if (activeView) activeView.onMidi(midiMessage);
+        const midiControl = this.findMidiControl(midiMessage);
+
+        if (midiControl !== undefined) {
+            if (activeView) activeView.onMidi(midiControl, midiMessage);
+        } else {
+            throw new Error('');
+        }
     }
 
     onSysex(sysex: Sysex) {
@@ -67,6 +86,9 @@ export class Session {
         const activeView = this.getActiveView().getInstance();
         if (activeView) activeView.onSysex(sysex);
     }
+
+    // Event Hooks
+    //////////////////////////////
 
     on(eventName: string, callback: Function) {
         if (!this._eventHandlers[eventName]) this._eventHandlers[eventName] = [];
@@ -83,11 +105,48 @@ export class Session {
         }
     }
 
-    render() {
-        const activeView = this.getActiveView();
-        if (!activeView) return;  // can't do anything until we have an active view
-        for (let component of this._components) {
-            activeView.getInstance().renderComponent(component);
+    // Midi Controls
+    //////////////////////////////
+
+    registerMidiControl(midiControl: MidiControl) {
+        if (this._registeredMidiControls.indexOf(midiControl) === -1) this._registeredMidiControls.push(midiControl);
+    }
+
+    getRegisteredMidiControls() {
+        return [...this._registeredMidiControls];
+    }
+
+    findMidiControl(midiMessage: MidiMessage): MidiControl | undefined {
+        // construct hex representation for patter comparison
+        const midiMessageHex = this.midiMessageToHex(midiMessage);
+
+        // look for a matching registered midiControl
+        for (let midiControl of this.getRegisteredMidiControls()) {
+            // skip midiControls with an input that does not match the midiMessage port
+            if (midiControl.input !== midiMessage.port) continue;
+
+            let match = true;
+            for (let pattern of midiControl.patterns) {
+                for (let i = 0; i < 6; i++) {
+                    // if not a match, break early
+                    if (pattern[i] !== '?' && pattern[i] !== midiMessageHex[i]) {
+                        match = false;
+                        break;
+                    }
+                }
+                // if found, return it
+                if (match) return midiControl;
+            }
+        }
+        // not found, return undefined
+        return undefined;
+    }
+
+    renderMidiControls() {
+        if (!this.getActiveView()) return;  // can't do anything until we have an active view
+
+        for (let control of this.getRegisteredMidiControls()) {
+            this.getActiveView().getInstance().renderMidiControl(control);
         }
     }
 
@@ -102,7 +161,6 @@ export class Session {
         if (instance.parent && views.indexOf(instance.parent) === -1) throw `Invalid view registration order: Parent view "${instance.parent.name}" must be registered before child view "${View.name}".`;
 
         if (views.indexOf(View) === -1) this._views = [...views, View];
-        instance.onRegister();
     }
 
     getViews() {
@@ -112,14 +170,14 @@ export class Session {
     setActiveView(View: typeof AbstractView) {
         if (this.getViews().indexOf(View) === -1) throw new Error(`${View.name} must first be registered before being set as the active view.`);
         this._activeView = View;
-        this.render();
+        this.renderMidiControls();
     }
 
     getActiveView(): typeof AbstractView {
         return this._activeView;
     }
 
-    // View Modes
+    // Modes
     //////////////////////////////
 
     getActiveModes() {
@@ -131,14 +189,14 @@ export class Session {
         const modeIndex = this._activeModes.indexOf(mode);
         if (modeIndex > -1) this._activeModes.splice(modeIndex, 1);
         this._activeModes.unshift(mode);  // prepend to modes
-        this.render(); // call refresh
+        this.renderMidiControls(); // call refresh
     }
 
     deactivateMode(mode: string) {
         const modeIndex = this._activeModes.indexOf(mode);
         if (modeIndex > -1) {
             this._activeModes.splice(modeIndex, 1);
-            this.render(); // call refresh
+            this.renderMidiControls(); // call refresh
         }
     }
 }
