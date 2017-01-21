@@ -19,9 +19,11 @@ export class Session {
     constructor() {
         global.init = () => {
             global.__is_init__ = true;
+            // call the session init callbacks
+            this._callEventCallbacks('init');
             // setup midi/sysex callbacks per port
             const midiInPorts = this.getMidiInPorts();
-            for (let port; port < midiInPorts.length; port++) {
+            for (let port = 0; port < midiInPorts.length; port++) {
                 midiInPorts[port].setMidiCallback((status: number, data1: number, data2: number) => {
                     this.onMidi(new MidiMessage({port, status, data1, data2}));
                 });
@@ -29,8 +31,6 @@ export class Session {
                     this.onSysex(new Sysex({ port, message }));
                 });
             }
-            // call the session init callbacks
-            this._callEventCallbacks('init');
             global.__is_init__ = false;
         };
 
@@ -61,15 +61,18 @@ export class Session {
     }
 
     midiMessageToHex(midiMessage: MidiMessage): string {
-        return (
-            midiMessage.status.toString(16)
-            + midiMessage.status.toString(16)
-            + midiMessage.status.toString(16)
-        ).toUpperCase();
+        const { status, data1, data2 } = midiMessage;
+        let result = '';
+        for (let midiByte of [status, data1, data2]) {
+            let hexByteString = midiByte.toString(16).toUpperCase();
+            if (hexByteString.length === 1) hexByteString = `0${hexByteString}`;
+            result = `${result}${hexByteString}`;
+        }
+        return result;
     }
 
     onMidi(midiMessage: MidiMessage) {
-        logger.debug(`(IN ${String(midiMessage.port)}) => ${this.midiMessageToHex(midiMessage)}`);
+        logger.debug(`IN ${String(midiMessage.port)} => ${this.midiMessageToHex(midiMessage)}`);
 
         const activeView = this.getActiveView().getInstance();
         const midiControl = this.findMidiControl(midiMessage);
@@ -77,12 +80,12 @@ export class Session {
         if (midiControl !== undefined) {
             if (activeView) activeView.onMidi(midiControl, midiMessage);
         } else {
-            throw new Error('');
+            toast('Unrecognized Midi Control')
         }
     }
 
     onSysex(sysex: Sysex) {
-        logger.debug(`(IN ${String(sysex.port)}) => ${sysex.message}`);
+        logger.debug(`IN ${String(sysex.port)} => ${sysex.message}`);
         const activeView = this.getActiveView().getInstance();
         if (activeView) activeView.onSysex(sysex);
     }
@@ -119,7 +122,6 @@ export class Session {
     findMidiControl(midiMessage: MidiMessage): MidiControl | undefined {
         // construct hex representation for patter comparison
         const midiMessageHex = this.midiMessageToHex(midiMessage);
-
         // look for a matching registered midiControl
         for (let midiControl of this.getRegisteredMidiControls()) {
             // skip midiControls with an input that does not match the midiMessage port
@@ -161,6 +163,7 @@ export class Session {
         if (instance.parent && views.indexOf(instance.parent) === -1) throw `Invalid view registration order: Parent view "${instance.parent.name}" must be registered before child view "${View.name}".`;
 
         if (views.indexOf(View) === -1) this._views = [...views, View];
+        instance.onRegister();
     }
 
     getViews() {

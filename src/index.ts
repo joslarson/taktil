@@ -1,7 +1,7 @@
+import * as api from 'bitwig-api-proxy';
 import * as utils from './utils';
 
-
-export { utils };
+export { api, utils };
 export { default as session } from './session';
 export { default as host } from './host';
 export { default as logger } from './logger';

@@ -1,13 +1,10 @@
 import { AbstractView } from 'typewig';
-import { midiControls } from './controller';
+import midiControls from './midicontrols';
 import * as components from './components';
 
 
 export class BaseView extends AbstractView {
     // parent = ParentView
-
-    play = new ViewComponent(components.PlayToggle, ['B4A1??', ''])
-
     onRegister() {
         this.registerComponent(components.PlayToggle, midiControls.PLAY);
         this.registerComponent(components.MetronomeToggle, midiControls.PLAY, 'SHIFT');

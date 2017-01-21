@@ -71,7 +71,7 @@ export default class MidiOutProxy {
         setTimeout(() => {
             while (this._midiQueue.length > 0) {
                 const { port, status, data1, data2 } = this._state[this._midiQueue.shift()];
-                logger.debug(`(OUT ${String(port)}) => { status: 0x${status.toString(16).toUpperCase()}, data1: ${data1.toString()}, data2: ${data2.toString()} }`);
+                logger.debug(`OUT ${String(port)} => { status: 0x${status.toString(16).toUpperCase()}, data1: ${data1.toString()}, data2: ${data2.toString()} }`);
                 host.getMidiOutPort(port).sendMidi(status, data1, data2);
             }
         }, 0);

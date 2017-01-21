@@ -2,7 +2,6 @@ import 'typewig/env'; // must be first in entry file (sets polyfills + globals)
 import { host, session, logger } from 'typewig';
 
 import store from './store';
-import TransportController from './controller';
 import { BaseView } from './views';
 
 
@@ -22,9 +21,6 @@ host.addDeviceNameBasedDiscoveryPair(['VMPK Output'], ['VMPK Input']);
 // init session
 session.on('init', () => {
     store.init();
-
-    // add controllers to session before registering views
-    session.registerMidiController(TransportController);
 
     // add views to session
     session.registerView(BaseView);
