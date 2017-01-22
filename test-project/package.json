@@ -1,0 +1,19 @@
+{
+  "name": "bitwig-simple-transport",
+  "version": "0.0.0",
+  "description": "",
+  "main": "index.html",
+  "dependencies": {
+    "bitwig-api-proxy": "^0.1.5",
+    "typewig": "^0.1.0"
+  },
+  "scripts": {},
+  "author": "Joe Larson",
+  "license": "ISC",
+  "typewig": {
+    "entries": "src/*.control.@(js|ts)",
+    "copy": [
+      "./src/README.md"
+    ]
+  }
+}

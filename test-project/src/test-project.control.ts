@@ -2,16 +2,16 @@ import 'typewig/env'; // must be first in entry file (sets polyfills + globals)
 import { host, session, logger } from 'typewig';
 
 import apiStore from './apistore';
-import { BaseView } from './views';
 import midiControls from './midicontrols';
+import { BaseView, OtherView, OtherView2, OtherView3 } from './views';
 
 
 // define controller script
 host.defineController(
     'Typewig Examples',  // vendor
-    'Simple Transport',  // name
+    'Test Project',  // name
     '1.0.0',  // version
-    'f7ccec7e-b1cc-11e6-80f5-76304dec7eb7',  // uuid
+    '2e6cf580-327b-409b-b87a-19f18643c43b',  // uuid
     'Joseph Larson'  // author
 );
 
@@ -29,8 +29,11 @@ session.on('init', () => {
 
     // 3. add views to session
     session.registerView(BaseView);
+    session.registerView(OtherView);
+    session.registerView(OtherView2);
+    session.registerView(OtherView3);
     // ... register more views here
 
-    // 4. set the active view to trigger initial render of midi controls
+    // 4. set the active view to trigger initial render of MidiControls
     session.setActiveView(BaseView);
 });

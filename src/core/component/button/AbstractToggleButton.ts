@@ -11,11 +11,9 @@ abstract class ToggleButton extends AbstractButtonBase {
         if (!this.state) {
             this.setState(true);
             this.onToggleOn();
-            logger.debug(`Event: ${this.name} toggleOn`);
         } else {
             this.setState(false);
             this.onToggleOff();
-            logger.debug(`Event: ${this.name} toggleOff`);
         }
     }
 

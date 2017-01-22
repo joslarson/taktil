@@ -1,5 +1,6 @@
 import { SimpleMidiMessage, default as MidiMessage } from '../midi/MidiMessage';
 import host from '../../host';
+import session from '../../session';
 
 
 export default class MidiControl {
@@ -12,13 +13,14 @@ export default class MidiControl {
     msb: string;
     lsb: string;
     patterns: string[];
+    onReset: number | ((midiControl: MidiControl) => void);
 
     constructor(filter: string | {
         input?: number, output?: number,
         patterns?: string[],
         status?: number, data1?: number, data2?: number,
         msb?: string, lsb?: string
-    }) {
+    }, onReset: number | ((midiControl: MidiControl) => void) = 0) {
         // set defaults
         let options = {
             input: 0, output: 0,
@@ -73,6 +75,7 @@ export default class MidiControl {
         this.msb = options.msb;
         this.lsb = options.lsb;
         this.patterns = options.patterns;
+        this.onReset = onReset;
     }
 
     private _getMidiFromPattern(pattern: string) {
@@ -99,5 +102,22 @@ export default class MidiControl {
             }
         }
         return result;
+    }
+
+    reset() {
+        if (typeof this.onReset === 'number') {
+            if (this.status && this.data1) this.render({ data2: this.onReset });
+        } else {
+            this.onReset(this);
+        }
+    }
+
+    render({ status = this.status, data1 = this.data1, data2, urgent = false }: { status?: number, data1?: number, data2: number, urgent?: boolean }) {
+        session.midiOut.sendMidi({ name: this.name, status, data1, data2, urgent, cacheKey: this.getCacheKey() });
+    }
+
+    getCacheKey() {
+        const {output: port, status, data1, data2 } = this;
+        return status && data1 ? `${port}:${status}:${data1}` : undefined;
     }
 }

@@ -1,17 +1,18 @@
-import { MidiControl, MidiOutProxy, MidiMessage, Sysex } from './core/midi';
+import { MidiControl, MidiOutProxy, SimpleMidiMessage, MidiMessage, Sysex } from './core/midi';
 import AbstractView from './core/view/AbstractView';
 import { AbstractComponentBase } from 'core/component';
 import * as api from 'bitwig-api-proxy';
+import { midiMessageToHex } from './utils';
 import logger from './logger';
 import host from './host';
 
 
 export class Session {
-    private _midiControls: MidiControl[];
+    private _midiControls: MidiControl[] = [];
+    private _registeredMidiControls: MidiControl[] = [];
     private _views: typeof AbstractView[] = [];
     private _activeView: typeof AbstractView;
     private _activeModes: string[] = [];
-    private _registeredMidiControls: MidiControl[] = [];
     private _eventHandlers: { [key: string]: Function[] } = {};
 
     midiOut: MidiOutProxy = new MidiOutProxy(this);
@@ -60,27 +61,15 @@ export class Session {
         return midiInPorts;
     }
 
-    midiMessageToHex(midiMessage: MidiMessage): string {
-        const { status, data1, data2 } = midiMessage;
-        let result = '';
-        for (let midiByte of [status, data1, data2]) {
-            let hexByteString = midiByte.toString(16).toUpperCase();
-            if (hexByteString.length === 1) hexByteString = `0${hexByteString}`;
-            result = `${result}${hexByteString}`;
-        }
-        return result;
-    }
-
     onMidi(midiMessage: MidiMessage) {
-        logger.debug(`IN ${String(midiMessage.port)} => ${this.midiMessageToHex(midiMessage)}`);
-
         const activeView = this.getActiveView().getInstance();
         const midiControl = this.findMidiControl(midiMessage);
 
         if (midiControl !== undefined) {
+            logger.debug(`IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${midiControl.name ? ` "${midiControl.name}"` : ''}`);
             if (activeView) activeView.onMidi(midiControl, midiMessage);
         } else {
-            toast('Unrecognized Midi Control')
+            logger.debug(`IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);
         }
     }
 
@@ -93,7 +82,7 @@ export class Session {
     // Event Hooks
     //////////////////////////////
 
-    on(eventName: string, callback: Function) {
+    on(eventName: string, callback: (...args: any[]) => any) {
         if (!this._eventHandlers[eventName]) this._eventHandlers[eventName] = [];
         this._eventHandlers[eventName].push(callback);
         return this;
@@ -111,6 +100,21 @@ export class Session {
     // Midi Controls
     //////////////////////////////
 
+    setMidiControls(midiControls: { [name: string]: MidiControl }) {
+        const midiControlsArray = [];
+        for (let midiControlName in midiControls) {
+            // set midi control name on object
+            midiControls[midiControlName].name = midiControlName;
+            // add to midi control array
+            midiControlsArray.push(midiControls[midiControlName]);
+        }
+        this._midiControls = midiControlsArray;
+    }
+
+    getMidiControls() {
+        return [...this._midiControls];
+    }
+
     registerMidiControl(midiControl: MidiControl) {
         if (this._registeredMidiControls.indexOf(midiControl) === -1) this._registeredMidiControls.push(midiControl);
     }
@@ -121,9 +125,9 @@ export class Session {
 
     findMidiControl(midiMessage: MidiMessage): MidiControl | undefined {
         // construct hex representation for patter comparison
-        const midiMessageHex = this.midiMessageToHex(midiMessage);
+        const midiMessageHex = midiMessageToHex(midiMessage);
         // look for a matching registered midiControl
-        for (let midiControl of this.getRegisteredMidiControls()) {
+        for (let midiControl of this.getMidiControls()) {
             // skip midiControls with an input that does not match the midiMessage port
             if (midiControl.input !== midiMessage.port) continue;
 
@@ -147,8 +151,8 @@ export class Session {
     renderMidiControls() {
         if (!this.getActiveView()) return;  // can't do anything until we have an active view
 
-        for (let control of this.getRegisteredMidiControls()) {
-            this.getActiveView().getInstance().renderMidiControl(control);
+        for (let midiControl of this.getMidiControls()) {
+            this.getActiveView().getInstance().renderMidiControl(midiControl);
         }
     }
 
@@ -173,6 +177,7 @@ export class Session {
     setActiveView(View: typeof AbstractView) {
         if (this.getViews().indexOf(View) === -1) throw new Error(`${View.name} must first be registered before being set as the active view.`);
         this._activeView = View;
+        this._callEventCallbacks('setActiveView', View);
         this.renderMidiControls();
     }
 
@@ -192,6 +197,7 @@ export class Session {
         const modeIndex = this._activeModes.indexOf(mode);
         if (modeIndex > -1) this._activeModes.splice(modeIndex, 1);
         this._activeModes.unshift(mode);  // prepend to modes
+        this._callEventCallbacks('activateMode', mode);
         this.renderMidiControls(); // call refresh
     }
 
@@ -199,6 +205,7 @@ export class Session {
         const modeIndex = this._activeModes.indexOf(mode);
         if (modeIndex > -1) {
             this._activeModes.splice(modeIndex, 1);
+            this._callEventCallbacks('deactivateMode', mode);
             this.renderMidiControls(); // call refresh
         }
     }

@@ -1,6 +1,7 @@
-import { session} from 'typewig';
+import { session, AbstractManualButton, AbstractView } from 'typewig';
 import * as components from 'typewig/contrib/components'
 import apiStore from './apistore';
+import { BaseView, OtherView, OtherView2, OtherView3 } from './views';
 
 
 export class ShiftModeGate extends components.AbstractModeGate {
@@ -29,4 +30,35 @@ export class OverwriteToggle extends components.AbstractOverwriteToggle {
 
 export class LoopToggle extends components.AbstractLoopToggle {
     transport = apiStore.transport;
+}
+
+
+export abstract class AbstractViewButton extends AbstractManualButton {
+    abstract View: typeof AbstractView;
+
+    onRegister() {
+        session.on('setActiveView', (View: typeof AbstractView) => {
+            this.setState(View === this.View);
+        });
+    }
+    onPress() {
+        session.setActiveView(this.View);
+    }
+}
+
+
+export class BaseViewButton extends AbstractViewButton {
+    View = BaseView;
+}
+
+export class OtherViewButton extends AbstractViewButton {
+    View = OtherView;
+}
+
+export class OtherView2Button extends AbstractViewButton {
+    View = OtherView2;
+}
+
+export class OtherView3Button extends AbstractViewButton {
+    View = OtherView3;
 }

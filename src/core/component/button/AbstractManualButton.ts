@@ -4,103 +4,92 @@ import MidiControl from '../../midi/MidiControl';
 import MidiMessage from '../../midi/MidiMessage';
 
 
+interface ManualButton {
+    onPress?();
+    onLongPress?();
+    onDoublePress?();
+    onRelease?();
+    onDoubleRelease?();
+}
+
 abstract class ManualButton extends AbstractButtonBase {
-    DURATION = { LONG: 350, DOUBLE: 450 };
+    LONG_ACTION_DURATION = 350;
+    DOUBLE_ACTION_DURATION = 450;
 
-    onMidi(midiControl: MidiControl, midi: MidiMessage) {
-        this._handlePress(midi);
-        this._handleLongPress(midi);
-        this._handleDoublePress(midi);
-        this._handleRelease(midi);
-        this._handleDoubleRelease(midi);
+    onMidi(midiControl: MidiControl, midiMessage: MidiMessage) {
+        if (this.onPress) this._handlePress(midiMessage);
+        if (this.onLongPress) this._handleLongPress(midiMessage);
+        if (this.onDoublePress) this._handleDoublePress(midiMessage);
+        if (this.onRelease) this._handleRelease(midiMessage);
+        if (this.onDoubleRelease) this._handleDoubleRelease(midiMessage);
     }
 
-    onPress() {
-        // optionally implemented in child class as override
+    protected isDoublePress(midiMessage: MidiMessage) {
+        return this.memory['doublePress'] && this.isPress(midiMessage);
     }
 
-    onLongPress() {
-        // optionally implemented in child class as override
+    protected isDoubleRelease(midiMessage: MidiMessage) {
+        return this.memory['doubleRelease'] && this.isRelease(midiMessage);
     }
 
-    onDoublePress() {
-        // optionally implemented in child class as override
-    }
-
-    onRelease() {
-        // optionally implemented in child class as override
-    }
-
-    onDoubleRelease() {
-        // optionally implemented in child class as override
-    }
-
-    protected isDoublePress(midi: MidiMessage) {
-        return this.memory['doublePress'] && this.isPress(midi);
-    }
-
-    protected isDoubleRelease(midi: MidiMessage) {
-        return this.memory['doubleRelease'] && this.isRelease(midi);
-    }
-
-    private _handlePress(midi: MidiMessage) {
+    private _handlePress(midiMessage: MidiMessage) {
         // if it's not a press, not implemented or is a doublePress, ignore it
-        if (!this.isPress(midi) || this.memory['doublePress']) return;
+        if (!this.isPress(midiMessage) || this.memory['doublePress']) return;
         // handle single press
         this.onPress();
     }
 
-    private _handleDoublePress(midi: MidiMessage) {
+    private _handleDoublePress(midiMessage: MidiMessage) {
         // if it's not a press or not implemented, ignore it
-        if (!this.isPress(midi)) return;
+        if (!this.isPress(midiMessage)) return;
 
         // if is doublePress
-        if (this.isDoublePress(midi)) {
+        if (this.isDoublePress(midiMessage)) {
             this.onDoublePress();
-        } else {
+        } else if (this.DOUBLE_ACTION_DURATION) {
             // setup interval task to remove self after DOUBLE_PRESS_DURATION
             const task = new TimeoutTask(this, function() {
                 delete this.memory['doublePress'];
-            }, this.DURATION.DOUBLE).start();
+            }, this.DOUBLE_ACTION_DURATION).start();
             this.memory['doublePress'] = task;
         }
     }
 
-    private _handleLongPress(midi: MidiMessage) {
+    private _handleLongPress(midiMessage: MidiMessage) {
         // if it's a doublePress or is not implemented, ignore it
-        if (this.isDoublePress(midi)) return;
+        if (this.isDoublePress(midiMessage)) return;
 
         // if it's a press schedule the callback
-        if (this.isPress(midi)) {
+        if (this.isPress(midiMessage) && this.LONG_ACTION_DURATION) {
             // schedule callback
             this.memory['longPress'] = new TimeoutTask(this, function() {
                 this.onLongPress();
-            }, this.DURATION.LONG).start();
+            }, this.LONG_ACTION_DURATION).start();
         } else { // otherwise cancel existing scheduled callback
             // cancel longPress task if button released too early
             if (this.memory['longPress']) this.cancelTimeoutTask('longPress');
         }
     }
 
-    private _handleRelease(midi: MidiMessage) {
+    private _handleRelease(midiMessage: MidiMessage) {
         // if it's not a release, not implemented or is a doubleRelease, ignore it
-        if (!this.isRelease(midi) || this.memory['doubleRelease']) return;
+        if (!this.isRelease(midiMessage) || this.memory['doubleRelease']) return;
         // handle single release
         this.onRelease();
     }
 
-    private _handleDoubleRelease(midi: MidiMessage) {
+    private _handleDoubleRelease(midiMessage: MidiMessage) {
         // if it's not a release or not implemented, ignore it
-        if (!this.isRelease(midi)) return;
+        if (!this.isRelease(midiMessage)) return;
 
         // if is doubleRelease
-        if (this.isDoubleRelease(midi)) {
+        if (this.isDoubleRelease(midiMessage)) {
             this.onDoubleRelease();
         } else {
-            // setup timeout task to remove self after this.DURATION.DOUBLE
+            // setup timeout task to remove self after this.DOUBLE_DURATION
             const task = new TimeoutTask(this, function() {
                 delete this.memory['doubleRelease'];
-            }, this.DURATION.DOUBLE).start();
+            }, this.DOUBLE_ACTION_DURATION).start();
             this.memory['doubleRelease'] = task;
         }
     }

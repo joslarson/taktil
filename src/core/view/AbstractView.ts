@@ -47,8 +47,10 @@ abstract class AbstractView {
         if (this.parent) {
             const parentInstance = this.parent.getInstance();
             parentInstance.renderMidiControl(midiControl);
+        } else {
+            // no parent? no component to render, reset midi control
+            midiControl.reset();
         }
-        // no parent? nothing to render.
     }
 
     registerComponent(ComponentClass: typeof AbstractComponentBase, midiControls: MidiControl[]|MidiControl, mode = '__BASE__') {
@@ -98,7 +100,9 @@ abstract class AbstractView {
                 const parentInstance = this.parent.getInstance();
                 parentInstance.onMidi(midiControl, midiMessage);
             } else {
-                toast(`MidiControl not implemented in current view.`);
+                midiControl.reset();
+                session.midiOut.updateMidiOutCacheWithMidiInput(midiMessage);
+                logger.debug(`MidiControl "${midiControl.name}" is unused in active view stack.`);
             }
         }
     }

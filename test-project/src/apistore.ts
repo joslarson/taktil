@@ -1,7 +1,7 @@
 import { api, host } from 'typewig';
 
 
-export class Store {
+export class ApiStore {
     transport: api.Transport;
 
     init() {
@@ -9,7 +9,7 @@ export class Store {
     }
 }
 
-const store = new Store();
+const apiStore = new ApiStore();
 
 
-export default store;
+export default apiStore;

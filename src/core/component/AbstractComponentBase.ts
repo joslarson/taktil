@@ -16,7 +16,7 @@ abstract class AbstractComponentBase {
     views: AbstractView[] = [];
     memory: { [key: string]: any } = {};
 
-    abstract state: any; // depends on midiControl type
+    abstract state: any; // depends on component type
 
     protected constructor() {}
 
@@ -77,61 +77,6 @@ abstract class AbstractComponentBase {
         delete this.memory[taskName];
     }
 }
-
-
-// abstract class AbstractComponentBase {
-//     private static instance: AbstractComponentBase;
-//     static getInstance() {
-//         // inheritance safe singleton pattern (each child class will have it's own singleton)
-//         const Component = this as any as { new (): AbstractComponentBase, instance: AbstractComponentBase };
-//         let instance = Component.instance;
-
-//         if (instance instanceof Component) return instance;
-
-//         instance = new Component();
-//         Component.instance = instance;
-//         return instance;
-//     }
-
-//     name = this.constructor.name;
-//     abstract filter: string | RegExp | ((midiMessage: MidiMessage) => boolean);
-//     protected __views: AbstractView[] = [];
-//     protected abstract __state: any; // depends on component
-//     protected constructor() {}
-
-//     // called when button is registered to a view for the first time
-//     // allows running of code that is only aloud in the api's init function
-//     register(midiControls: MidiControl[], view: AbstractView) {
-//         this.registrations.push({'view': view, 'midiControls': midiControls});
-//         this.midiControls = [...this.midiControls, ...midiControls];
-//         if (this.views.indexOf(view) === -1) this.views.push(view);
-//         // call onRegister()
-//         this.onRegister();
-//     }
-
-//     // renders component state to hardware
-//     abstract render(): void;
-
-//     // handles midi messages routed to component
-//     onMidi(pattern: string, midi: MidiMessage): void {
-//         throw 'Not Implemented';
-//     }
-
-//     onSysex(msg: string): void  {
-//         throw 'Not Implemented';
-//     }
-
-//     setState(state) {
-//         // if the state isn't changing, there's nothing to do.
-//         if (areDeepEqual(state, this.__state)) return;
-//         // update object state
-//         this.__state = state;
-//         // update hardware state through view to avoid
-//         // updating hardware controls not in current view
-//         const activeView = session.getActiveView().getInstance();
-//         // activeView.renderComponent(this);
-//     }
-// }
 
 
 export default AbstractComponentBase;

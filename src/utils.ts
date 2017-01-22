@@ -1,4 +1,5 @@
 import host from './host';
+import  { SimpleMidiMessage } from './core/midi';
 
 
 export function guid() {
@@ -34,6 +35,18 @@ export class TimeoutTask {
         this.cancelled = true;
         return this;
     }
+}
+
+
+export function midiMessageToHex(midiMessage: SimpleMidiMessage): string {
+    const { status, data1, data2 } = midiMessage;
+    let result = '';
+    for (let midiByte of [status, data1, data2]) {
+        let hexByteString = midiByte.toString(16).toUpperCase();
+        if (hexByteString.length === 1) hexByteString = `0${hexByteString}`;
+        result = `${result}${hexByteString}`;
+    }
+    return result;
 }
 
 

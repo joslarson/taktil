@@ -1,34 +1,40 @@
-import { SimpleMidiMessage } from './MidiMessage';
+import { default as MidiMessage, SimpleMidiMessage } from './MidiMessage';
 import host from '../../host';
 import logger from '../../logger';
+import { areDeepEqual } from '../../utils';
+import { midiMessageToHex } from '../../utils';
 
 
-export interface MidiOutControlState extends SimpleMidiMessage {
+export interface NaiveMidiMessage extends SimpleMidiMessage {
+    name?: string,
     port: number,
-    urgent?: boolean,
 }
 
 
 export default class MidiOutProxy {
-    private _state: { [key: string]: MidiOutControlState } = {};
-    private _midiQueue: string[] = [];  // TODO: can this really be trusted to be in sync if it only knows about the outflow of midi data?
+    private _cacheableState: { [key: string]: NaiveMidiMessage } = {};
+    private _midiQueue: NaiveMidiMessage[] = [];
     private _sysexQueue: { port: number, data: string }[] = [];
 
-    constructor(document) {
-        document.on('flush', () => this.flushQueues());
+    constructor(session) {
+        session.on('flush', () => this.flushQueues());
     }
 
-    sendMidi({ port = 0, status, data1, data2, urgent = false }: { port?: number, status: number, data1: number, data2: number, urgent?: boolean }) {
-        const key = `${port}:${status}:${data1}`;
-        // quick exit if there's no change to data2 value
-        if (this._state[key] !== undefined && this._state[key].data2 === data2) return;
-        this._state = { ...this._state, [key]: { port, status, data1, data2 } };
+    sendMidi({ name, port = 0, status, data1, data2, urgent = false, cacheKey }: { name?: string, port?: number, status: number, data1: number, data2: number, urgent?: boolean, cacheKey?: string }) {
+        if (cacheKey) {
+            if (this._cacheableState[cacheKey] !== undefined && areDeepEqual(this._cacheableState[cacheKey], { name, port, status, data1, data2 })) return;
+            this._cacheableState = { ...this._cacheableState, [cacheKey]: { name, port, status, data1, data2 } };
+        }
         // if urgent, fire midi message immediately, otherwise queue it up for next flush
         if (urgent) {
-            logger.debug(`(OUT ${String(port)}) => { status: 0x${status.toString(16).toUpperCase()}, data1: ${data1.toString()}, data2: ${data2.toString()} }`);
+            if (name) {
+                logger.debug(`OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}${name ? ` "${name}"` : ''}`);
+            } else {
+                logger.debug(`OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}`);
+            }
             host.getMidiOutPort(port).sendMidi(status, data1, data2);
         } else {
-            this._midiQueue.push(key);
+            this._midiQueue.push({ name, port, status, data1, data2 });
         }
     }
 
@@ -70,8 +76,12 @@ export default class MidiOutProxy {
         // 1. async flush queued midi messages
         setTimeout(() => {
             while (this._midiQueue.length > 0) {
-                const { port, status, data1, data2 } = this._state[this._midiQueue.shift()];
-                logger.debug(`OUT ${String(port)} => { status: 0x${status.toString(16).toUpperCase()}, data1: ${data1.toString()}, data2: ${data2.toString()} }`);
+                const { name, port, status, data1, data2 } = this._midiQueue.shift();
+                if (name) {
+                    logger.debug(`OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}${name ? ` "${name}"` : ''}`);
+                } else {
+                    logger.debug(`OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}`);
+                }
                 host.getMidiOutPort(port).sendMidi(status, data1, data2);
             }
         }, 0);
@@ -82,5 +92,16 @@ export default class MidiOutProxy {
                 host.getMidiOutPort(port).sendSysex(data)
             }
         }, 0);
+    }
+
+    updateMidiOutCacheWithMidiInput({ port, status, data1, data2 }: NaiveMidiMessage) {
+        const cacheKey = this.getCacheKey({ port, status, data1, data2 });
+            if (this._cacheableState[cacheKey] !== undefined && this._cacheableState[cacheKey].data2 !== data2) {
+                this._cacheableState = { ...this._cacheableState, [cacheKey]: { port, status, data1, data2 } };
+            }
+    }
+
+    getCacheKey({ port = 0, status, data1, data2 }) {
+        return `${port}:${status}:${data1}`;
     }
 }
