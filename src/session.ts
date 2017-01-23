@@ -66,10 +66,10 @@ export class Session {
         const midiControl = this.findMidiControl(midiMessage);
 
         if (midiControl !== undefined) {
-            logger.debug(`IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${midiControl.name ? ` "${midiControl.name}"` : ''}`);
+            logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${midiControl.name ? ` "${midiControl.name}"` : ''}`);
             if (activeView) activeView.onMidi(midiControl, midiMessage);
         } else {
-            logger.debug(`IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);
+            logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);
         }
     }
 
@@ -82,7 +82,7 @@ export class Session {
     // Event Hooks
     //////////////////////////////
 
-    on(eventName: string, callback: (...args: any[]) => any) {
+    on(eventName: 'init' | 'flush' | 'exit' | 'setActiveView' | 'activateMode' | 'deactivateMode', callback: (...args: any[]) => any) {
         if (!this._eventHandlers[eventName]) this._eventHandlers[eventName] = [];
         this._eventHandlers[eventName].push(callback);
         return this;

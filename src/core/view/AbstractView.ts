@@ -102,7 +102,7 @@ abstract class AbstractView {
             } else {
                 midiControl.reset();
                 session.midiOut.updateMidiOutCacheWithMidiInput(midiMessage);
-                logger.debug(`MidiControl "${midiControl.name}" is unused in active view stack.`);
+                logger.info(`MidiControl "${midiControl.name}" is unused in active view stack.`);
             }
         }
     }

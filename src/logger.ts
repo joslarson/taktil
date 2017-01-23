@@ -7,12 +7,21 @@ export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
 export class Logger {
     private _levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
     private _level: Level = 'DEBUG';
+    private _midiLevel: 'Input' | 'Output' | 'Both' | 'None';
     private _levelSetting;
     private _filter = '';
     private _filterSetting;
+    private _initQueue = [];
 
     constructor() {
         session.on('init', () => {
+            host.getPreferences().getEnumSetting(
+                'Log Midi',
+                'Development',
+                ['None', 'Input', 'Output', 'Both'],
+                'None'
+            ).addValueObserver(midiLevel => this._midiLevel = midiLevel);
+
             this._levelSetting = host.getPreferences().getEnumSetting(
                 'Log Level', 'Development', this._levels, this._level
             );
@@ -29,6 +38,11 @@ export class Logger {
                     console.log(`╰───┴${'─'.repeat(message.length)}╯`);
                 }
             });
+
+            while (this._initQueue.length > 0) {
+                const [level, messages] = this._initQueue.shift();
+                this._log(level, ...messages);
+            }
         });
     }
 
@@ -60,11 +74,20 @@ export class Logger {
         this._log('INFO', ...messages);
     }
 
+    log(...messages) {
+        this.info(...messages);
+    }
+
     debug(...messages) {
         this._log('DEBUG', ...messages);
     }
 
     private _log(level, ...messages) {
+        if (!this._levelSetting) {
+            this._initQueue.push([level, messages]);
+            return;
+        }
+
         if (this._levels.indexOf(level) > this._levels.indexOf(this._level)) return;
 
         const message = `[${level.toUpperCase()}] ${messages.join(' ')}`;
@@ -72,6 +95,14 @@ export class Logger {
             const re = new RegExp(this._filter, 'gi');
             if (!re.test(message)) return;
         }
+
+        const isMidiInput = new RegExp('IN  [0-9]+ \=\=\> [A-Z0-9]{6}', 'gi').test(message);
+        const isMidiOutput = new RegExp('OUT [0-9]+ \<\=\=\ [A-Z0-9]{6}', 'gi').test(message);
+
+        if (this._midiLevel === 'None' && (isMidiInput || isMidiOutput)) return;
+        if (this._midiLevel === 'Input' && isMidiOutput) return;
+        if (this._midiLevel === 'Output' && isMidiInput) return;
+
         level === 'ERROR' ? console.error(message) : console.log(message);
     }
 }

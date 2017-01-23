@@ -17,7 +17,7 @@ host.defineController(
 
 // setup and Discover Midi Controllers
 host.defineMidiPorts(1, 1);  // number of midi inputs, outputs
-host.addDeviceNameBasedDiscoveryPair(['VMPK Output'], ['VMPK Input']);
+host.addDeviceNameBasedDiscoveryPair(['Maschine Studio Virtual Input'], ['Maschine Studio Virtual Output']);
 
 // init session
 session.on('init', () => {
