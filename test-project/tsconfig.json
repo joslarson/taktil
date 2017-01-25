@@ -6,9 +6,10 @@
         "baseUrl": "./src",
         "sourceMap": false,
         "moduleResolution": "node",
-        "allowJs": true
+        "allowJs": true,
+        "importHelpers": true
     },
-    "compileOnSave": true,
+    "compileOnSave": false,
     "include": [
         "src/**/*.ts"
     ],

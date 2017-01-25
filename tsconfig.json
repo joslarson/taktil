@@ -1,16 +1,15 @@
 {
     "compilerOptions": {
-        "target": "es2015",
+        "target": "es3",
         "module": "es2015",
         "sourceMap": false,
         "declaration": true,
-        // "allowJs": true,
         "rootDir": "src",
         "baseUrl": "./src",
         "moduleResolution": "node",
-        // "watch": true,
         "outDir": "./dist",
-        "lib": ["DOM", "ES6", "DOM.Iterable", "ScriptHost"]
+        "lib": ["dom", "es6", "dom.iterable", "scripthost"],
+        "importHelpers": true
     },
     "compileOnSave": false,
     "include": [
