@@ -2,9 +2,8 @@
   "name": "typewig-simple-transport",
   "version": "0.0.0",
   "description": "",
-  "main": "index.html",
   "dependencies": {
-    "typewig": "^0.2.0"
+    "typewig": "^0.2.1"
   },
   "scripts": {},
   "author": "Joe Larson",
