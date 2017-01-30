@@ -187,8 +187,6 @@ export default class MidiControl {
     enableMidiOut: boolean;
     cache: string[] = [];
 
-
-
     constructor({
         port, inPort = 0, outPort = 0,
         patterns,
@@ -241,21 +239,22 @@ export default class MidiControl {
     }
 
     render({ value, color, urgent = false }: { value: boolean | number, color?: Color, urgent?: boolean }) {
-        if (this.enableMidiOut) {
-            // convert value to data2
-            let data2: number;
-            if (typeof value === 'boolean') {
-                data2 = value ? 127 : 0;
-            } else if (isInt(value) && value <= 127 && value >= 0) {
-                data2 = value;
-            } else if (isFloat(value) && value <= 1 && value >= 0) {
-                data2 = parseInt(String(value * 127), 10);
-            } else {
-                throw new Error(`Invalid MidiControl value "${value}"`);
-            }
-            session.midiOut.sendMidi({
-                name: this.name, status: this.status, data1: this.data1, data2, urgent,
-            });
+        if (!this.enableMidiOut) return;
+
+        // convert value to data2
+        let data2: number;
+        if (typeof value === 'boolean') {
+            data2 = value ? 127 : 0;
+        } else if (isInt(value) && value <= 127 && value >= 0) {
+            data2 = value;
+        } else if (isFloat(value) && value <= 1 && value >= 0) {
+            data2 = parseInt(String(value * 127), 10);
+        } else {
+            throw new Error(`Invalid MidiControl value "${value}"`);
         }
+
+        session.midiOut.sendMidi({
+            name: this.name, status: this.status, data1: this.data1, data2, urgent,
+        });
     }
 }
