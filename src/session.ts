@@ -1,4 +1,4 @@
-import { MidiControl, MidiOutProxy, SimpleMidiMessage, MidiMessage, Sysex } from './core/midi';
+import { MidiControl, MidiOutProxy, SimpleMidiMessage, MidiMessage, SysexMessage } from './core/midi';
 import AbstractView from './core/view/AbstractView';
 import { AbstractComponentBase } from 'core/component';
 import * as api from 'bitwig-api-proxy';
@@ -28,8 +28,8 @@ export class Session {
                 midiInPorts[port].setMidiCallback((status: number, data1: number, data2: number) => {
                     this.onMidi(new MidiMessage({port, status, data1, data2}));
                 });
-                midiInPorts[port].setSysexCallback((message: string) => {
-                    this.onSysex(new Sysex({ port, message }));
+                midiInPorts[port].setSysexCallback((data: string) => {
+                    this.onSysex(new SysexMessage({ port, data }));
                 });
             }
             global.__is_init__ = false;
@@ -73,8 +73,8 @@ export class Session {
         }
     }
 
-    onSysex(sysex: Sysex) {
-        logger.debug(`IN ${String(sysex.port)} => ${sysex.message}`);
+    onSysex(sysex: SysexMessage) {
+        logger.debug(`IN ${String(sysex.port)} => ${sysex.data}`);
         const activeView = this.getActiveView().getInstance();
         if (activeView) activeView.onSysex(sysex);
     }
@@ -128,8 +128,8 @@ export class Session {
         const midiMessageHex = midiMessageToHex(midiMessage);
         // look for a matching registered midiControl
         for (let midiControl of this.getMidiControls()) {
-            // skip midiControls with an input that does not match the midiMessage port
-            if (midiControl.input !== midiMessage.port) continue;
+            // skip midiControls with an inPort that does not match the midiMessage port
+            if (midiControl.inPort !== midiMessage.port) continue;
 
             let match = true;
             for (let pattern of midiControl.patterns) {

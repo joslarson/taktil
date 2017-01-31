@@ -1,4 +1,4 @@
-import { SimpleMidiMessage, default as MidiMessage } from '../midi/MidiMessage';
+import { SimpleMidiMessage, MidiMessage, SysexMessage } from '../midi/';
 import host from '../../host';
 import session from '../../session';
 
@@ -157,14 +157,6 @@ function patternIsValid(pattern: string) {
     return !/[a-fA-F0-9\?]{6}/.test(pattern);
 }
 
-function isInt(n){
-    return Number(n) === n && n % 1 === 0;
-}
-
-function isFloat(n){
-    return Number(n) === n && n % 1 !== 0;
-}
-
 export interface Color {
     r: number;
     g: number;
@@ -189,17 +181,18 @@ export default class MidiControl {
 
     constructor({
         port, inPort = 0, outPort = 0,
-        patterns,
+        patterns = [],
         status, data1, data2,
         defaultColor,
         cacheOnMidiIn = true, enableMidiOut = true,
     }: {
         port?: number, inPort?: number, outPort?: number,
-        patterns: string[],
+        patterns?: string[],  // patterns for all inPort and outPort MidiMessages
         status?: number, data1?: number, data2?: number,
         defaultColor?: Color,
         cacheOnMidiIn?: boolean, enableMidiOut?: boolean,
     }) {
+        if (patterns.length === 0 && !(status || data1 || data2)) throw new Error(`Error, MidiControl must specify at least on of the following: pattern, status, data1, data2`);
         // verify pattern strings are valid
         for (let pattern of patterns) {
             if (patternIsValid(pattern)) throw new Error(`Invalid midi pattern: "${pattern}"`);
@@ -234,27 +227,87 @@ export default class MidiControl {
         this.enableMidiOut = enableMidiOut;
     }
 
-    renderDisabled() {
-        if (this.status && this.data1) this.render({ value: 0 });
+    getMessagesFromValue(value: boolean | number, type: 'BOOLEAN' | 'MIDI_BYTE' | 'PERCENTAGE'): (MidiMessage | SysexMessage)[] {
+        let data2;
+        if (type === 'BOOLEAN') {
+            data2 = value as boolean ? 127 : 0;
+        } else if (type === 'MIDI_BYTE') {
+            data2 = value as number;
+        } else if (type === 'PERCENTAGE') {
+            data2 = Math.round(value as number * 127);
+        }
+        return [new MidiMessage({ port: this.outPort, status: this.status, data1: this.data1, data2: data2})];
     }
 
-    render({ value, color, urgent = false }: { value: boolean | number, color?: Color, urgent?: boolean }) {
-        if (!this.enableMidiOut) return;
+    getMessagesFromColor(color: Color): (MidiMessage | SysexMessage)[] {
+        return [];  // implemented in child classes
+    }
 
-        // convert value to data2
-        let data2: number;
-        if (typeof value === 'boolean') {
-            data2 = value ? 127 : 0;
-        } else if (isInt(value) && value <= 127 && value >= 0) {
-            data2 = value;
-        } else if (isFloat(value) && value <= 1 && value >= 0) {
-            data2 = parseInt(String(value * 127), 10);
+    render({
+        value, type = 'MIDI_BYTE',
+        color,
+        urgent = false,
+    }: { 
+        value?: boolean | number, type?: 'BOOLEAN' | 'MIDI_BYTE' | 'PERCENTAGE',
+        color?: Color,
+        urgent?: boolean,
+    }) {
+        // no midi out? no midi out.
+        if (!this.enableMidiOut) return;
+        // build midiMessage list to send to controller
+        let messages: (MidiMessage | SysexMessage)[] = [];
+
+        // get messages from value
+        if (
+            (type === 'BOOLEAN' && typeof value === 'boolean') ||
+            (type === 'MIDI_BYTE' && typeof value === 'number' && value <= 127 && value >= 0) ||
+            (type === 'PERCENTAGE' && typeof value === 'number' && value <= 1 && value >= 0)
+        ) {
+            messages = [...messages, ...this.getMessagesFromValue(value, type)];
         } else {
-            throw new Error(`Invalid MidiControl value "${value}"`);
+            throw new Error(`Invalid MidiControl value "${value}", sent as type "${type}".`);
         }
 
-        session.midiOut.sendMidi({
-            name: this.name, status: this.status, data1: this.data1, data2, urgent,
-        });
+        // get messages from color
+        messages = [...messages, ...this.getMessagesFromColor(color)];
+
+        // send messages
+        for (let message of messages) {
+            if (message instanceof MidiMessage) {
+                // send message to cache, return if no change
+                if (!this.cacheMidiMessage(message)) return;
+                const { port, status, data1, data2 } = message;
+                session.midiOut.sendMidi({ name: this.name, status, data1, data2, urgent });
+            } else {
+                const { port, data } = message;
+                session.midiOut.sendSysex({ port, data, urgent })
+            }
+        }
+    }
+
+    cacheMidiMessage(midiMessage: MidiMessage): boolean {
+        const midiMessagePattern = getPatternFromMidi(midiMessage);
+        if (this.cache.indexOf(midiMessagePattern) !== -1) return false;
+        let match = true;
+        for (let i = 0; i < this.patterns.length; i++) {
+            const pattern = this.patterns[i];
+            for (let ii = 0; ii < 6; ii++) {
+                // if not a match, break early
+                if (pattern[ii] !== '?' && pattern[ii] !== midiMessagePattern[ii]) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                this.cache[i] = midiMessagePattern;
+                return true;
+            } else {
+                throw new Error(`MidiMessage "${midiMessagePattern}" does not match existing pattern on MidiControl "${this.name}".`);
+            }
+        }
+    }
+
+    renderDisabledState() {
+        if (this.status && this.data1) this.render({ value: 0 });
     }
 }

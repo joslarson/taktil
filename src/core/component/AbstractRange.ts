@@ -9,7 +9,7 @@ abstract class Range extends AbstractComponentBase {
     state: number = 0;
 
     renderMidiControl(midiControl: MidiControl) {
-        midiControl.render({ data2: this.state });
+        midiControl.render({ value: this.state });
     }
 
     onMidi(midiControl: MidiControl, midi: MidiMessage) {

@@ -10,7 +10,7 @@ abstract class AbstractButtonBase extends AbstractComponentBase {
     state: any = false;
 
     renderMidiControl(midiControl: MidiControl) {
-        midiControl.render({ data2: this.state ? 127 : 0 });
+        midiControl.render({ value: this.state ? 127 : 0 });
     }
 
     protected isPress(midi: MidiMessage) {

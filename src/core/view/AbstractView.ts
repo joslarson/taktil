@@ -1,4 +1,4 @@
-import { MidiMessage, Sysex } from '../midi';
+import { MidiMessage, SysexMessage } from '../midi';
 import AbstractComponentBase from '../component/AbstractComponentBase';
 import MidiControl from '../midi/MidiControl';
 import session from '../../session';
@@ -49,7 +49,7 @@ abstract class AbstractView {
             parentInstance.renderMidiControl(midiControl);
         } else {
             // no parent? no component to render, reset midi control
-            midiControl.reset();
+            midiControl.renderDisabledState();
         }
     }
 
@@ -100,14 +100,14 @@ abstract class AbstractView {
                 const parentInstance = this.parent.getInstance();
                 parentInstance.onMidi(midiControl, midiMessage);
             } else {
-                midiControl.reset();
+                midiControl.renderDisabledState();
                 session.midiOut.updateMidiOutCacheWithMidiInput(midiMessage);
                 logger.info(`MidiControl "${midiControl.name}" is unused in active view stack.`);
             }
         }
     }
 
-    onSysex(sysex: Sysex) {
+    onSysex(sysex: SysexMessage) {
         const { port } = sysex;
         let mode: string;
         let component: AbstractComponentBase;
