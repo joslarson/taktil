@@ -3,131 +3,11 @@ import host from '../../host';
 import session from '../../session';
 
 
-// export default class MidiControl {
-//     name: string;
-//     input: number;
-//     output: number;
-//     status: number;
-//     data1: number;
-//     data2: number;
-//     msb: string;
-//     lsb: string;
-//     patterns: string[];
-//     onReset: number | ((midiControl: MidiControl) => void);
-
-//     constructor(filter: string | {
-//         input?: number, output?: number,
-//         patterns?: string[],
-//         status?: number, data1?: number, data2?: number,
-//         msb?: string, lsb?: string
-//     }, onReset: number | ((midiControl: MidiControl) => void) = 0) {
-//         // set defaults
-//         let options = {
-//             input: 0, output: 0,
-//             patterns: [],
-//             status: undefined, data1: undefined, data2: undefined,
-//             msb: undefined, lsb: undefined,
-//         };
-
-//         // override defaults with provided constructor data
-//         if (typeof filter === 'string') {
-//             options = { ...options, patterns: [filter] };
-//         } else {
-//             options = {
-//                 ...options, ...filter,
-//                 // add msb and lb patterns to pattern list
-//                 patterns: [
-//                     ...(filter.patterns || []),
-//                     ...(options.msb ? [options.msb] : []),
-//                     ...(options.lsb ? [options.lsb] : []),
-//                 ],
-//             };
-//         }
-
-//         // verify pattern strings are valid
-//         for (let pattern of options.patterns) {
-//             if (this.patternIsValid(pattern)) throw new Error(`Invalid midi pattern: "${pattern}"`);
-//         }
-
-//         // if there is only one pattern set status, data1, and/or data2 that can be pulled from it
-//         if (options.patterns.length === 1) {
-//             options = {
-//                 ...options,
-//                 ...this._getMidiFromPattern(options.patterns[0])
-//             };
-//         }
-
-//         // when no pattern is set, create a pattern from the provided data
-//         if (options.patterns.length === 0 && (options.status || options.data1 || options.data2)) {
-//             const { status, data1, data2 } = options;
-//             options = {
-//                 ...options,
-//                 patterns: [this._getPatternFromMidi({ status, data1, data2 })],
-//             };
-//         }
-
-//         // set object properties
-//         this.input = options.input;
-//         this.output = options.output;
-//         this.status = options.status;
-//         this.data1 = options.data1;
-//         this.data2 = options.data2;
-//         this.msb = options.msb;
-//         this.lsb = options.lsb;
-//         this.patterns = options.patterns;
-//         this.onReset = onReset;
-//     }
-
-//     private _getMidiFromPattern(pattern: string) {
-//         const status = pattern.slice(0, 2);
-//         const data1 = pattern.slice(2, 4);
-//         const data2 = pattern.slice(4, 6);
-
-//         return {
-//             status: status.indexOf('?') === -1 ? parseInt(status, 16): undefined,
-//             data1: data1.indexOf('?') === -1 ? parseInt(data1, 16): undefined,
-//             data2: data2.indexOf('?') === -1 ? parseInt(data2, 16): undefined,
-//         }
-//     }
-
-//     private _getPatternFromMidi({ status = undefined, data1 = undefined, data2 = undefined }: SimpleMidiMessage) {
-//         let result = '';
-//         for (let midiByte of [status, data1, data2]) {
-//             if (midiByte === undefined) {
-//                 result = `${result}??`
-//             } else {
-//                 let hexByteString = midiByte.toString(16).toUpperCase();
-//                 if (hexByteString.length === 1) hexByteString = `0${hexByteString}`;
-//                 result = `${result}${hexByteString}`;
-//             }
-//         }
-//         return result;
-//     }
-
-//     reset() {
-//         if (typeof this.onReset === 'number') {
-//             if (this.status && this.data1) this.render({ data2: this.onReset });
-//         } else {
-//             this.onReset(this);
-//         }
-//     }
-
-//     render({ status = this.status, data1 = this.data1, data2, urgent = false }: { status?: number, data1?: number, data2: number, urgent?: boolean }) {
-//         session.midiOut.sendMidi({ name: this.name, status, data1, data2, urgent, cacheKey: this.getCacheKey() });
-//     }
-
-//     getCacheKey() {
-//         const {output: port, status, data1, data2 } = this;
-//         return status && data1 ? `${port}:${status}:${data1}` : undefined;
-//     }
-
-//     patternIsValid(pattern: string) {
-//         return !/[a-fA-F0-9\?]{6}/.test(pattern);
-//     }
-// }
-
-
-function getPatternFromMidi({ status = undefined, data1 = undefined, data2 = undefined }: SimpleMidiMessage) {
+function getPatternFromMidi({
+    status = undefined, data1 = undefined, data2 = undefined,
+}: {
+    status?: number, data1?: number, data2?: number,
+}) {
     let result = '';
     for (let midiByte of [status, data1, data2]) {
         if (midiByte === undefined) {
@@ -163,127 +43,43 @@ export interface Color {
     b: number;
 }
 
-export default class MidiControl {
+// enum Resolution {
+//     MIDI_BYTE = 128,
+//     MSB_LSB = 16384,
+// }
+
+export abstract class AbstractMidiControl {
     name: string;
-    inPort: number;
-    outPort: number;
+    resolution: number = 128;
+    defaultState = { value: 0, color: { r: 0, g: 0, b: 0 } as Color };
+    state = { ...this.defaultState };
+
+    inPort: number = 0;
+    outPort: number = 0;
     patterns: string[];
 
-    status: number;
-    data1: number;
-    data2: number;
-
-    defaultColor: Color;
-
-    cacheOnMidiIn: boolean;
-    enableMidiOut: boolean;
     cache: string[] = [];
+    cacheOnMidiIn: boolean = true;
+    enableMidiOut: boolean = true;
 
-    constructor({
-        port, inPort = 0, outPort = 0,
-        patterns = [],
-        status, data1, data2,
-        defaultColor,
-        cacheOnMidiIn = true, enableMidiOut = true,
-    }: {
-        port?: number, inPort?: number, outPort?: number,
-        patterns?: string[],  // patterns for all inPort and outPort MidiMessages
-        status?: number, data1?: number, data2?: number,
-        defaultColor?: Color,
-        cacheOnMidiIn?: boolean, enableMidiOut?: boolean,
+    constructor({ port, inPort, outPort, patterns }: {
+        port?: number, inPort?: number, outPort?: number, patterns: string[],  // patterns for all inPort and outPort MidiMessages
     }) {
-        if (patterns.length === 0 && !(status || data1 || data2)) throw new Error(`Error, MidiControl must specify at least on of the following: pattern, status, data1, data2`);
+        if (!patterns || patterns.length === 0) throw new Error(`Error, MidiControl must specify at least one pattern.`);
         // verify pattern strings are valid
         for (let pattern of patterns) {
-            if (patternIsValid(pattern)) throw new Error(`Invalid midi pattern: "${pattern}"`);
-        }
-
-        // if there is only one pattern set status, data1, and/or data2 that can be pulled from it
-        if (patterns.length === 1) {
-            // { status, data1, data2 } = getMidiFromPattern(patterns[0]);
-            const midiMessage = getMidiFromPattern(patterns[0]);
-            status = midiMessage.status;
-            data1 = midiMessage.data1;
-            data2 = midiMessage.data2;
-        }
-
-        // when no pattern is set, create a pattern from the provided data
-        if (patterns.length === 0 && (status || data1 || data2)) {
-            patterns = [getPatternFromMidi({ status, data1, data2 })];
+            // if (!patternIsValid(pattern)) throw new Error(`Invalid midi pattern: "${pattern}"`);
         }
 
         // set object properties
-        this.inPort = port !== undefined ?  port : inPort;
-        this.outPort = port !== undefined ?  port : outPort;
+        this.inPort = port !== undefined ?  port : (inPort !== undefined ? inPort : this.inPort);
+        this.outPort = port !== undefined ?  port : (outPort !== undefined ? outPort : this.outPort);
         this.patterns = patterns;
-
-        this.status = status;
-        this.data1 = data1;
-        this.data2 = data2;
-
-        this.defaultColor = defaultColor;
-
-        this.cacheOnMidiIn = cacheOnMidiIn;
-        this.enableMidiOut = enableMidiOut;
     }
 
-    getMessagesFromValue(value: boolean | number, type: 'BOOLEAN' | 'MIDI_BYTE' | 'PERCENTAGE'): (MidiMessage | SysexMessage)[] {
-        let data2;
-        if (type === 'BOOLEAN') {
-            data2 = value as boolean ? 127 : 0;
-        } else if (type === 'MIDI_BYTE') {
-            data2 = value as number;
-        } else if (type === 'PERCENTAGE') {
-            data2 = Math.round(value as number * 127);
-        }
-        return [new MidiMessage({ port: this.outPort, status: this.status, data1: this.data1, data2: data2})];
-    }
+    abstract getRenderMessages({ value, color }: { value: number, color?: Color }): (MidiMessage | SysexMessage)[];
 
-    getMessagesFromColor(color: Color): (MidiMessage | SysexMessage)[] {
-        return [];  // implemented in child classes
-    }
-
-    render({
-        value, type = 'MIDI_BYTE',
-        color,
-        urgent = false,
-    }: { 
-        value?: boolean | number, type?: 'BOOLEAN' | 'MIDI_BYTE' | 'PERCENTAGE',
-        color?: Color,
-        urgent?: boolean,
-    }) {
-        // no midi out? no midi out.
-        if (!this.enableMidiOut) return;
-        // build midiMessage list to send to controller
-        let messages: (MidiMessage | SysexMessage)[] = [];
-
-        // get messages from value
-        if (
-            (type === 'BOOLEAN' && typeof value === 'boolean') ||
-            (type === 'MIDI_BYTE' && typeof value === 'number' && value <= 127 && value >= 0) ||
-            (type === 'PERCENTAGE' && typeof value === 'number' && value <= 1 && value >= 0)
-        ) {
-            messages = [...messages, ...this.getMessagesFromValue(value, type)];
-        } else {
-            throw new Error(`Invalid MidiControl value "${value}", sent as type "${type}".`);
-        }
-
-        // get messages from color
-        messages = [...messages, ...this.getMessagesFromColor(color)];
-
-        // send messages
-        for (let message of messages) {
-            if (message instanceof MidiMessage) {
-                // send message to cache, return if no change
-                if (!this.cacheMidiMessage(message)) return;
-                const { port, status, data1, data2 } = message;
-                session.midiOut.sendMidi({ name: this.name, status, data1, data2, urgent });
-            } else {
-                const { port, data } = message;
-                session.midiOut.sendSysex({ port, data, urgent })
-            }
-        }
-    }
+    abstract getValueFromMessage(message: MidiMessage | SysexMessage): number;
 
     cacheMidiMessage(midiMessage: MidiMessage): boolean {
         const midiMessagePattern = getPatternFromMidi(midiMessage);
@@ -307,7 +103,81 @@ export default class MidiControl {
         }
     }
 
-    renderDisabledState() {
-        if (this.status && this.data1) this.render({ value: 0 });
+    onMidiIn(midiMessage: MidiMessage) {
+        if (this.cacheOnMidiIn) {
+            // update cache with input
+            this.cacheMidiMessage(midiMessage);
+            // re-render based on current state (messages will only be sent if they are different than what's in the cache)
+            this.sendRenderMessages(this.getRenderMessages({ ...this.state }));
+        }
+    }
+
+    sendRenderMessages(messages: (MidiMessage | SysexMessage)[], urgent = false) {
+        // no midi out? no midi out.
+        if (!this.enableMidiOut) return;
+
+        for (let message of messages) {
+            if (message instanceof MidiMessage) {
+                // send message to cache, return if no change
+                if (!this.cacheMidiMessage(message)) return;
+                const { port, status, data1, data2 } = message;
+                session.midiOut.sendMidi({ name: this.name, status, data1, data2, urgent });
+            } else if (message instanceof SysexMessage) {
+                const { port, data } = message;
+                session.midiOut.sendSysex({ port, data, urgent })
+            } else {
+                throw new Error('Unrecognized message type.');
+            }
+        }
+    }
+
+    render({ value, color = this.defaultState.color, urgent = false }: { value: number, color?: Color, urgent?: boolean }) {
+        // validate input
+        if (value < 0 || value > this.resolution - 1) throw new Error(`Invalid MidiControl value "${value}" for resolution "${this.resolution}".`);
+        // update state
+        this.state = { value, color };
+        // get messages
+        const messages = this.getRenderMessages({ value, color });
+        // send messages
+        this.sendRenderMessages(messages, urgent);
+    }
+
+    renderDefaultState() {
+        // println('default');
+        this.render({ ...this.defaultState });
     }
 }
+
+
+export class SimpleMidiControl extends AbstractMidiControl {
+    cacheOnMidiIn = false;
+    status: number;
+    data1: number;
+
+    constructor({ port, inPort, outPort, status, data1 }: {
+        port?: number, inPort?: number, outPort?: number, status: number, data1: number
+    }) {
+        super({ port, inPort, outPort, patterns: [getPatternFromMidi({ status, data1 })]});
+        this.status = status;
+        this.data1 = data1;
+    }
+
+    getRenderMessages({ value, color }: { value: number, color?: Color }): (MidiMessage | SysexMessage)[] {
+        const { outPort: port, status, data1 } = this;
+        const data2 = value;
+        return [
+            new MidiMessage({ port, status, data1, data2 }),
+        ]
+    }
+
+    getValueFromMessage(message: MidiMessage | SysexMessage): number {
+        if (message instanceof MidiMessage && message.status === this.status && message.data1 === this.data1) {
+            return message.data2;
+        } else {
+            return this.state.value;
+        }
+    }
+}
+
+
+export default AbstractMidiControl;

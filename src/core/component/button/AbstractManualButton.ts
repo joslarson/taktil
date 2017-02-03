@@ -1,7 +1,6 @@
 import AbstractButtonBase from './AbstractButtonBase';
 import { TimeoutTask } from '../../../utils';
 import MidiControl from '../../midi/MidiControl';
-import MidiMessage from '../../midi/MidiMessage';
 
 
 interface ManualButton {
@@ -16,35 +15,35 @@ abstract class ManualButton extends AbstractButtonBase {
     LONG_ACTION_DURATION = 350;
     DOUBLE_ACTION_DURATION = 450;
 
-    onMidi(midiControl: MidiControl, midiMessage: MidiMessage) {
-        if (this.onPress) this._handlePress(midiMessage);
-        if (this.onLongPress) this._handleLongPress(midiMessage);
-        if (this.onDoublePress) this._handleDoublePress(midiMessage);
-        if (this.onRelease) this._handleRelease(midiMessage);
-        if (this.onDoubleRelease) this._handleDoubleRelease(midiMessage);
+    onValue(midiControl: MidiControl, value: number) {
+        if (this.onPress) this._handlePress(value);
+        if (this.onLongPress) this._handleLongPress(value);
+        if (this.onDoublePress) this._handleDoublePress(value);
+        if (this.onRelease) this._handleRelease(value);
+        if (this.onDoubleRelease) this._handleDoubleRelease(value);
     }
 
-    protected isDoublePress(midiMessage: MidiMessage) {
-        return this.memory['doublePress'] && this.isPress(midiMessage);
+    protected isDoublePress(value: number) {
+        return this.memory['doublePress'] && this.isPress(value);
     }
 
-    protected isDoubleRelease(midiMessage: MidiMessage) {
-        return this.memory['doubleRelease'] && this.isRelease(midiMessage);
+    protected isDoubleRelease(value: number) {
+        return this.memory['doubleRelease'] && this.isRelease(value);
     }
 
-    private _handlePress(midiMessage: MidiMessage) {
+    private _handlePress(value: number) {
         // if it's not a press, not implemented or is a doublePress, ignore it
-        if (!this.isPress(midiMessage) || this.memory['doublePress']) return;
+        if (!this.isPress(value) || this.memory['doublePress']) return;
         // handle single press
         this.onPress();
     }
 
-    private _handleDoublePress(midiMessage: MidiMessage) {
+    private _handleDoublePress(value: number) {
         // if it's not a press or not implemented, ignore it
-        if (!this.isPress(midiMessage)) return;
+        if (!this.isPress(value)) return;
 
         // if is doublePress
-        if (this.isDoublePress(midiMessage)) {
+        if (this.isDoublePress(value)) {
             this.onDoublePress();
         } else if (this.DOUBLE_ACTION_DURATION) {
             // setup interval task to remove self after DOUBLE_PRESS_DURATION
@@ -55,12 +54,12 @@ abstract class ManualButton extends AbstractButtonBase {
         }
     }
 
-    private _handleLongPress(midiMessage: MidiMessage) {
+    private _handleLongPress(value: number) {
         // if it's a doublePress or is not implemented, ignore it
-        if (this.isDoublePress(midiMessage)) return;
+        if (this.isDoublePress(value)) return;
 
         // if it's a press schedule the callback
-        if (this.isPress(midiMessage) && this.LONG_ACTION_DURATION) {
+        if (this.isPress(value) && this.LONG_ACTION_DURATION) {
             // schedule callback
             this.memory['longPress'] = new TimeoutTask(this, function() {
                 this.onLongPress();
@@ -71,19 +70,19 @@ abstract class ManualButton extends AbstractButtonBase {
         }
     }
 
-    private _handleRelease(midiMessage: MidiMessage) {
+    private _handleRelease(value: number) {
         // if it's not a release, not implemented or is a doubleRelease, ignore it
-        if (!this.isRelease(midiMessage) || this.memory['doubleRelease']) return;
+        if (!this.isRelease(value) || this.memory['doubleRelease']) return;
         // handle single release
         this.onRelease();
     }
 
-    private _handleDoubleRelease(midiMessage: MidiMessage) {
+    private _handleDoubleRelease(value: number) {
         // if it's not a release or not implemented, ignore it
-        if (!this.isRelease(midiMessage)) return;
+        if (!this.isRelease(value)) return;
 
         // if is doubleRelease
-        if (this.isDoubleRelease(midiMessage)) {
+        if (this.isDoubleRelease(value)) {
             this.onDoubleRelease();
         } else {
             // setup timeout task to remove self after this.DOUBLE_DURATION

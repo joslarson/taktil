@@ -4,15 +4,15 @@ import MidiControl from '../../midi/MidiControl';
 
 
 abstract class AbstractGateButton extends AbstractManualButton {
-    onMidi(midiControl: MidiControl, midi: MidiMessage) {
+    onValue(midiControl: MidiControl, value: number) {
         if (this.state !== undefined) {
-            if (this.isPress(midi)) {
+            if (this.isPress(value)) {
                 this.setState(true);
-            } else if (this.isRelease(midi)) {
+            } else if (this.isRelease(value)) {
                 this.setState(false);
             }
         }
-        super.onMidi(midiControl, midi);
+        super.onValue(midiControl, value);
     }
 }
 

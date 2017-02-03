@@ -67,6 +67,7 @@ export class Session {
 
         if (midiControl !== undefined) {
             logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${midiControl.name ? ` "${midiControl.name}"` : ''}`);
+            midiControl.onMidiIn(midiMessage);
             if (activeView) activeView.onMidi(midiControl, midiMessage);
         } else {
             logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);

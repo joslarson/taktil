@@ -49,7 +49,7 @@ abstract class AbstractView {
             parentInstance.renderMidiControl(midiControl);
         } else {
             // no parent? no component to render, reset midi control
-            midiControl.renderDisabledState();
+            midiControl.renderDefaultState();
         }
     }
 
@@ -94,13 +94,13 @@ abstract class AbstractView {
         }
 
         if (mode && component) {
-            component.onMidi(midiControl, midiMessage);
+            component.onValue(midiControl, midiControl.getValueFromMessage(midiMessage));
         } else {
             if (this.parent) {
                 const parentInstance = this.parent.getInstance();
                 parentInstance.onMidi(midiControl, midiMessage);
             } else {
-                midiControl.renderDisabledState();
+                midiControl.renderDefaultState();
                 session.midiOut.updateMidiOutCacheWithMidiInput(midiMessage);
                 logger.info(`MidiControl "${midiControl.name}" is unused in active view stack.`);
             }

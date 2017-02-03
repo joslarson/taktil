@@ -1,7 +1,6 @@
 import AbstractComponentBase from './AbstractComponentBase';
 import AbstractView from '../view/AbstractView';
 import MidiControl from '../midi/MidiControl';
-import MidiMessage from '../midi/MidiMessage';
 
 
 abstract class ComponentSet extends AbstractComponentBase {
@@ -40,9 +39,9 @@ abstract class ComponentSet extends AbstractComponentBase {
         this.getSubComponent(midiControl).renderMidiControl(midiControl);
     }
 
-    onMidi(midiControl: MidiControl, midi: MidiMessage) {
+    onValue(midiControl: MidiControl, value: number) {
         // pass on midi to corresponding midiControl
-        this.getSubComponent(midiControl).onMidi(midiControl, midi);
+        this.getSubComponent(midiControl).onValue(midiControl, value);
     }
 }
 

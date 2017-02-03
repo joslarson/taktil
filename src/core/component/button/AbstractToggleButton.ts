@@ -5,14 +5,14 @@ import logger from '../../../logger';
 
 
 abstract class ToggleButton extends AbstractButtonBase {
-    onMidi(midiControl: MidiControl, midi: MidiMessage) {
-        if (!this.isPress(midi)) return;
+    onValue(midiControl: MidiControl, value: number) {
+        if (!this.isPress(value)) return;
 
         if (!this.state) {
-            this.setState(true);
+            this.setState(midiControl.resolution - 1);
             this.onToggleOn();
         } else {
-            this.setState(false);
+            this.setState(0);
             this.onToggleOff();
         }
     }

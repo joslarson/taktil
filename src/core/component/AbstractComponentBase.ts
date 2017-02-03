@@ -1,5 +1,4 @@
 import AbstractView from '../view/AbstractView';
-import MidiMessage from '../midi/MidiMessage';
 import { areDeepEqual, TimeoutTask } from '../../utils';
 import session from '../../session';
 import MidiControl from '../midi/MidiControl';
@@ -63,11 +62,7 @@ abstract class AbstractComponentBase {
     abstract renderMidiControl(midiControl: MidiControl): void;
 
     // handles midi messages routed to midiControl
-    onMidi(midiControl: MidiControl, midi: MidiMessage): void {
-        throw 'Not Implemented';
-    }
-
-    onSysex(midiControl: MidiControl, msg: string): void  {
+    onValue(midiControl: MidiControl, value: number): void {
         throw 'Not Implemented';
     }
 
