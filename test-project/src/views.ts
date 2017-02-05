@@ -7,6 +7,7 @@ export class BaseView extends AbstractView {
     // parent = ParentView
     onRegister() {
         this.registerComponent(components.PlayToggle, midiControls.PLAY);
+        this.registerComponent(components.PlayToggle, midiControls.GROUP_A);
         this.registerComponent(components.MetronomeToggle, midiControls.PLAY, 'SHIFT');
         this.registerComponent(components.PreRollToggle, midiControls.REC, 'SHIFT');
         // this.registerComponent(components.RestartButton, midiControls.RESTART);

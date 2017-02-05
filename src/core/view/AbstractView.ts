@@ -33,23 +33,23 @@ abstract class AbstractView {
         return this._componentMap[mode].components[componentMapIndex];
     }
 
-    renderMidiControl(midiControl: MidiControl) {
+    connectMidiControl(midiControl: MidiControl) {
         // check view modes in order for component/midiControl registration
         for (let activeMode of session.getActiveModes()) {
             if (!this._componentMap[activeMode]) continue;  // mode not used in view
-            const component = this.getComponent(midiControl, activeMode);
-            if (component) {
-                component.renderMidiControl(midiControl);
+            const component: AbstractComponentBase = this.getComponent(midiControl, activeMode);
+            if (component) { 
+                midiControl.activeComponent = component;
                 return;
             }
         }
         // component not found in view? send to parent
         if (this.parent) {
             const parentInstance = this.parent.getInstance();
-            parentInstance.renderMidiControl(midiControl);
+            parentInstance.connectMidiControl(midiControl);
         } else {
-            // no parent? no component to render, reset midi control
-            midiControl.renderDefaultState();
+            // no parent? no component to connect to
+            midiControl.activeComponent = null;
         }
     }
 

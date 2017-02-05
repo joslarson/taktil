@@ -50,11 +50,9 @@ abstract class AbstractComponentBase {
         if (areDeepEqual(state, this.state)) return;
         // update object state
         this.state = state;
-        // update hardware state through view to avoid
-        // updating hardware midiControls not in current view
+        // update hardware state if in view
         for (let midiControl of this.midiControls) {
-            const activeView = session.getActiveView().getInstance();
-            activeView.renderMidiControl(midiControl);
+            if (midiControl.activeComponent === this) this.renderMidiControl(midiControl);
         }
     }
 

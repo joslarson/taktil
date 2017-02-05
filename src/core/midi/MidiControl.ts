@@ -1,4 +1,5 @@
 import { SimpleMidiMessage, MidiMessage, SysexMessage } from '../midi/';
+import { AbstractComponentBase } from '../component'
 import host from '../../host';
 import session from '../../session';
 
@@ -34,7 +35,7 @@ function getMidiFromPattern(pattern: string) {
 }
 
 function patternIsValid(pattern: string) {
-    return !/[a-fA-F0-9\?]{6}/.test(pattern);
+    return /[a-fA-F0-9\?]{6}/.test(pattern);
 }
 
 export interface Color {
@@ -62,13 +63,15 @@ export abstract class AbstractMidiControl {
     cacheOnMidiIn: boolean = true;
     enableMidiOut: boolean = true;
 
+    activeComponent: AbstractComponentBase = null;
+
     constructor({ port, inPort, outPort, patterns }: {
         port?: number, inPort?: number, outPort?: number, patterns: string[],  // patterns for all inPort and outPort MidiMessages
     }) {
         if (!patterns || patterns.length === 0) throw new Error(`Error, MidiControl must specify at least one pattern.`);
         // verify pattern strings are valid
         for (let pattern of patterns) {
-            // if (!patternIsValid(pattern)) throw new Error(`Invalid midi pattern: "${pattern}"`);
+            if (!patternIsValid(pattern)) throw new Error(`Invalid midi pattern: "${pattern}"`);
         }
 
         // set object properties
@@ -84,32 +87,34 @@ export abstract class AbstractMidiControl {
     cacheMidiMessage(midiMessage: MidiMessage): boolean {
         const midiMessagePattern = getPatternFromMidi(midiMessage);
         if (this.cache.indexOf(midiMessagePattern) !== -1) return false;
-        let match = true;
         for (let i = 0; i < this.patterns.length; i++) {
+            let isMatch = true;
             const pattern = this.patterns[i];
             for (let ii = 0; ii < 6; ii++) {
                 // if not a match, break early
                 if (pattern[ii] !== '?' && pattern[ii] !== midiMessagePattern[ii]) {
-                    match = false;
+                    isMatch = false;
                     break;
                 }
             }
-            if (match) {
+            if (isMatch) {
                 this.cache[i] = midiMessagePattern;
                 return true;
-            } else {
-                throw new Error(`MidiMessage "${midiMessagePattern}" does not match existing pattern on MidiControl "${this.name}".`);
             }
         }
+        // no match
+        throw new Error(`MidiMessage "${midiMessagePattern}" does not match existing pattern on MidiControl "${this.name}".`);
     }
 
-    onMidiIn(midiMessage: MidiMessage) {
+    onMidi(midiMessage: MidiMessage) {
         if (this.cacheOnMidiIn) {
             // update cache with input
             this.cacheMidiMessage(midiMessage);
             // re-render based on current state (messages will only be sent if they are different than what's in the cache)
             this.sendRenderMessages(this.getRenderMessages({ ...this.state }));
         }
+
+        if (this.activeComponent) this.activeComponent.onValue(this, this.getValueFromMessage(midiMessage));
     }
 
     sendRenderMessages(messages: (MidiMessage | SysexMessage)[], urgent = false) {
@@ -118,10 +123,11 @@ export abstract class AbstractMidiControl {
 
         for (let message of messages) {
             if (message instanceof MidiMessage) {
-                // send message to cache, return if no change
-                if (!this.cacheMidiMessage(message)) return;
-                const { port, status, data1, data2 } = message;
-                session.midiOut.sendMidi({ name: this.name, status, data1, data2, urgent });
+                // send message to cache, send to midi out if new
+                if (this.cacheMidiMessage(message)){
+                    const { port, status, data1, data2 } = message;
+                    session.midiOut.sendMidi({ name: this.name, status, data1, data2, urgent });
+                }
             } else if (message instanceof SysexMessage) {
                 const { port, data } = message;
                 session.midiOut.sendSysex({ port, data, urgent })
@@ -143,14 +149,12 @@ export abstract class AbstractMidiControl {
     }
 
     renderDefaultState() {
-        // println('default');
         this.render({ ...this.defaultState });
     }
 }
 
 
 export class SimpleMidiControl extends AbstractMidiControl {
-    cacheOnMidiIn = false;
     status: number;
     data1: number;
 

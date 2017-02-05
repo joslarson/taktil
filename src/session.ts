@@ -67,8 +67,8 @@ export class Session {
 
         if (midiControl !== undefined) {
             logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${midiControl.name ? ` "${midiControl.name}"` : ''}`);
-            midiControl.onMidiIn(midiMessage);
-            if (activeView) activeView.onMidi(midiControl, midiMessage);
+            midiControl.onMidi(midiMessage);
+            // if (activeView) activeView.onMidi(midiControl, midiMessage);
         } else {
             logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);
         }
@@ -153,7 +153,7 @@ export class Session {
         if (!this.getActiveView()) return;  // can't do anything until we have an active view
 
         for (let midiControl of this.getMidiControls()) {
-            this.getActiveView().getInstance().renderMidiControl(midiControl);
+            this.getActiveView().getInstance().connectMidiControl(midiControl);
         }
     }
 
