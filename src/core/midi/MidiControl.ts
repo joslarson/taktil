@@ -2,6 +2,7 @@ import { SimpleMidiMessage, MidiMessage, SysexMessage } from '../midi/';
 import { AbstractComponentBase } from '../component'
 import host from '../../host';
 import session from '../../session';
+import logger from '../../logger';
 
 
 function getPatternFromMidi({
@@ -114,7 +115,11 @@ export abstract class AbstractMidiControl {
             this.sendRenderMessages(this.getRenderMessages({ ...this.state }));
         }
 
-        if (this.activeComponent) this.activeComponent.onValue(this, this.getValueFromMessage(midiMessage));
+        if (this.activeComponent) {
+            this.activeComponent.onValue(this, this.getValueFromMessage(midiMessage));
+        } else {
+            logger.info(`MidiControl "${this.name}" is unused in active view stack.`);
+        }
     }
 
     sendRenderMessages(messages: (MidiMessage | SysexMessage)[], urgent = false) {

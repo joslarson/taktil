@@ -79,40 +79,6 @@ abstract class AbstractView {
     onRegister() {
         // optionally implemented in child class
     }
-
-    onMidi(midiControl: MidiControl, midiMessage: MidiMessage) {
-        let mode: string;
-        let component: AbstractComponentBase;
-
-        // if component in an active mode, let the component in the first associated mode handle
-        for (let activeMode of session.getActiveModes()) {
-            component = this.getComponent(midiControl, activeMode);
-            if (component) {
-                mode = activeMode;
-                break;
-            }
-        }
-
-        if (mode && component) {
-            component.onValue(midiControl, midiControl.getValueFromMessage(midiMessage));
-        } else {
-            if (this.parent) {
-                const parentInstance = this.parent.getInstance();
-                parentInstance.onMidi(midiControl, midiMessage);
-            } else {
-                midiControl.renderDefaultState();
-                session.midiOut.updateMidiOutCacheWithMidiInput(midiMessage);
-                logger.info(`MidiControl "${midiControl.name}" is unused in active view stack.`);
-            }
-        }
-    }
-
-    onSysex(sysex: SysexMessage) {
-        const { port } = sysex;
-        let mode: string;
-        let component: AbstractComponentBase;
-        // TODO: sysex flow?
-    }
 }
 
 export default AbstractView;

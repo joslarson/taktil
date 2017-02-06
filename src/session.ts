@@ -62,13 +62,11 @@ export class Session {
     }
 
     onMidi(midiMessage: MidiMessage) {
-        const activeView = this.getActiveView().getInstance();
         const midiControl = this.findMidiControl(midiMessage);
 
         if (midiControl !== undefined) {
             logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${midiControl.name ? ` "${midiControl.name}"` : ''}`);
             midiControl.onMidi(midiMessage);
-            // if (activeView) activeView.onMidi(midiControl, midiMessage);
         } else {
             logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);
         }
@@ -76,8 +74,6 @@ export class Session {
 
     onSysex(sysex: SysexMessage) {
         logger.debug(`IN ${String(sysex.port)} => ${sysex.data}`);
-        const activeView = this.getActiveView().getInstance();
-        if (activeView) activeView.onSysex(sysex);
     }
 
     // Event Hooks
@@ -154,6 +150,12 @@ export class Session {
 
         for (let midiControl of this.getMidiControls()) {
             this.getActiveView().getInstance().connectMidiControl(midiControl);
+            // connect midi control to corresponding component in view if any
+            if (midiControl.activeComponent) {
+                midiControl.activeComponent.renderMidiControl(midiControl);
+            } else {  // otherwise render default state
+                midiControl.renderDefaultState();
+            }
         }
     }
 

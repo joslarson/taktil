@@ -8,6 +8,30 @@ export class BaseView extends AbstractView {
     onRegister() {
         this.registerComponent(components.PlayToggle, midiControls.PLAY);
         this.registerComponent(components.PlayToggle, midiControls.GROUP_A);
+        this.registerComponent(components.PlayToggle, midiControls.GROUP_B);
+        this.registerComponent(components.PlayToggle, midiControls.GROUP_C);
+        this.registerComponent(components.PlayToggle, midiControls.GROUP_D);
+        this.registerComponent(components.PlayToggle, midiControls.GROUP_E);
+        this.registerComponent(components.PlayToggle, midiControls.GROUP_F);
+        this.registerComponent(components.PlayToggle, midiControls.GROUP_G);
+        // this.registerComponent(components.PlayToggle, midiControls.GROUP_H);
+
+        this.registerComponent(components.PlayToggle, midiControls.PAD_1);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_2);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_3);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_4);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_5);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_6);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_7);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_8);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_9);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_10);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_11);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_12);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_13);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_14);
+        this.registerComponent(components.PlayToggle, midiControls.PAD_15);
+        // this.registerComponent(components.PlayToggle, midiControls.PAD_16);
         this.registerComponent(components.MetronomeToggle, midiControls.PLAY, 'SHIFT');
         this.registerComponent(components.PreRollToggle, midiControls.REC, 'SHIFT');
         // this.registerComponent(components.RestartButton, midiControls.RESTART);

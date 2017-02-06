@@ -18,7 +18,10 @@ class MaschinePanKnob extends MaschineKnob {
 
 
 class MaschineColorButton extends MaschineButton {
-    defaultState = { ...this.defaultState, color: { r: 0.80, g: 1, b: 0.4 } };  // warm to match default buttons
+    // PLAY green: { r: .02, g: 1, b: 0.06 }
+    // Off-white (like most buttons): { r: 0.8, g: 1, b: 0.4 }
+
+    defaultState = { ...this.defaultState, color: { r: 0.8, g: 1, b: 0.4 } };  // warm to match default buttons
     constructor({ port, inPort, outPort, status, data1 }: {
         port?: number, inPort?: number, outPort?: number, status: number, data1: number
     }) {
@@ -36,7 +39,7 @@ class MaschineColorButton extends MaschineButton {
             ...super.getRenderMessages({ value, color }),
             new MidiMessage({ status: (this.status & 0xF0), data1: this.data1, data2: hsb.h }),
             new MidiMessage({ status: (this.status & 0xF0) + 1, data1: this.data1, data2: hsb.s }),
-            new MidiMessage({ status: (this.status & 0xF0) + 2, data1: this.data1, data2: value === 0 ? 20 : 127 }),
+            new MidiMessage({ status: (this.status & 0xF0) + 2, data1: this.data1, data2: this.activeComponent ? (value === 0 ? 20 : 127) : 0 }),
         ];
     }
 }
