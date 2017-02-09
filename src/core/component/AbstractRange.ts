@@ -1,19 +1,19 @@
-import AbstractComponentBase from './AbstractComponentBase';
-import MidiControl from '../midi/MidiControl';
+import AbstractComponent from './AbstractComponent';
+import { AbstractControl } from '../control';
 import * as utils from '../../utils';
 import MidiMessage from '../midi/MidiMessage';
 import session from '../../session';
 
 
-abstract class Range extends AbstractComponentBase {
-    state: number = 0;
+abstract class Range extends AbstractComponent {
+    state: { value: number } = { value: 0 };
 
-    renderMidiControl(midiControl: MidiControl) {
-        midiControl.render({ value: this.state });
+    renderControl(control: AbstractControl) {
+        control.render({ value: this.state.value });
     }
 
-    onValue(midiControl: MidiControl, value: number) {
-        this.state = value;
+    onValue(control: AbstractControl, value: number) {
+        this.setState({ ...this.state, value: value })
     }
 }
 

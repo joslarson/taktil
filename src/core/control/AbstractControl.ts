@@ -1,11 +1,10 @@
 import { SimpleMidiMessage, MidiMessage, SysexMessage } from '../midi/';
-import { AbstractComponentBase } from '../component'
-import host from '../../host';
+import { AbstractComponent } from '../component'
 import session from '../../session';
 import logger from '../../logger';
 
 
-function getPatternFromMidi({
+export function getPatternFromMidi({
     status = undefined, data1 = undefined, data2 = undefined,
 }: {
     status?: number, data1?: number, data2?: number,
@@ -23,7 +22,7 @@ function getPatternFromMidi({
     return result;
 }
 
-function getMidiFromPattern(pattern: string) {
+export function getMidiFromPattern(pattern: string) {
     const status = pattern.slice(0, 2);
     const data1 = pattern.slice(2, 4);
     const data2 = pattern.slice(4, 6);
@@ -35,7 +34,7 @@ function getMidiFromPattern(pattern: string) {
     }
 }
 
-function patternIsValid(pattern: string) {
+export function patternIsValid(pattern: string) {
     return /[a-fA-F0-9\?]{6}/.test(pattern);
 }
 
@@ -45,12 +44,7 @@ export interface Color {
     b: number;
 }
 
-// enum Resolution {
-//     MIDI_BYTE = 128,
-//     MSB_LSB = 16384,
-// }
-
-export abstract class AbstractMidiControl {
+abstract class AbstractControl {
     name: string;
     resolution: number = 128;
     defaultState = { value: 0, color: { r: 0, g: 0, b: 0 } as Color };
@@ -64,12 +58,12 @@ export abstract class AbstractMidiControl {
     cacheOnMidiIn: boolean = true;
     enableMidiOut: boolean = true;
 
-    activeComponent: AbstractComponentBase = null;
+    activeComponent: AbstractComponent = null;
 
     constructor({ port, inPort, outPort, patterns }: {
         port?: number, inPort?: number, outPort?: number, patterns: string[],  // patterns for all inPort and outPort MidiMessages
     }) {
-        if (!patterns || patterns.length === 0) throw new Error(`Error, MidiControl must specify at least one pattern.`);
+        if (!patterns || patterns.length === 0) throw new Error(`Error, Control must specify at least one pattern.`);
         // verify pattern strings are valid
         for (let pattern of patterns) {
             if (!patternIsValid(pattern)) throw new Error(`Invalid midi pattern: "${pattern}"`);
@@ -104,7 +98,7 @@ export abstract class AbstractMidiControl {
             }
         }
         // no match
-        throw new Error(`MidiMessage "${midiMessagePattern}" does not match existing pattern on MidiControl "${this.name}".`);
+        throw new Error(`MidiMessage "${midiMessagePattern}" does not match existing pattern on Control "${this.name}".`);
     }
 
     onMidi(midiMessage: MidiMessage) {
@@ -118,7 +112,7 @@ export abstract class AbstractMidiControl {
         if (this.activeComponent) {
             this.activeComponent.onValue(this, this.getValueFromMessage(midiMessage));
         } else {
-            logger.info(`MidiControl "${this.name}" is unused in active view stack.`);
+            logger.info(`Control "${this.name}" is unused in active view stack.`);
         }
     }
 
@@ -144,7 +138,7 @@ export abstract class AbstractMidiControl {
 
     render({ value, color = this.defaultState.color, urgent = false }: { value: number, color?: Color, urgent?: boolean }) {
         // validate input
-        if (value < 0 || value > this.resolution - 1) throw new Error(`Invalid MidiControl value "${value}" for resolution "${this.resolution}".`);
+        if (value < 0 || value > this.resolution - 1) throw new Error(`Invalid Control value "${value}" for resolution "${this.resolution}".`);
         // update state
         this.state = { value, color };
         // get messages
@@ -159,34 +153,4 @@ export abstract class AbstractMidiControl {
 }
 
 
-export class SimpleMidiControl extends AbstractMidiControl {
-    status: number;
-    data1: number;
-
-    constructor({ port, inPort, outPort, status, data1 }: {
-        port?: number, inPort?: number, outPort?: number, status: number, data1: number
-    }) {
-        super({ port, inPort, outPort, patterns: [getPatternFromMidi({ status, data1 })]});
-        this.status = status;
-        this.data1 = data1;
-    }
-
-    getRenderMessages({ value, color }: { value: number, color?: Color }): (MidiMessage | SysexMessage)[] {
-        const { outPort: port, status, data1 } = this;
-        const data2 = value;
-        return [
-            new MidiMessage({ port, status, data1, data2 }),
-        ]
-    }
-
-    getValueFromMessage(message: MidiMessage | SysexMessage): number {
-        if (message instanceof MidiMessage && message.status === this.status && message.data1 === this.data1) {
-            return message.data2;
-        } else {
-            return this.state.value;
-        }
-    }
-}
-
-
-export default AbstractMidiControl;
+export default AbstractControl;

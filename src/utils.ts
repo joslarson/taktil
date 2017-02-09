@@ -1,4 +1,3 @@
-import host from './host';
 import  { SimpleMidiMessage } from './core/midi';
 
 
@@ -27,7 +26,7 @@ export class TimeoutTask {
     start(...args) {
         host.scheduleTask(() => {
             if (!this.cancelled) this.callback.apply(this.scope, args);
-        }, [], this.interval);
+        }, this.interval);
         return this;
     }
 

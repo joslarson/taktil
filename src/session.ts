@@ -1,20 +1,18 @@
-import { MidiControl, MidiOutProxy, SimpleMidiMessage, MidiMessage, SysexMessage } from './core/midi';
-import AbstractView from './core/view/AbstractView';
-import { AbstractComponentBase } from 'core/component';
-import * as api from 'bitwig-api-proxy';
+import { MidiOutProxy, SimpleMidiMessage, MidiMessage, SysexMessage } from './core/midi';
+import { AbstractControl } from 'core/control';
+import { AbstractView } from './core/view';
+import { AbstractComponent } from 'core/component';
 import { midiMessageToHex } from './utils';
 import logger from './logger';
-import host from './host';
 
 
 export class Session {
-    private _midiControls: MidiControl[] = [];
-    private _registeredMidiControls: MidiControl[] = [];
+    private _controls: { [key: string]: AbstractControl } = {};
+    private _registeredControls: AbstractControl[] = [];
     private _views: typeof AbstractView[] = [];
     private _activeView: typeof AbstractView;
     private _activeModes: string[] = [];
     private _eventHandlers: { [key: string]: Function[] } = {};
-
     midiOut: MidiOutProxy = new MidiOutProxy(this);
 
     constructor() {
@@ -23,7 +21,7 @@ export class Session {
             // call the session init callbacks
             this._callEventCallbacks('init');
             // setup midi/sysex callbacks per port
-            const midiInPorts = this.getMidiInPorts();
+            const midiInPorts = this.midiInPorts;
             for (let port = 0; port < midiInPorts.length; port++) {
                 midiInPorts[port].setMidiCallback((status: number, data1: number, data2: number) => {
                     this.onMidi(new MidiMessage({port, status, data1, data2}));
@@ -49,7 +47,7 @@ export class Session {
     // Midi
     //////////////////////////////
 
-    getMidiInPorts(): api.MidiIn[] {
+    get midiInPorts(): API.MidiIn[] {
         const midiInPorts = [];
         for (let i = 0; true; i++) {
             try {
@@ -62,11 +60,11 @@ export class Session {
     }
 
     onMidi(midiMessage: MidiMessage) {
-        const midiControl = this.findMidiControl(midiMessage);
+        const control = this.findControl(midiMessage);
 
-        if (midiControl !== undefined) {
-            logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${midiControl.name ? ` "${midiControl.name}"` : ''}`);
-            midiControl.onMidi(midiMessage);
+        if (control !== undefined) {
+            logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${control.name ? ` "${control.name}"` : ''}`);
+            control.onMidi(midiMessage);
         } else {
             logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);
         }
@@ -79,7 +77,7 @@ export class Session {
     // Event Hooks
     //////////////////////////////
 
-    on(eventName: 'init' | 'flush' | 'exit' | 'setActiveView' | 'activateMode' | 'deactivateMode', callback: (...args: any[]) => any) {
+    on(eventName: 'init' | 'flush' | 'exit' | 'activateView' | 'activateMode' | 'deactivateMode', callback: (...args: any[]) => any) {
         if (!this._eventHandlers[eventName]) this._eventHandlers[eventName] = [];
         this._eventHandlers[eventName].push(callback);
         return this;
@@ -97,39 +95,41 @@ export class Session {
     // Midi Controls
     //////////////////////////////
 
-    setMidiControls(midiControls: { [name: string]: MidiControl }) {
-        const midiControlsArray = [];
-        for (let midiControlName in midiControls) {
+    set controls(controls: { [name: string]: AbstractControl }) {
+        const controlsArray = [];
+        for (let controlName in controls) {
             // set midi control name on object
-            midiControls[midiControlName].name = midiControlName;
+            controls[controlName].name = controlName;
             // add to midi control array
-            midiControlsArray.push(midiControls[midiControlName]);
+            controlsArray.push(controls[controlName]);
         }
-        this._midiControls = midiControlsArray;
+        this._controls = controls;
     }
 
-    getMidiControls() {
-        return [...this._midiControls];
+    get controls() {
+        return { ...this._controls };
     }
 
-    registerMidiControl(midiControl: MidiControl) {
-        if (this._registeredMidiControls.indexOf(midiControl) === -1) this._registeredMidiControls.push(midiControl);
+    registerControl(control: AbstractControl) {
+        if (this._registeredControls.indexOf(control) === -1) this._registeredControls.push(control);
     }
 
-    getRegisteredMidiControls() {
-        return [...this._registeredMidiControls];
+    get registeredControls() {
+        return [...this._registeredControls];
     }
 
-    findMidiControl(midiMessage: MidiMessage): MidiControl | undefined {
+    findControl(midiMessage: MidiMessage): AbstractControl | undefined {
         // construct hex representation for patter comparison
         const midiMessageHex = midiMessageToHex(midiMessage);
-        // look for a matching registered midiControl
-        for (let midiControl of this.getMidiControls()) {
-            // skip midiControls with an inPort that does not match the midiMessage port
-            if (midiControl.inPort !== midiMessage.port) continue;
+        // look for a matching registered control
+        for (let controlName in this.controls) {
+            const control = this.controls[controlName];
+
+            // skip controls with an inPort that does not match the midiMessage port
+            if (control.inPort !== midiMessage.port) continue;
 
             let match = true;
-            for (let pattern of midiControl.patterns) {
+            for (let pattern of control.patterns) {
                 for (let i = 0; i < 6; i++) {
                     // if not a match, break early
                     if (pattern[i] !== '?' && pattern[i] !== midiMessageHex[i]) {
@@ -138,23 +138,24 @@ export class Session {
                     }
                 }
                 // if found, return it
-                if (match) return midiControl;
+                if (match) return control;
             }
         }
         // not found, return undefined
         return undefined;
     }
 
-    renderMidiControls() {
-        if (!this.getActiveView()) return;  // can't do anything until we have an active view
+    renderControls() {
+        if (!this.activeView) return;  // can't do anything until we have an active view
 
-        for (let midiControl of this.getMidiControls()) {
-            this.getActiveView().getInstance().connectMidiControl(midiControl);
+        for (let controlName in this.controls) {
+            const control = this.controls[controlName];
+            this.activeView.getInstance().connectControl(control);
             // connect midi control to corresponding component in view if any
-            if (midiControl.activeComponent) {
-                midiControl.activeComponent.renderMidiControl(midiControl);
+            if (control.activeComponent) {
+                control.activeComponent.renderControl(control);
             } else {  // otherwise render default state
-                midiControl.renderDefaultState();
+                control.renderDefaultState();
             }
         }
     }
@@ -162,36 +163,38 @@ export class Session {
     // Views
     //////////////////////////////
 
-    registerView(View: typeof AbstractView): void {
+    set views(Views: typeof AbstractView[]) {
         if (!global.__is_init__) throw 'Untimely view registration: views can only be registered from within the init callback.';
-        const instance = View.getInstance();  // getInstance must be called here to instantiate during init
-        const views = this.getViews();
+        for (let View of Views) {
+            const instance = View.getInstance();  // getInstance must be called here to instantiate during init
+            const views = this.views;
 
-        if (instance.parent && views.indexOf(instance.parent) === -1) throw `Invalid view registration order: Parent view "${instance.parent.name}" must be registered before child view "${View.name}".`;
+            if (instance.parent && views.indexOf(instance.parent) === -1) throw `Invalid view registration order: Parent view "${instance.parent.name}" must be registered before child view "${View.name}".`;
 
-        if (views.indexOf(View) === -1) this._views = [...views, View];
-        instance.onRegister();
+            if (views.indexOf(View) === -1) this._views = [...views, View];
+            instance.onRegister();
+        }
     }
 
-    getViews() {
+    get views() {
         return [...this._views];
     }
 
-    setActiveView(View: typeof AbstractView) {
-        if (this.getViews().indexOf(View) === -1) throw new Error(`${View.name} must first be registered before being set as the active view.`);
+    set activeView(View: typeof AbstractView) {
+        if (this.views.indexOf(View) === -1) throw new Error(`${View.name} must first be registered before being set as the active view.`);
         this._activeView = View;
-        this._callEventCallbacks('setActiveView', View);
-        this.renderMidiControls();
+        this._callEventCallbacks('activateView', View);
+        this.renderControls();
     }
 
-    getActiveView(): typeof AbstractView {
+    get activeView(): typeof AbstractView {
         return this._activeView;
     }
 
     // Modes
     //////////////////////////////
 
-    getActiveModes() {
+    get activeModes() {
         return [...this._activeModes, '__BASE__']
     }
 
@@ -201,7 +204,7 @@ export class Session {
         if (modeIndex > -1) this._activeModes.splice(modeIndex, 1);
         this._activeModes.unshift(mode);  // prepend to modes
         this._callEventCallbacks('activateMode', mode);
-        this.renderMidiControls(); // call refresh
+        this.renderControls(); // call refresh
     }
 
     deactivateMode(mode: string) {
@@ -209,7 +212,7 @@ export class Session {
         if (modeIndex > -1) {
             this._activeModes.splice(modeIndex, 1);
             this._callEventCallbacks('deactivateMode', mode);
-            this.renderMidiControls(); // call refresh
+            this.renderControls(); // call refresh
         }
     }
 }

@@ -1,49 +1,49 @@
-import AbstractComponentBase from './AbstractComponentBase';
+import AbstractComponent from './AbstractComponent';
 import AbstractView from '../view/AbstractView';
-import MidiControl from '../midi/MidiControl';
+import AbstractControl from '../control/AbstractControl';
 
 
-abstract class ComponentSet extends AbstractComponentBase {
-    private _componentMap: { midiControls: MidiControl[], components: AbstractComponentBase[] } = {
-        midiControls: [], components: [],
+abstract class ComponentSet extends AbstractComponent {
+    private _componentMap: { controls: AbstractControl[], components: AbstractComponent[] } = {
+        controls: [], components: [],
     };
 
-    abstract createComponent(index): AbstractComponentBase;
+    abstract createComponent(index): AbstractComponent;
 
-    getSubComponent(midiControl: MidiControl): AbstractComponentBase {
-        return this._componentMap.components[this._componentMap.midiControls.indexOf(midiControl)];
+    getSubComponent(control: AbstractControl): AbstractComponent {
+        return this._componentMap.components[this._componentMap.controls.indexOf(control)];
     }
 
-    register(midiControls: MidiControl[], view: AbstractView) {
-        super.register(midiControls, view);
+    register(controls: AbstractControl[], view: AbstractView) {
+        super.register(controls, view);
 
-        for (let i = 0; i < midiControls.length; i++) {
-            let midiControl = midiControls[i];
+        for (let i = 0; i < controls.length; i++) {
+            let control = controls[i];
             // create/add component
-            let component: AbstractComponentBase = this.createComponent.apply(this, [i]);
-            component.parent = this.constructor as typeof AbstractComponentBase;
-            this._componentMap.midiControls.push(midiControl);
+            let component: AbstractComponent = this.createComponent.apply(this, [i]);
+            component.parent = this.constructor as typeof AbstractComponent;
+            this._componentMap.controls.push(control);
             this._componentMap.components.push(component);
             // register component
-            component.register([midiControl], view);
+            component.register([control], view);
         }
     }
 
-    setCreateComponentCallback(callback: (index) => AbstractComponentBase) {
+    setCreateComponentCallback(callback: (index) => AbstractComponent) {
         this.createComponent = callback;
         return this;
     }
 
-    renderMidiControl(midiControl: MidiControl) {
-        // pass on state to corresponding midiControl
-        this.getSubComponent(midiControl).renderMidiControl(midiControl);
+    renderControl(control: AbstractControl) {
+        // pass on state to corresponding control
+        this.getSubComponent(control).renderControl(control);
     }
 
-    onValue(midiControl: MidiControl, value: number) {
-        // pass on midi to corresponding midiControl
-        this.getSubComponent(midiControl).onValue(midiControl, value);
+    onValue(control: AbstractControl, value: number) {
+        // pass on midi to corresponding control
+        this.getSubComponent(control).onValue(control, value);
     }
 }
 
 
-export default AbstractComponentBase;
+export default AbstractComponent;

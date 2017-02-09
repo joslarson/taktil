@@ -1,8 +1,5 @@
-import { api, host } from 'typewig';
-
-
 export class ApiStore {
-    transport: api.Transport;
+    transport: API.Transport;
 
     init() {
         this.transport = host.createTransport();

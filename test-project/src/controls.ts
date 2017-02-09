@@ -1,13 +1,13 @@
-import { session, host, SimpleMidiControl, MidiMessage, SysexMessage } from 'typewig';
+import { session, SimpleControl, MidiMessage, SysexMessage } from 'typewig';
 
 import { rgb2hsb, rgb2hsv } from './utils';
 
 
-class MaschineButton extends SimpleMidiControl {
+class MaschineButton extends SimpleControl {
     cacheOnMidiIn = false;
 }
 
-class MaschineKnob extends SimpleMidiControl {
+class MaschineKnob extends SimpleControl {
     cacheOnMidiIn = true;
 }
 
@@ -21,7 +21,7 @@ class MaschineColorButton extends MaschineButton {
     // PLAY green: { r: .02, g: 1, b: 0.06 }
     // Off-white (like most buttons): { r: 0.8, g: 1, b: 0.4 }
 
-    defaultState = { ...this.defaultState, color: { r: 0.8, g: 1, b: 0.4 } };  // warm to match default buttons
+    defaultState = { ...this.defaultState, color: { r: 0.75, g: 1, b: 0.35 } };  // warm to match default buttons
     constructor({ port, inPort, outPort, status, data1 }: {
         port?: number, inPort?: number, outPort?: number, status: number, data1: number
     }) {

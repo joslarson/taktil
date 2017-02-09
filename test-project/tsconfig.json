@@ -11,9 +11,8 @@
     },
     "compileOnSave": false,
     "include": [
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "node_modules/typewig/typings/**/*.d.ts"
     ],
-    "exclude": [
-        "node_modules"
-    ]
+    "exclude": []
 }

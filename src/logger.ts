@@ -1,4 +1,3 @@
-import host from './host';
 import session from './session';
 
 

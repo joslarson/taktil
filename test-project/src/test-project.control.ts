@@ -1,8 +1,8 @@
 import 'typewig/env'; // must be first in entry file (sets polyfills + globals)
-import { host, session, logger } from 'typewig';
+import { session, logger } from 'typewig';
 
 import apiStore from './apistore';
-import midiControls from './midicontrols';
+import controls from './controls';
 import { BaseView, OtherView, OtherView2, OtherView3 } from './views';
 
 
@@ -25,15 +25,16 @@ session.on('init', () => {
     apiStore.init();
 
     // 2. set master midiControls list on session
-    session.setMidiControls(midiControls);
+    session.controls = controls;
 
     // 3. add views to session
-    session.registerView(BaseView);
-    session.registerView(OtherView);
-    session.registerView(OtherView2);
-    session.registerView(OtherView3);
-    // ... register more views here
+    session.views = [
+        BaseView,
+        OtherView,
+        OtherView2,
+        OtherView3,
+    ];
 
     // 4. set the active view to trigger initial render of MidiControls
-    session.setActiveView(BaseView);
+    session.activeView = BaseView;
 });

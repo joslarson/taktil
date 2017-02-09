@@ -17,6 +17,7 @@ export class MetronomeToggle extends components.AbstractMetronomeToggle {
 }
 
 export class PreRollToggle extends components.AbstractPreRollToggle {
+    state = { ...this.state, color: { r: 0.3, g: 0, b: 1} };
     transport = apiStore.transport;
 }
 
@@ -37,12 +38,13 @@ export abstract class AbstractViewButton extends AbstractManualButton {
     abstract View: typeof AbstractView;
 
     onRegister() {
-        session.on('setActiveView', (View: typeof AbstractView) => {
-            this.setState(View === this.View);
+        session.on('activateView', (View: typeof AbstractView) => {
+            this.setState({ ...this.state, on: View === this.View });
         });
     }
+
     onPress() {
-        session.setActiveView(this.View);
+        session.activeView = this.View;
     }
 }
 

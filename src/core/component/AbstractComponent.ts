@@ -1,27 +1,27 @@
 import AbstractView from '../view/AbstractView';
 import { areDeepEqual, TimeoutTask } from '../../utils';
 import session from '../../session';
-import MidiControl from '../midi/MidiControl';
+import AbstractControl from '../control/AbstractControl';
 import logger from '../../logger';
 
 
-abstract class AbstractComponentBase {
-    private static instance: AbstractComponentBase;
+abstract class AbstractComponent {
+    private static instance: AbstractComponent;
 
-    parent: typeof AbstractComponentBase;
+    parent: typeof AbstractComponent;
     name = this.constructor.name;
-    midiControls: MidiControl[] = [];
+    controls: AbstractControl[] = [];
     registrations: Object[] = [];
     views: AbstractView[] = [];
     memory: { [key: string]: any } = {};
 
-    abstract state: any; // depends on component type
+    abstract state: Object; // contents depends on component type
 
     protected constructor() {}
 
     static getInstance() {
-        // inheritance safe singleton pattern (each child class will have it's own singleton)
-        const Component = this as any as { new (): AbstractComponentBase, instance: AbstractComponentBase };
+        // inheritance safe singleton pattern (each child class will have its own singleton)
+        const Component = this as any as { new (): AbstractComponent, instance: AbstractComponent };
         let instance = Component.instance;
 
         if (instance instanceof Component) return instance;
@@ -33,9 +33,9 @@ abstract class AbstractComponentBase {
 
     // called when button is registered to a view for the first time
     // allows running of code that is only aloud in the api's init function
-    register(midiControls: MidiControl[], view: AbstractView) {
-        this.registrations.push({'view': view, 'midiControls': midiControls});
-        this.midiControls = [...this.midiControls, ...midiControls];
+    register(controls: AbstractControl[], view: AbstractView) {
+        this.registrations.push({'view': view, 'controls': controls});
+        this.controls = [...this.controls, ...controls];
         if (this.views.indexOf(view) === -1) this.views.push(view);
         // call onRegister()
         this.onRegister();
@@ -51,18 +51,16 @@ abstract class AbstractComponentBase {
         // update object state
         this.state = state;
         // update hardware state if in view
-        for (let midiControl of this.midiControls) {
-            if (midiControl.activeComponent === this) this.renderMidiControl(midiControl);
+        for (let control of this.controls) {
+            if (control.activeComponent === this) this.renderControl(control);
         }
     }
 
-    // renders component state to hardware midiControl
-    abstract renderMidiControl(midiControl: MidiControl): void;
+    // renders component state to hardware control
+    abstract renderControl(control: AbstractControl): void;
 
-    // handles midi messages routed to midiControl
-    onValue(midiControl: MidiControl, value: number): void {
-        throw 'Not Implemented';
-    }
+    // handles midi messages routed to control
+    abstract onValue(control: AbstractControl, value: number);
 
     cancelTimeoutTask(taskName: string) {
         const memory = this.memory[taskName];
@@ -72,4 +70,4 @@ abstract class AbstractComponentBase {
 }
 
 
-export default AbstractComponentBase;
+export default AbstractComponent;

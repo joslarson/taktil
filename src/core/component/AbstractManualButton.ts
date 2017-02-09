@@ -1,6 +1,6 @@
-import AbstractButtonBase from './AbstractButtonBase';
-import { TimeoutTask } from '../../../utils';
-import MidiControl from '../../midi/MidiControl';
+import AbstractComponent from './AbstractComponent';
+import { TimeoutTask } from './../../utils';
+import { AbstractControl } from '../control';
 
 
 interface ManualButton {
@@ -11,16 +11,36 @@ interface ManualButton {
     onDoubleRelease?();
 }
 
-abstract class ManualButton extends AbstractButtonBase {
+abstract class ManualButton extends AbstractComponent {
     LONG_ACTION_DURATION = 350;
     DOUBLE_ACTION_DURATION = 450;
 
-    onValue(midiControl: MidiControl, value: number) {
+    state = {
+        on: false,
+        color: undefined
+    };
+
+    renderControl(control: AbstractControl) {
+        control.render({
+            value: this.state.on ? control.resolution - 1 : 0,
+            color: this.state.color,
+        });
+    }
+
+    onValue(control: AbstractControl, value: number) {
         if (this.onPress) this._handlePress(value);
         if (this.onLongPress) this._handleLongPress(value);
         if (this.onDoublePress) this._handleDoublePress(value);
         if (this.onRelease) this._handleRelease(value);
         if (this.onDoubleRelease) this._handleDoubleRelease(value);
+    }
+
+    protected isPress(value: number) {
+        return value > 0;
+    }
+
+    protected isRelease(value: number) {
+        return value === 0;
     }
 
     protected isDoublePress(value: number) {
