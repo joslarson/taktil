@@ -1,8 +1,8 @@
-import { AbstractGateButton, AbstractToggleButton } from '../../core/component';
+import { AbstractButton } from '../../core/component';
 import session from '../../session';
 
 
-export abstract class AbstractPlayToggle extends AbstractToggleButton {
+export abstract class AbstractPlayToggle extends AbstractButton {
     abstract transport: API.Transport;
 
     onRegister() {
@@ -11,17 +11,13 @@ export abstract class AbstractPlayToggle extends AbstractToggleButton {
         );
     }
 
-    onToggleOn() {
-        this.transport.play();
-    }
-
-    onToggleOff() {
-        this.transport.stop();
+    onPress() {
+        this.state.on ? this.transport.stop() : this.transport.play();
     }
 }
 
 
-export abstract class AbstractMetronomeToggle extends AbstractToggleButton {
+export abstract class AbstractMetronomeToggle extends AbstractButton {
     abstract transport: API.Transport;
 
     onRegister() {
@@ -30,17 +26,13 @@ export abstract class AbstractMetronomeToggle extends AbstractToggleButton {
         });
     }
 
-    onToggleOn() {
-        this.transport.isMetronomeEnabled().set(true);
-    }
-
-    onToggleOff() {
-        this.transport.isMetronomeEnabled().set(false);
+    onPress() {
+        this.transport.isMetronomeEnabled().set(!this.state.on);
     }
 }
 
 
-export abstract class AbstractPreRollToggle extends AbstractToggleButton {
+export abstract class AbstractPreRollToggle extends AbstractButton {
     abstract transport: API.Transport;
 
     onRegister() {
@@ -49,26 +41,27 @@ export abstract class AbstractPreRollToggle extends AbstractToggleButton {
         });
     }
 
-    onToggleOn() {
-        this.transport.setPreRoll('one_bar');
-    }
-
-    onToggleOff() {
-        this.transport.setPreRoll('none');
+    onPress() {
+        this.transport.setPreRoll(this.state.on ? 'none' : 'one_bar');
     }
 }
 
 
-export abstract class AbstractRestartButton extends AbstractGateButton {
+export abstract class AbstractRestartButton extends AbstractButton {
     abstract transport: API.Transport;
 
     onPress() {
+        this.setState({ ...this.state, on: true });
         this.transport.restart();
+    }
+
+    onRelease() {
+        this.setState({ ...this.state, on: false });
     }
 }
 
 
-export abstract class AbstractOverwriteToggle extends AbstractToggleButton {
+export abstract class AbstractOverwriteToggle extends AbstractButton {
     abstract transport: API.Transport;
 
     onRegister() {
@@ -77,17 +70,13 @@ export abstract class AbstractOverwriteToggle extends AbstractToggleButton {
         );
     }
 
-    onToggleOn() {
-        this.transport.isClipLauncherOverdubEnabled().set(false);
-    }
-
-    onToggleOff() {
-        this.transport.isClipLauncherOverdubEnabled().set(true);
+    onPress() {
+        this.transport.isClipLauncherOverdubEnabled().set(!this.state.on);
     }
 }
 
 
-export abstract class AbstractLoopToggle extends AbstractToggleButton {
+export abstract class AbstractLoopToggle extends AbstractButton {
     abstract transport: API.Transport;
 
     onRegister() {
@@ -96,11 +85,7 @@ export abstract class AbstractLoopToggle extends AbstractToggleButton {
         );
     }
 
-    onToggleOn() {
-        this.transport.isArrangerLoopEnabled().set(true);
-    }
-
-    onToggleOff() {
-        this.transport.isArrangerLoopEnabled().set(false);
+    onPress() {
+        this.transport.isArrangerLoopEnabled().set(!this.state.on);
     }
 }

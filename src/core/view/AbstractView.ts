@@ -2,7 +2,6 @@ import { MidiMessage, SysexMessage } from '../midi';
 import { AbstractComponent } from '../component';
 import { AbstractControl } from '../control';
 import session from '../../session';
-import logger from '../../logger';
 
 
 abstract class AbstractView {
@@ -26,10 +25,10 @@ abstract class AbstractView {
 
     protected constructor() {}
 
-    getComponent(control: AbstractControl, mode: string, ifDoesNotExists = undefined) {
-        if (this._componentMap[mode] === undefined) return ifDoesNotExists;
+    getComponent(control: AbstractControl, mode: string) {
+        if (this._componentMap[mode] === undefined) return;
         const componentMapIndex = this._componentMap[mode].controls.indexOf(control);
-        if (componentMapIndex === -1) return ifDoesNotExists;
+        if (componentMapIndex === -1) return;
         return this._componentMap[mode].components[componentMapIndex];
     }
 
@@ -70,9 +69,6 @@ abstract class AbstractView {
             // add control and component pair to component map
             this._componentMap[mode].controls.push(control);
             this._componentMap[mode].components.push(component);
-
-            // add control to registered control list (if it's not already there)
-            if (session.registeredControls.indexOf(control) === -1) session.registerControl(control);
         }
     }
 

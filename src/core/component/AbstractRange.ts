@@ -12,7 +12,7 @@ abstract class Range extends AbstractComponent {
         control.render({ value: this.state.value });
     }
 
-    onValue(control: AbstractControl, value: number) {
+    onControlInput(control: AbstractControl, value: number) {
         this.setState({ ...this.state, value: value })
     }
 }

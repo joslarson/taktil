@@ -11,32 +11,6 @@ export function guid() {
 }
 
 
-export class TimeoutTask {
-    scope: any;
-    callback: Function;
-    interval: number;
-    cancelled = false;
-
-    constructor (scope, callback, interval) {
-        this.scope = scope;
-        this.callback = callback;
-        this.interval = interval;
-    }
-
-    start(...args) {
-        host.scheduleTask(() => {
-            if (!this.cancelled) this.callback.apply(this.scope, args);
-        }, this.interval);
-        return this;
-    }
-
-    cancel() {
-        this.cancelled = true;
-        return this;
-    }
-}
-
-
 export function midiMessageToHex(midiMessage: SimpleMidiMessage): string {
     const { status, data1, data2 } = midiMessage;
     let result = '';

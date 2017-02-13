@@ -13,24 +13,24 @@ export class BaseView extends AbstractView {
         this.registerComponent(components.PlayToggle, controls.GROUP_E);
         this.registerComponent(components.PlayToggle, controls.GROUP_F);
         this.registerComponent(components.PlayToggle, controls.GROUP_G);
-        this.registerComponent(components.PreRollToggle, controls.GROUP_H);
+        this.registerComponent(components.MetronomeToggle, controls.GROUP_H);
 
-        this.registerComponent(components.PlayToggle, controls.PAD_1);
-        this.registerComponent(components.PlayToggle, controls.PAD_2);
-        this.registerComponent(components.PlayToggle, controls.PAD_3);
-        this.registerComponent(components.PlayToggle, controls.PAD_4);
-        this.registerComponent(components.PlayToggle, controls.PAD_5);
-        this.registerComponent(components.PlayToggle, controls.PAD_6);
-        this.registerComponent(components.PlayToggle, controls.PAD_7);
-        this.registerComponent(components.PlayToggle, controls.PAD_8);
-        this.registerComponent(components.PlayToggle, controls.PAD_9);
-        this.registerComponent(components.PlayToggle, controls.PAD_10);
-        this.registerComponent(components.PlayToggle, controls.PAD_11);
-        this.registerComponent(components.PlayToggle, controls.PAD_12);
-        this.registerComponent(components.PlayToggle, controls.PAD_13);
-        this.registerComponent(components.PlayToggle, controls.PAD_14);
-        this.registerComponent(components.PlayToggle, controls.PAD_15);
-        this.registerComponent(components.PreRollToggle, controls.PAD_16);
+        this.registerComponent(components.PlayToggle, controls.PAD_1, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_2, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_3, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_4, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_5, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_6, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_7, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_8, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_9, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_10, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_11, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_12, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_13, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_14, 'SHIFT');
+        this.registerComponent(components.PlayToggle, controls.PAD_15, 'SHIFT');
+        this.registerComponent(components.MetronomeToggle, controls.PAD_16);
 
 
         this.registerComponent(components.MetronomeToggle, controls.PLAY, 'SHIFT');

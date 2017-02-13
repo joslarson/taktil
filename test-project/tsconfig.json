@@ -12,7 +12,8 @@
     "compileOnSave": false,
     "include": [
         "src/**/*.ts",
-        "node_modules/typewig/typings/**/*.d.ts"
+        "node_modules/bitwig-api-ts-stubs/bitwig-api.d.ts",
+        "node_modules/typewig/types/global.d.ts"
     ],
     "exclude": []
 }

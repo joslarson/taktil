@@ -4,7 +4,7 @@ import AbstractControl from '../control/AbstractControl';
 
 
 abstract class ComponentSet extends AbstractComponent {
-    private _componentMap: { controls: AbstractControl[], components: AbstractComponent[] } = {
+    protected _componentMap: { controls: AbstractControl[], components: AbstractComponent[] } = {
         controls: [], components: [],
     };
 
@@ -39,9 +39,9 @@ abstract class ComponentSet extends AbstractComponent {
         this.getSubComponent(control).renderControl(control);
     }
 
-    onValue(control: AbstractControl, value: number) {
+    onControlInput(control: AbstractControl, value: number) {
         // pass on midi to corresponding control
-        this.getSubComponent(control).onValue(control, value);
+        this.getSubComponent(control).onControlInput(control, value);
     }
 }
 

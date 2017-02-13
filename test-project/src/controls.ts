@@ -1,4 +1,4 @@
-import { session, SimpleControl, MidiMessage, SysexMessage } from 'typewig';
+import { session, SimpleControl, MidiMessage, SysexMessage, MidiPattern } from 'typewig';
 
 import { rgb2hsb, rgb2hsv } from './utils';
 
@@ -7,39 +7,44 @@ class MaschineButton extends SimpleControl {
     cacheOnMidiIn = false;
 }
 
-class MaschineKnob extends SimpleControl {
-    cacheOnMidiIn = true;
-}
 
-
-class MaschinePanKnob extends MaschineKnob {
+class PanKnob extends SimpleControl {
     defaultState = { ...this.defaultState, value: 65 };
 }
 
 
 class MaschineColorButton extends MaschineButton {
     // PLAY green: { r: .02, g: 1, b: 0.06 }
-    // Off-white (like most buttons): { r: 0.8, g: 1, b: 0.4 }
-
+    // Off-white (like most buttons): { r: 0.75, g: 1, b: 0.35 }
     defaultState = { ...this.defaultState, color: { r: 0.75, g: 1, b: 0.35 } };  // warm to match default buttons
+    state = { ...this.defaultState };
+
     constructor({ port, inPort, outPort, status, data1 }: {
         port?: number, inPort?: number, outPort?: number, status: number, data1: number
     }) {
         super({ port, inPort, outPort, status, data1 });
-        const hueStatus = (this.status & 0xF0).toString(16).toUpperCase();
-        const saturationStatus = ((this.status & 0xF0) + 1).toString(16).toUpperCase();
-        const brightnessStatus = ((this.status & 0xF0) + 2).toString(16).toUpperCase();
-        const data1Hex = this.data1.toString(16).toUpperCase();
-        this.patterns = [...this.patterns, `${hueStatus}${data1Hex}??`, `${saturationStatus}${data1Hex}??`, `${brightnessStatus}${data1Hex}??`];
+        const hStatus = this.status & 0xF0;
+        const sStatus = hStatus + 1;
+        const bStatus = hStatus + 2;
+        this.patterns = [
+            ...this.patterns,
+            new MidiPattern({ status: hStatus, data1, data2: undefined}),
+            new MidiPattern({ status: sStatus, data1, data2: undefined }),
+            new MidiPattern({ status: bStatus, data1, data2: undefined }),
+        ];
     }
 
-    getRenderMessages({ value, color }: { value: number, color?: { r: number, g: number, b: number } }): (MidiMessage | SysexMessage)[] {
-        const hsb = rgb2hsv(color);
+    getRenderMessages(): (MidiMessage | SysexMessage)[] {
+        const hsb = rgb2hsv(this.state.color);
+        const { status, data1 } = this;
         return [
-            ...super.getRenderMessages({ value, color }),
-            new MidiMessage({ status: (this.status & 0xF0), data1: this.data1, data2: hsb.h }),
-            new MidiMessage({ status: (this.status & 0xF0) + 1, data1: this.data1, data2: hsb.s }),
-            new MidiMessage({ status: (this.status & 0xF0) + 2, data1: this.data1, data2: this.activeComponent ? (value === 0 ? 20 : 127) : 0 }),
+            ...super.getRenderMessages(),
+            new MidiMessage({ status: (status & 0xF0), data1, data2: hsb.h }),
+            new MidiMessage({ status: (status & 0xF0) + 1, data1, data2: hsb.s }),
+            new MidiMessage({
+                status: (status & 0xF0) + 2, data1,
+                data2: this.activeComponent ? (this.state.value === 0 ? 20 : 127) : 0,
+            }),
         ];
     }
 }
@@ -181,14 +186,14 @@ export default {
     VOL_TOUCH_G: new MaschineButton({ status: 0xB7, data1: 0x72 }),
     VOL_TOUCH_H: new MaschineButton({ status: 0xB7, data1: 0x74 }),
 
-    VOL_A: new MaschineKnob({ status: 0xB7, data1: 0x67 }),
-    VOL_B: new MaschineKnob({ status: 0xB7, data1: 0x69 }),
-    VOL_C: new MaschineKnob({ status: 0xB7, data1: 0x6B }),
-    VOL_D: new MaschineKnob({ status: 0xB7, data1: 0x6D }),
-    VOL_E: new MaschineKnob({ status: 0xB7, data1: 0x6F }),
-    VOL_F: new MaschineKnob({ status: 0xB7, data1: 0x71 }),
-    VOL_G: new MaschineKnob({ status: 0xB7, data1: 0x73 }),
-    VOL_H: new MaschineKnob({ status: 0xB7, data1: 0x75 }),
+    VOL_A: new SimpleControl({ status: 0xB7, data1: 0x67 }),
+    VOL_B: new SimpleControl({ status: 0xB7, data1: 0x69 }),
+    VOL_C: new SimpleControl({ status: 0xB7, data1: 0x6B }),
+    VOL_D: new SimpleControl({ status: 0xB7, data1: 0x6D }),
+    VOL_E: new SimpleControl({ status: 0xB7, data1: 0x6F }),
+    VOL_F: new SimpleControl({ status: 0xB7, data1: 0x71 }),
+    VOL_G: new SimpleControl({ status: 0xB7, data1: 0x73 }),
+    VOL_H: new SimpleControl({ status: 0xB7, data1: 0x75 }),
 
     PAN_TOUCH_A: new MaschineButton({ status: 0xB8, data1: 0x66 }),
     PAN_TOUCH_B: new MaschineButton({ status: 0xB8, data1: 0x68 }),
@@ -199,14 +204,14 @@ export default {
     PAN_TOUCH_G: new MaschineButton({ status: 0xB8, data1: 0x72 }),
     PAN_TOUCH_H: new MaschineButton({ status: 0xB8, data1: 0x74 }),
 
-    PAN_A: new MaschinePanKnob({ status: 0xB8, data1: 0x67 }),
-    PAN_B: new MaschinePanKnob({ status: 0xB8, data1: 0x69 }),
-    PAN_C: new MaschinePanKnob({ status: 0xB8, data1: 0x6B }),
-    PAN_D: new MaschinePanKnob({ status: 0xB8, data1: 0x6D }),
-    PAN_E: new MaschinePanKnob({ status: 0xB8, data1: 0x6F }),
-    PAN_F: new MaschinePanKnob({ status: 0xB8, data1: 0x71 }),
-    PAN_G: new MaschinePanKnob({ status: 0xB8, data1: 0x73 }),
-    PAN_H: new MaschinePanKnob({ status: 0xB8, data1: 0x75 }),
+    PAN_A: new PanKnob({ status: 0xB8, data1: 0x67 }),
+    PAN_B: new PanKnob({ status: 0xB8, data1: 0x69 }),
+    PAN_C: new PanKnob({ status: 0xB8, data1: 0x6B }),
+    PAN_D: new PanKnob({ status: 0xB8, data1: 0x6D }),
+    PAN_E: new PanKnob({ status: 0xB8, data1: 0x6F }),
+    PAN_F: new PanKnob({ status: 0xB8, data1: 0x71 }),
+    PAN_G: new PanKnob({ status: 0xB8, data1: 0x73 }),
+    PAN_H: new PanKnob({ status: 0xB8, data1: 0x75 }),
 
     // MACRO_TOUCH_1: new MaschineButton({ status: 0xB0, data1: 0x66 }),
     // MACRO_TOUCH_2: new MaschineButton({ status: 0xB0, data1: 0x68 }),

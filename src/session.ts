@@ -3,12 +3,10 @@ import { AbstractControl } from 'core/control';
 import { AbstractView } from './core/view';
 import { AbstractComponent } from 'core/component';
 import { midiMessageToHex } from './utils';
-import logger from './logger';
 
 
 export class Session {
     private _controls: { [key: string]: AbstractControl } = {};
-    private _registeredControls: AbstractControl[] = [];
     private _views: typeof AbstractView[] = [];
     private _activeView: typeof AbstractView;
     private _activeModes: string[] = [];
@@ -38,8 +36,9 @@ export class Session {
         };
 
         global.exit = () => {
-            // TODO: send exit event to active components
-            // call the session exit callbacks
+            // reset all controls to default state
+            for (let controlName in this.controls) this.controls[controlName].renderDefaultState(true);
+            // call registered exit callbacks
             this._callEventCallbacks('exit');
         };
     }
@@ -62,16 +61,16 @@ export class Session {
     onMidi(midiMessage: MidiMessage) {
         const control = this.findControl(midiMessage);
 
-        if (control !== undefined) {
-            logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${control.name ? ` "${control.name}"` : ''}`);
+        if (control) {
+            console.log(`[MIDI] IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${control.name ? ` "${control.name}"` : ''}`);
             control.onMidi(midiMessage);
         } else {
-            logger.debug(`MIDI IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);
+            console.log(`[MIDI] IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);
         }
     }
 
     onSysex(sysex: SysexMessage) {
-        logger.debug(`IN ${String(sysex.port)} => ${sysex.data}`);
+        console.log(`[MIDI] IN ${String(sysex.port)} => ${sysex.data}`);
     }
 
     // Event Hooks
@@ -92,15 +91,25 @@ export class Session {
         }
     }
 
-    // Midi Controls
+    // Controls
     //////////////////////////////
 
     set controls(controls: { [name: string]: AbstractControl }) {
-        const controlsArray = [];
+        const controlsArray: AbstractControl[] = [];
         for (let controlName in controls) {
-            // set midi control name on object
-            controls[controlName].name = controlName;
-            // add to midi control array
+            const control = controls[controlName];
+            // set control name on object
+            control.name = controlName;
+            for (let existingControl of controlsArray) {
+                // if no of the ports match up, then there's no conflict
+                if (control.outPort !== existingControl.outPort && control.inPort !== existingControl.inPort) continue;
+                for (let pattern of control.patterns) {
+                    for (let existingPattern of existingControl.patterns) {
+                        if (pattern.conflictsWith(existingPattern)) throw new Error(`Control "${control.name}" conflicts with existing Control "${existingControl.name}".`);
+                    }
+                }
+            }
+            // add to control array
             controlsArray.push(controls[controlName]);
         }
         this._controls = controls;
@@ -110,17 +119,7 @@ export class Session {
         return { ...this._controls };
     }
 
-    registerControl(control: AbstractControl) {
-        if (this._registeredControls.indexOf(control) === -1) this._registeredControls.push(control);
-    }
-
-    get registeredControls() {
-        return [...this._registeredControls];
-    }
-
-    findControl(midiMessage: MidiMessage): AbstractControl | undefined {
-        // construct hex representation for patter comparison
-        const midiMessageHex = midiMessageToHex(midiMessage);
+    findControl(midiMessage: MidiMessage): AbstractControl {
         // look for a matching registered control
         for (let controlName in this.controls) {
             const control = this.controls[controlName];
@@ -128,21 +127,13 @@ export class Session {
             // skip controls with an inPort that does not match the midiMessage port
             if (control.inPort !== midiMessage.port) continue;
 
-            let match = true;
             for (let pattern of control.patterns) {
-                for (let i = 0; i < 6; i++) {
-                    // if not a match, break early
-                    if (pattern[i] !== '?' && pattern[i] !== midiMessageHex[i]) {
-                        match = false;
-                        break;
-                    }
-                }
-                // if found, return it
-                if (match) return control;
+                // if pattern matches midiMessage, return control
+                if (pattern.test(midiMessage)) return control;
             }
         }
-        // not found, return undefined
-        return undefined;
+        // not found, return null
+        return null;
     }
 
     renderControls() {
@@ -150,13 +141,10 @@ export class Session {
 
         for (let controlName in this.controls) {
             const control = this.controls[controlName];
+            // connect control to corresponding component in view (if any)
             this.activeView.getInstance().connectControl(control);
-            // connect midi control to corresponding component in view if any
-            if (control.activeComponent) {
-                control.activeComponent.renderControl(control);
-            } else {  // otherwise render default state
-                control.renderDefaultState();
-            }
+            // render the control
+            control.render();
         }
     }
 
@@ -164,9 +152,9 @@ export class Session {
     //////////////////////////////
 
     set views(Views: typeof AbstractView[]) {
-        if (!global.__is_init__) throw 'Untimely view registration: views can only be registered from within the init callback.';
+        if (!global.__is_init__) throw new Error('Untimely view registration: views can only be registered from within the init callback.');
         for (let View of Views) {
-            const instance = View.getInstance();  // getInstance must be called here to instantiate during init
+            const instance = View.getInstance();  // getInstance must be called here to instantiate view during init
             const views = this.views;
 
             if (instance.parent && views.indexOf(instance.parent) === -1) throw `Invalid view registration order: Parent view "${instance.parent.name}" must be registered before child view "${View.name}".`;

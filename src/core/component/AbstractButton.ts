@@ -1,9 +1,8 @@
 import AbstractComponent from './AbstractComponent';
-import { TimeoutTask } from './../../utils';
-import { AbstractControl } from '../control';
+import { AbstractControl, SimpleControl } from '../control';
 
 
-interface ManualButton {
+interface AbstractButton {
     onPress?();
     onLongPress?();
     onDoublePress?();
@@ -11,23 +10,21 @@ interface ManualButton {
     onDoubleRelease?();
 }
 
-abstract class ManualButton extends AbstractComponent {
-    LONG_ACTION_DURATION = 350;
-    DOUBLE_ACTION_DURATION = 450;
+abstract class AbstractButton extends AbstractComponent {
+    LONG_PRESS_DELAY = 350;
+    DOUBLE_PRESS_DELAY = 450;
 
-    state = {
-        on: false,
-        color: undefined
-    };
+    state: { on: boolean, color?: { r: number, g: number, b: number } } = { on: false };
+    memory: { [key: string]: any } = {};
 
-    renderControl(control: AbstractControl) {
+    renderControl(control: SimpleControl) {
         control.render({
             value: this.state.on ? control.resolution - 1 : 0,
-            color: this.state.color,
+            ...(this.state.color === undefined ? {} : { color: this.state.color }),
         });
     }
 
-    onValue(control: AbstractControl, value: number) {
+    onControlInput(control: SimpleControl, value: number) {
         if (this.onPress) this._handlePress(value);
         if (this.onLongPress) this._handleLongPress(value);
         if (this.onDoublePress) this._handleDoublePress(value);
@@ -35,84 +32,85 @@ abstract class ManualButton extends AbstractComponent {
         if (this.onDoubleRelease) this._handleDoubleRelease(value);
     }
 
-    protected isPress(value: number) {
+    protected _isPress(value: number) {
         return value > 0;
     }
 
-    protected isRelease(value: number) {
+    protected _isRelease(value: number) {
         return value === 0;
     }
 
-    protected isDoublePress(value: number) {
-        return this.memory['doublePress'] && this.isPress(value);
+    protected _isDoublePress(value: number) {
+        return this.memory['doublePress'] && this._isPress(value);
     }
 
-    protected isDoubleRelease(value: number) {
-        return this.memory['doubleRelease'] && this.isRelease(value);
+    protected _isDoubleRelease(value: number) {
+        return this.memory['doubleRelease'] && this._isRelease(value);
     }
 
     private _handlePress(value: number) {
         // if it's not a press, not implemented or is a doublePress, ignore it
-        if (!this.isPress(value) || this.memory['doublePress']) return;
+        if (!this._isPress(value) || this.memory['doublePress']) return;
         // handle single press
         this.onPress();
     }
 
     private _handleDoublePress(value: number) {
         // if it's not a press or not implemented, ignore it
-        if (!this.isPress(value)) return;
+        if (!this._isPress(value)) return;
 
         // if is doublePress
-        if (this.isDoublePress(value)) {
+        if (this._isDoublePress(value)) {
             this.onDoublePress();
-        } else if (this.DOUBLE_ACTION_DURATION) {
+        } else {
             // setup interval task to remove self after DOUBLE_PRESS_DURATION
-            const task = new TimeoutTask(this, function() {
+            this.memory['doublePress'] = setTimeout(() => {
                 delete this.memory['doublePress'];
-            }, this.DOUBLE_ACTION_DURATION).start();
-            this.memory['doublePress'] = task;
+            }, this.DOUBLE_PRESS_DELAY);
         }
     }
 
     private _handleLongPress(value: number) {
         // if it's a doublePress or is not implemented, ignore it
-        if (this.isDoublePress(value)) return;
+        if (this._isDoublePress(value)) return;
 
         // if it's a press schedule the callback
-        if (this.isPress(value) && this.LONG_ACTION_DURATION) {
+        if (this._isPress(value)) {
             // schedule callback
-            this.memory['longPress'] = new TimeoutTask(this, function() {
+            this.memory['longPress'] = setTimeout(() => {
                 this.onLongPress();
-            }, this.LONG_ACTION_DURATION).start();
+            }, this.LONG_PRESS_DELAY);
         } else { // otherwise cancel existing scheduled callback
             // cancel longPress task if button released too early
-            if (this.memory['longPress']) this.cancelTimeoutTask('longPress');
+            if (this.memory['longPress']) {
+                clearTimeout(this.memory['longPress']);
+                delete this.memory['longPress'];
+            };
         }
     }
 
     private _handleRelease(value: number) {
         // if it's not a release, not implemented or is a doubleRelease, ignore it
-        if (!this.isRelease(value) || this.memory['doubleRelease']) return;
+        if (!this._isRelease(value) || this.memory['doubleRelease']) return;
         // handle single release
         this.onRelease();
     }
 
     private _handleDoubleRelease(value: number) {
         // if it's not a release or not implemented, ignore it
-        if (!this.isRelease(value)) return;
+        if (!this._isRelease(value)) return;
 
         // if is doubleRelease
-        if (this.isDoubleRelease(value)) {
+        if (this._isDoubleRelease(value)) {
             this.onDoubleRelease();
         } else {
-            // setup timeout task to remove self after this.DOUBLE_DURATION
-            const task = new TimeoutTask(this, function() {
+            // setup timeout task to remove self after this.DOUBLE_PRESS_DELAY
+            this.memory['doubleRelease'] = setTimeout(() => {
                 delete this.memory['doubleRelease'];
-            }, this.DOUBLE_ACTION_DURATION).start();
-            this.memory['doubleRelease'] = task;
+            }, this.DOUBLE_PRESS_DELAY);
         }
     }
 }
 
 
-export default ManualButton;
+export default AbstractButton;

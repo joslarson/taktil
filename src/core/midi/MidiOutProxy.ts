@@ -1,5 +1,4 @@
 import { default as MidiMessage, SimpleMidiMessage } from './MidiMessage';
-import logger from '../../logger';
 import { areDeepEqual } from '../../utils';
 import { midiMessageToHex } from '../../utils';
 
@@ -21,7 +20,7 @@ export default class MidiOutProxy {
     sendMidi({ name, port = 0, status, data1, data2, urgent = false, cacheKey }: { name?: string, port?: number, status: number, data1: number, data2: number, urgent?: boolean, cacheKey?: string }) {
         // if urgent, fire midi message immediately, otherwise queue it up for next flush
         if (urgent) {
-            logger.debug(`MIDI OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}${name ? ` "${name}"` : ''}`);
+            console.log(`[MIDI] OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}${name ? ` "${name}"` : ''}`);
             host.getMidiOutPort(port).sendMidi(status, data1, data2);
         } else {
             this._midiQueue.push({ name, port, status, data1, data2 });
@@ -67,16 +66,16 @@ export default class MidiOutProxy {
         setTimeout(() => {
             while (this._midiQueue.length > 0) {
                 const { name, port, status, data1, data2 } = this._midiQueue.shift();
-                logger.debug(`MIDI OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}${name ? ` "${name}"` : ''}`);
+                console.log(`[MIDI] OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}${name ? ` "${name}"` : ''}`);
                 host.getMidiOutPort(port).sendMidi(status, data1, data2);
             }
-        }, 0);
+        });
         // 2. async flush queued sysex messages
         setTimeout(() => {
             while (this._sysexQueue.length > 0) {
                 const { port, data } = this._sysexQueue.shift();
                 host.getMidiOutPort(port).sendSysex(data)
             }
-        }, 0);
+        });
     }
 }

@@ -1,8 +1,7 @@
 import AbstractView from '../view/AbstractView';
-import { areDeepEqual, TimeoutTask } from '../../utils';
+import { areDeepEqual } from '../../utils';
 import session from '../../session';
 import AbstractControl from '../control/AbstractControl';
-import logger from '../../logger';
 
 
 abstract class AbstractComponent {
@@ -13,7 +12,6 @@ abstract class AbstractComponent {
     controls: AbstractControl[] = [];
     registrations: Object[] = [];
     views: AbstractView[] = [];
-    memory: { [key: string]: any } = {};
 
     abstract state: Object; // contents depends on component type
 
@@ -60,13 +58,7 @@ abstract class AbstractComponent {
     abstract renderControl(control: AbstractControl): void;
 
     // handles midi messages routed to control
-    abstract onValue(control: AbstractControl, value: number);
-
-    cancelTimeoutTask(taskName: string) {
-        const memory = this.memory[taskName];
-        if (memory instanceof TimeoutTask) memory.cancel();
-        delete this.memory[taskName];
-    }
+    abstract onControlInput(control: AbstractControl, value: number);
 }
 
 
