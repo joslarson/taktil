@@ -6,7 +6,7 @@ import * as components from './components';
 export class BaseView extends AbstractView {
     onRegister() {
         this.registerComponent(components.PlayToggle, controls.PLAY);
-        this.registerComponent(components.PlayToggle, controls.GROUP_A);
+        this.registerComponent(components.TrackButton, controls.GROUP_A);
         this.registerComponent(components.PlayToggle, controls.GROUP_B);
         this.registerComponent(components.PlayToggle, controls.GROUP_C);
         this.registerComponent(components.PlayToggle, controls.GROUP_D);
