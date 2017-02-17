@@ -17,19 +17,19 @@ abstract class AbstractButton extends AbstractComponent {
     state: { on: boolean, color?: { r: number, g: number, b: number } } = { on: false };
     memory: { [key: string]: any } = {};
 
-    renderControl(control: SimpleControl) {
+    renderControl(control: AbstractControl) {
         control.render({
             value: this.state.on ? control.resolution - 1 : 0,
             ...(this.state.color === undefined ? {} : { color: this.state.color }),
         });
     }
 
-    onControlInput(control: SimpleControl, value: number) {
-        if (this.onPress) this._handlePress(value);
-        if (this.onLongPress) this._handleLongPress(value);
-        if (this.onDoublePress) this._handleDoublePress(value);
-        if (this.onRelease) this._handleRelease(value);
-        if (this.onDoubleRelease) this._handleDoubleRelease(value);
+    onControlInput(control: AbstractControl, controlState) {
+        if (this.onPress) this._handlePress(controlState.value);
+        if (this.onLongPress) this._handleLongPress(controlState.value);
+        if (this.onDoublePress) this._handleDoublePress(controlState.value);
+        if (this.onRelease) this._handleRelease(controlState.value);
+        if (this.onDoubleRelease) this._handleDoubleRelease(controlState.value);
     }
 
     protected _isPress(value: number) {

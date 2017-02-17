@@ -58,7 +58,7 @@ abstract class AbstractComponent {
     abstract renderControl(control: AbstractControl): void;
 
     // handles midi messages routed to control
-    abstract onControlInput(control: AbstractControl, value: number);
+    abstract onControlInput(control: AbstractControl, controlState);
 }
 
 

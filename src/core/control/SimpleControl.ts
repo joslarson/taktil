@@ -24,9 +24,9 @@ export default class SimpleControl extends AbstractControl {
         ]
     }
 
-    getValueFromMessage(message: MidiMessage | SysexMessage): number {
-        if (message instanceof MidiMessage && message.status === this.status && message.data1 === this.data1) {
-            return message.data2;
+    getStateFromInput(input: MidiMessage | SysexMessage): number {
+        if (input instanceof MidiMessage && input.status === this.status && input.data1 === this.data1) {
+            return input.data2;
         } else {
             return this.state.value;
         }

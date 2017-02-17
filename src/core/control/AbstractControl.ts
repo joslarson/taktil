@@ -38,7 +38,7 @@ abstract class AbstractControl {
 
     abstract getRenderMessages(): (MidiMessage | SysexMessage)[];
 
-    abstract getValueFromMessage(message: MidiMessage | SysexMessage): number;
+    abstract getStateFromInput(message: MidiMessage | SysexMessage): { value: number, color: Color, [others: string]: any };
 
     cacheMidiMessage(midiMessage: MidiMessage): boolean {
         if (this.cache.indexOf(midiMessage.hex) !== -1) return false;
@@ -62,7 +62,7 @@ abstract class AbstractControl {
         }
 
         if (this.activeComponent) {
-            this.activeComponent.onControlInput(this, this.getValueFromMessage(midiMessage));
+            this.activeComponent.onControlInput(this, this.getStateFromInput(midiMessage));
         } else {
             console.info(`Control "${this.name}" is not mapped in active view stack.`);
         }
