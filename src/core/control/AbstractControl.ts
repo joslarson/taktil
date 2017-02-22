@@ -12,8 +12,8 @@ export interface Color {
 abstract class AbstractControl {
     name: string;
     resolution: number = 128;
-    defaultState: { value: number, color: Color, [others: string]: any} = { value: 0, color: { r: 0, g: 0, b: 0 } };
-    state = { ...this.defaultState };
+    state: { value: number, color: Color, [others: string]: any} = { value: 0, color: { r: 0, g: 0, b: 0 } };
+    protected _defaultState: { value: number, color: Color, [others: string]: any };
 
     inPort: number = 0;
     outPort: number = 0;
@@ -26,19 +26,24 @@ abstract class AbstractControl {
     activeComponent: AbstractComponent = null;
 
     constructor({ port, inPort, outPort, patterns }: {
-        port?: number, inPort?: number, outPort?: number, patterns: string[],  // patterns for all inPort and outPort MidiMessages
+        port?: number, inPort?: number, outPort?: number, patterns: (string | MidiPattern)[],  // patterns for all inPort and outPort MidiMessages
     }) {
         if (!patterns || patterns.length === 0) throw new Error(`Error, Control must specify at least one pattern.`);
 
         // set object properties
         this.inPort = port !== undefined ?  port : (inPort !== undefined ? inPort : this.inPort);
         this.outPort = port !== undefined ?  port : (outPort !== undefined ? outPort : this.outPort);
-        this.patterns = patterns.map(pattern => new MidiPattern(pattern));
+        this.patterns = patterns.map(pattern => typeof pattern === 'string' ? new MidiPattern(pattern) : pattern);
+    }
+
+    get defaultState() {
+        if (!this._defaultState) this._defaultState = { ...this.state };
+        return this._defaultState;
     }
 
     abstract getRenderMessages(): (MidiMessage | SysexMessage)[];
 
-    abstract getStateFromInput(message: MidiMessage | SysexMessage): { value: number, color: Color, [others: string]: any };
+    abstract getInputState(message: MidiMessage | SysexMessage): { value: number, color: Color, [others: string]: any };
 
     cacheMidiMessage(midiMessage: MidiMessage): boolean {
         if (this.cache.indexOf(midiMessage.hex) !== -1) return false;
@@ -62,13 +67,30 @@ abstract class AbstractControl {
         }
 
         if (this.activeComponent) {
-            this.activeComponent.onControlInput(this, this.getStateFromInput(midiMessage));
+            this.activeComponent.onControlInput(this, this.getInputState(midiMessage));
         } else {
             console.info(`Control "${this.name}" is not mapped in active view stack.`);
         }
     }
 
-    render(state?: { value: number, color?: Color, [others: string]: any}, urgent = false) {
+    sendMidiMessages(urgent = false) {
+        for (let message of this.getRenderMessages()) {
+            if (message instanceof MidiMessage) {
+                // send message to cache, send to midi out if new
+                if (this.cacheMidiMessage(message)){
+                    const { port, status, data1, data2 } = message;
+                    session.midiOut.sendMidi({ name: this.name, status, data1, data2, urgent });
+                }
+            } else if (message instanceof SysexMessage) {
+                const { port, data } = message;
+                session.midiOut.sendSysex({ port, data, urgent })
+            } else {
+                throw new Error('Unrecognized message type.');
+            }
+        }
+    }
+
+    render(state?: { value?: number, color?: Color, [others: string]: any}, urgent = false) {
         // no midi out? no render.
         if (!this.enableMidiOut) return;
         // if render called with no args
@@ -81,27 +103,19 @@ abstract class AbstractControl {
             }
         } else {
             // validate input
-            if (state.value < 0 || state.value > this.resolution - 1) throw new Error(`Invalid value "${state.value}" for Control "${this.name}" with resolution "${this.resolution}".`);
+            if (state.value !== undefined && (state.value < 0 || state.value > this.resolution - 1)) throw new Error(`Invalid value "${state.value}" for Control "${this.name}" with resolution "${this.resolution}".`);
             // remove undefined object property keys from incoming state to allow default state to override
             Object.keys(state).forEach(key => state[key] === undefined && delete state[key]);
             // update state
             this.state = { ...this.defaultState, ...state };
             // send messages
-            for (let message of this.getRenderMessages()) {
-                if (message instanceof MidiMessage) {
-                    // send message to cache, send to midi out if new
-                    if (this.cacheMidiMessage(message)){
-                        const { port, status, data1, data2 } = message;
-                        session.midiOut.sendMidi({ name: this.name, status, data1, data2, urgent });
-                    }
-                } else if (message instanceof SysexMessage) {
-                    const { port, data } = message;
-                    session.midiOut.sendSysex({ port, data, urgent })
-                } else {
-                    throw new Error('Unrecognized message type.');
-                }
-            }
+            this.sendMidiMessages(urgent);
         }
+        this.postRender();
+    }
+
+    postRender() {
+
     }
 
     renderDefaultState(urgent = false) {

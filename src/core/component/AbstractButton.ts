@@ -12,24 +12,25 @@ interface AbstractButton {
 
 abstract class AbstractButton extends AbstractComponent {
     LONG_PRESS_DELAY = 350;
-    DOUBLE_PRESS_DELAY = 450;
+    DOUBLE_PRESS_DELAY = 350;
 
-    state: { on: boolean, color?: { r: number, g: number, b: number } } = { on: false };
+    state: { on?: boolean, color?: { r: number, g: number, b: number } } = { on: false };
     memory: { [key: string]: any } = {};
 
-    renderControl(control: AbstractControl) {
+    renderControl(control: SimpleControl, overrides: Object = {}) {
         control.render({
             value: this.state.on ? control.resolution - 1 : 0,
             ...(this.state.color === undefined ? {} : { color: this.state.color }),
+            ...overrides
         });
     }
 
-    onControlInput(control: AbstractControl, controlState) {
-        if (this.onPress) this._handlePress(controlState.value);
-        if (this.onLongPress) this._handleLongPress(controlState.value);
-        if (this.onDoublePress) this._handleDoublePress(controlState.value);
-        if (this.onRelease) this._handleRelease(controlState.value);
-        if (this.onDoubleRelease) this._handleDoubleRelease(controlState.value);
+    onControlInput(control: SimpleControl, controlInput) {
+        if (this.onPress) this._handlePress(controlInput.value);
+        if (this.onLongPress) this._handleLongPress(controlInput.value);
+        if (this.onDoublePress) this._handleDoublePress(controlInput.value);
+        if (this.onRelease) this._handleRelease(controlInput.value);
+        if (this.onDoubleRelease) this._handleDoubleRelease(controlInput.value);
     }
 
     protected _isPress(value: number) {

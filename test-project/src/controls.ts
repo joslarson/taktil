@@ -1,4 +1,4 @@
-import { session, SimpleControl, MidiMessage, SysexMessage, MidiPattern } from 'typewig';
+import { session, SimpleControl, MidiMessage, SysexMessage, MidiPattern, utils } from 'typewig';
 
 import { rgb2hsb, rgb2hsv } from './utils';
 
@@ -9,43 +9,76 @@ class MaschineButton extends SimpleControl {
 
 
 class PanKnob extends SimpleControl {
-    defaultState = { ...this.defaultState, value: 65 };
+    state = { ...this.state, value: 65 };
 }
 
+const colors = {
+    playGreen: { r: 0.02, g: 1.00, b: 0.06 },  // matches machine play button color
+    offWhite:  { r: 0.75, g: 1.00, b: 0.35 },  // warm to match default maschine buttons
+};
 
 class MaschineColorButton extends MaschineButton {
-    // PLAY green: { r: .02, g: 1, b: 0.06 }
-    // Off-white (like most buttons): { r: 0.75, g: 1, b: 0.35 }
-    defaultState = { ...this.defaultState, color: { r: 0.75, g: 1, b: 0.35 } };  // warm to match default buttons
-    state = { ...this.defaultState };
+    // set the default state
+    state = { ...this.state, color: colors.offWhite, disabled: false, flashing: false };
+    flashInterval;
 
     constructor({ port, inPort, outPort, status, data1 }: {
         port?: number, inPort?: number, outPort?: number, status: number, data1: number
     }) {
         super({ port, inPort, outPort, status, data1 });
-        const hStatus = this.status & 0xF0;
-        const sStatus = hStatus + 1;
-        const bStatus = hStatus + 2;
         this.patterns = [
             ...this.patterns,
-            new MidiPattern({ status: hStatus, data1, data2: undefined}),
-            new MidiPattern({ status: sStatus, data1, data2: undefined }),
-            new MidiPattern({ status: bStatus, data1, data2: undefined }),
+            new MidiPattern({ status: this.hueStatus, data1, data2: undefined }),
+            new MidiPattern({ status: this.saturationStatus, data1, data2: undefined }),
+            new MidiPattern({ status: this.brightnessStatus, data1, data2: undefined }),
         ];
     }
 
+    get hueStatus() {
+        return this.status & 0xF0;
+    }
+
+    get saturationStatus() {
+        return this.hueStatus + 1;
+    }
+
+    get brightnessStatus() {
+        return this.hueStatus + 2;
+    }
+
     getRenderMessages(): (MidiMessage | SysexMessage)[] {
+        const doNotSaturate = utils.areDeepEqual(this.state.color, colors.offWhite);
         const hsb = rgb2hsv(this.state.color);
         const { status, data1 } = this;
+        let brightnessData2 = !this.activeComponent || this.state.disabled ? 0 : (this.state.value === 0 ? 20 : 127);
+        if (brightnessData2 === 127 && this.state.flashing) {
+            const brightnessHex = new MidiMessage({ status: this.brightnessStatus, data1, data2: brightnessData2 }).hex;
+            if (this.cache.indexOf(brightnessHex) > -1) brightnessData2 = 20;
+        }
         return [
             ...super.getRenderMessages(),
-            new MidiMessage({ status: (status & 0xF0), data1, data2: hsb.h }),
-            new MidiMessage({ status: (status & 0xF0) + 1, data1, data2: hsb.s }),
+            new MidiMessage({ status: this.hueStatus, data1, data2: hsb.h }),
             new MidiMessage({
-                status: (status & 0xF0) + 2, data1,
-                data2: this.activeComponent ? (this.state.value === 0 ? 20 : 127) : 0,
+                status: this.saturationStatus, data1,
+                data2: doNotSaturate ? hsb.s : (hsb.s === 0 ? 0 : 100 + Math.round((hsb.s / 127) * 27)) }),
+            new MidiMessage({
+                status: this.brightnessStatus, data1,
+                data2: brightnessData2,
             }),
         ];
+    }
+
+    postRender() {
+        if (this.state.value > 0 && this.state.flashing) {
+            if (!this.flashInterval) {
+                this.flashInterval = setInterval(() => {
+                    this.sendMidiMessages();
+                }, 175);
+            }
+        } else if (this.flashInterval) {
+            clearInterval(this.flashInterval);
+            delete this.flashInterval;
+        }
     }
 }
 

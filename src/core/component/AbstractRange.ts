@@ -5,7 +5,7 @@ import MidiMessage from '../midi/MidiMessage';
 import session from '../../session';
 
 
-abstract class Range extends AbstractComponent {
+abstract class AbstractRange extends AbstractComponent {
     state: { value: number } = { value: 0 };
 
     renderControl(control: AbstractControl) {
@@ -18,4 +18,4 @@ abstract class Range extends AbstractComponent {
 }
 
 
-export default Range;
+export default AbstractRange;

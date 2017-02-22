@@ -1,9 +1,9 @@
 import 'typewig/env'; // must be first in entry file (sets polyfills + globals)
-import { session, logger } from 'typewig';
+import { session } from 'typewig';
 
-import apiStore from './apistore';
+import bitwig from './apistore';
 import controls from './controls';
-import { BaseView, OtherView, OtherView2, OtherView3 } from './views';
+import { BaseView, PatternView, PadMidiView, NavigateView } from './views';
 
 
 // define controller script
@@ -22,7 +22,7 @@ host.addDeviceNameBasedDiscoveryPair(['Maschine Studio Virtual Input'], ['Maschi
 // init session
 session.on('init', () => {
     // 1. init api sourced data
-    apiStore.init();
+    bitwig.init();
 
     // 2. set master midiControls list on session
     session.controls = controls;
@@ -30,11 +30,11 @@ session.on('init', () => {
     // 3. add views to session
     session.views = [
         BaseView,
-        OtherView,
-        OtherView2,
-        OtherView3,
+        PatternView,
+        PadMidiView,
+        NavigateView,
     ];
 
     // 4. set the active view to trigger initial render of MidiControls
-    session.activeView = BaseView;
+    session.activeView = PatternView;
 });

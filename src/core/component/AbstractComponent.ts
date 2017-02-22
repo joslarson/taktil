@@ -50,7 +50,7 @@ abstract class AbstractComponent {
         this.state = state;
         // update hardware state if in view
         for (let control of this.controls) {
-            if (control.activeComponent === this) this.renderControl(control);
+            control.render();
         }
     }
 

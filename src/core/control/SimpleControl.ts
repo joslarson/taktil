@@ -8,10 +8,9 @@ export default class SimpleControl extends AbstractControl {
     constructor({ port, inPort, outPort, status, data1 }: {
         port?: number, inPort?: number, outPort?: number, status: number, data1: number
     }) {
-        super({
-            port, inPort, outPort,
-            patterns: [new MidiPattern({ status, data1, data2: undefined }).string],
-        });
+        super({ port, inPort, outPort, patterns: [
+            new MidiPattern({ status, data1, data2: undefined }),
+        ]});
         this.status = status;
         this.data1 = data1;
     }
@@ -21,14 +20,14 @@ export default class SimpleControl extends AbstractControl {
         const data2 = this.state.value;
         return [
             new MidiMessage({ port, status, data1, data2 }),
-        ]
+        ];
     }
 
-    getStateFromInput(input: MidiMessage | SysexMessage): number {
+    getInputState(input: MidiMessage | SysexMessage) {
         if (input instanceof MidiMessage && input.status === this.status && input.data1 === this.data1) {
-            return input.data2;
+            return { ...this.state, value: input.data2 };
         } else {
-            return this.state.value;
+            return { ...this.state };
         }
     }
 }

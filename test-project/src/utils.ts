@@ -66,9 +66,21 @@ export function rgb2hsv ({ r, g, b }: { r: number, g: number, b: number }) {
             h -= 1;
         }
     }
+
     return {
-        h: Math.round(h * 127),
+        // h: Math.round(h * 127),
+        h: getOffsetHue(Math.round(h * 127), 0),
         s: Math.round(s * 127),
         v: Math.round(v * 127)
     };
+}
+
+
+function getOffsetHue(hue, offset) {
+    offset = offset > 127 ? offset % 127 : (offset < -127 ? offset % -127 : offset);
+    if (offset >= 0) {
+        return hue + offset <= 127 ? hue + offset : hue + offset - 127;
+    } else {
+        return hue + offset >= 0   ? hue + offset : hue + offset + 127;
+    }
 }
