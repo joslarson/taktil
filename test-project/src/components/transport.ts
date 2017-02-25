@@ -37,6 +37,7 @@ export abstract class ArmToggle extends AbstractButton {
 
     onPress() {
         this.track.getArm().set(!this.track.getArm().get());
+        console.log();
     }
 }
 

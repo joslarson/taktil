@@ -4,9 +4,12 @@ export class Bitwig {
     cursorTrack: API.CursorTrack & API.Track;
     trackBank: API.TrackBank;
     popupBrowser: API.PopupBrowser;
+    sceneBank: API.SceneBank;
 
     init() {
         this.transport = host.createTransport();
+        this.transport.tempo().markInterested();
+        this.transport.getPosition().markInterested();
 
         this.application = host.createApplication();
 
@@ -16,6 +19,7 @@ export class Bitwig {
 
         this.trackBank = host.createMainTrackBank(8, 0, 0);
         this.popupBrowser = host.createPopupBrowser();
+        this.sceneBank = host.createSceneBank(16);
     }
 }
 

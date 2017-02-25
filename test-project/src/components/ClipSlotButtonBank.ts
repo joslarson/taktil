@@ -18,7 +18,7 @@ export abstract class AbstractClipSlotButton extends AbstractButton {
         const value = isPlaying || isPlaybackQueued || isRecording || isRecordingQueued ? control.resolution - 1 : 0;
         const disabled = !hasContent && !isRecordingQueued ;
         const flashing = isPlaybackQueued || isRecordingQueued;
-        const color = isRecordingQueued ? { r: 1, g: 0, b: 0 } : this.state.color;
+        const color = isRecordingQueued || isRecording ? { r: 1, g: 0, b: 0 } : this.state.color;
         control.render({
             value, ...(color === undefined ? {} : { color }), disabled, flashing,
         });
@@ -57,7 +57,6 @@ export default class ClipSlotButtonBank extends AbstractComponentSet {
             const subComponent = this._componentMap.components[index];
             if (subComponent) subComponent.setState({ ...subComponent.state, hasContent });
         });
-        this.clipLauncherSlotBank.itemCount().addValueObserver(count => console.log(count));
     }
 
     getComponentClass(index: number) {

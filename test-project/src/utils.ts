@@ -1,3 +1,6 @@
+import bitwig from 'apistore';
+
+
 export function rgb2hsb({ r, g, b }: { r: number, g: number, b: number }) {
     var result: { h: number, s: number, b: number } = { h: undefined, s: undefined, b: undefined };
 
@@ -84,3 +87,69 @@ function getOffsetHue(hue, offset) {
         return hue + offset >= 0   ? hue + offset : hue + offset + 127;
     }
 }
+
+export class SyncedInterval {
+    static minBpm = 20;
+    static maxBpm = 666;
+
+    callback: Function;
+    beats: number;
+    cancelled = false;
+    target: number = null;
+    codeLag = 35;
+    even = false;
+
+    constructor (callback, beats) {
+        this.callback = callback;
+        this.beats = beats;
+    }
+
+    start() {
+        const startTime = new Date().getTime();
+        const position = bitwig.transport ? bitwig.transport.getPosition().get() : 1;
+        const isPlaying = bitwig.transport ? bitwig.transport.isPlaying().get() : false;
+        
+        const bpm = (bitwig.transport ?
+                     bitwig.transport.tempo().get() * (
+                         SyncedInterval.maxBpm - SyncedInterval.minBpm
+                     ) + SyncedInterval.minBpm
+                     : 120);
+        const beatLength = 60000 / bpm;
+
+        let delay = this.beats * beatLength - this.codeLag;
+
+        if (this.target === null && isPlaying) {
+            const remainder = position % this.beats;
+            const beatsUntilNextMark = this.beats - remainder;
+            this.target = position + beatsUntilNextMark;
+            this.even = false;
+        }
+
+        if (isPlaying) {
+            delay = (this.target - position) * beatLength * this.beats - this.codeLag;
+        } else {
+            this.target = null;
+        }
+
+        host.scheduleTask(() => {
+            if (!this.cancelled) {
+                this.even = !this.even;
+                const even = isPlaying ? this.target % (this.beats * 2) === 0 : this.even;
+                this.callback(even);
+                // update codeLag
+                const endTime = new Date().getTime();
+                this.codeLag = ((endTime - (startTime + delay)) + this.codeLag * 29) / 30;
+                if (this.target !== null) this.target = this.target + this.beats;
+                this.start();  // repeat
+            }
+        }, delay);
+        return this;
+    }
+
+    cancel() {
+        this.cancelled = true;
+        return this;
+    }
+}
+
+// const si = new SyncedInterval(() => {}, 1/2).start();

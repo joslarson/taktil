@@ -1,6 +1,7 @@
 import { session, SimpleControl, MidiMessage, SysexMessage, MidiPattern, utils } from 'typewig';
 
-import { rgb2hsb, rgb2hsv } from './utils';
+import { rgb2hsv, SyncedInterval } from './utils';
+import bitwig from 'apistore';
 
 
 class MaschineButton extends SimpleControl {
@@ -20,7 +21,7 @@ const colors = {
 class MaschineColorButton extends MaschineButton {
     // set the default state
     state = { ...this.state, color: colors.offWhite, disabled: false, flashing: false };
-    flashInterval;
+    flashInterval: SyncedInterval;
 
     constructor({ port, inPort, outPort, status, data1 }: {
         port?: number, inPort?: number, outPort?: number, status: number, data1: number
@@ -52,8 +53,7 @@ class MaschineColorButton extends MaschineButton {
         const { status, data1 } = this;
         let brightnessData2 = !this.activeComponent || this.state.disabled ? 0 : (this.state.value === 0 ? 20 : 127);
         if (brightnessData2 === 127 && this.state.flashing) {
-            const brightnessHex = new MidiMessage({ status: this.brightnessStatus, data1, data2: brightnessData2 }).hex;
-            if (this.cache.indexOf(brightnessHex) > -1) brightnessData2 = 20;
+            brightnessData2 = this.even ? 20 : 127;
         }
         return [
             ...super.getRenderMessages(),
@@ -71,13 +71,15 @@ class MaschineColorButton extends MaschineButton {
     postRender() {
         if (this.state.value > 0 && this.state.flashing) {
             if (!this.flashInterval) {
-                this.flashInterval = setInterval(() => {
+                this.flashInterval = new SyncedInterval(even => {
+                    this.even = even;
                     this.sendMidiMessages();
-                }, 175);
+                }, 1/2).start();
             }
         } else if (this.flashInterval) {
-            clearInterval(this.flashInterval);
+            this.flashInterval.cancel();
             delete this.flashInterval;
+            this.even = false;
         }
     }
 }
