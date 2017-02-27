@@ -91,12 +91,12 @@ function getOffsetHue(hue, offset) {
 export class SyncedInterval {
     static minBpm = 20;
     static maxBpm = 666;
+    static codeLag = 35;
 
     callback: Function;
     beats: number;
     cancelled = false;
     target: number = null;
-    codeLag = 35;
     even = false;
 
     constructor (callback, beats) {
@@ -116,7 +116,7 @@ export class SyncedInterval {
                      : 120);
         const beatLength = 60000 / bpm;
 
-        let delay = this.beats * beatLength - this.codeLag;
+        let delay = this.beats * beatLength - SyncedInterval.codeLag;
 
         if (this.target === null && isPlaying) {
             const remainder = position % this.beats;
@@ -126,7 +126,7 @@ export class SyncedInterval {
         }
 
         if (isPlaying) {
-            delay = (this.target - position) * beatLength * this.beats - this.codeLag;
+            delay = (this.target - position) * beatLength * this.beats - SyncedInterval.codeLag;
         } else {
             this.target = null;
         }
@@ -138,7 +138,7 @@ export class SyncedInterval {
                 this.callback(even);
                 // update codeLag
                 const endTime = new Date().getTime();
-                this.codeLag = ((endTime - (startTime + delay)) + this.codeLag * 29) / 30;
+                SyncedInterval.codeLag = ((endTime - (startTime + delay)) + SyncedInterval.codeLag * 29) / 30;
                 if (this.target !== null) this.target = this.target + this.beats;
                 this.start();  // repeat
             }

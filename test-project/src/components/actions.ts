@@ -38,3 +38,31 @@ export class PasteButton extends ActionButton {
 export class DeleteButton extends ActionButton {
     action = 'delete';
 }
+
+export abstract class LayoutButton extends AbstractButton {
+    abstract layout: string;
+
+    onRegister() {
+        bitwig.application.panelLayout().addValueObserver(layout => {
+            this.setState({ ...this.state, on: layout === this.layout });
+        });
+    }
+
+    onPress() {
+        console.log('press');
+        
+        bitwig.application.setPanelLayout(this.layout);
+    }
+}
+
+export class MixLayoutButton extends LayoutButton {
+    layout = 'MIX';
+}
+
+export class ArrangeLayoutButton extends LayoutButton {
+    layout = 'ARRANGE';
+}
+
+export class EditLayoutButton extends LayoutButton {
+    layout = 'EDIT';
+}

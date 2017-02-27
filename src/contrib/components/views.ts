@@ -13,7 +13,11 @@ export abstract class AbstractViewButton extends AbstractButton {
     }
 
     onPress() {
-        session.activeView = this.View;
+        if (session.activeView === this.View && this.View.getInstance().parent) {
+            session.activeView = this.View.getInstance().parent;
+        } else {
+            session.activeView = this.View;
+        }
     }
 }
 

@@ -110,7 +110,7 @@ export default {
     GRP:  new MaschineButton({ status: 0xB1, data1: 0x1A }),
     SND:  new MaschineButton({ status: 0xB1, data1: 0x1B }),
     CUE:  new MaschineButton({ status: 0xB1, data1: 0x1C }),
-    KNOB: new MaschineButton({ status: 0xB1, data1: 0x1D }),
+    KNOB: new SimpleControl({ status: 0xB1, data1: 0x1D }),
 
 
     // PERFORMANCE

@@ -203,6 +203,10 @@ export class Session {
             this.renderControls(); // call refresh
         }
     }
+
+    modeIsActive(mode: string) {
+        return this.activeModes.indexOf(mode) > -1;
+    }
 }
 
 let session = new Session();

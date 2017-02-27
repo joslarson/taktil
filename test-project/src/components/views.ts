@@ -1,21 +1,21 @@
 import * as components from 'typewig/contrib/components';
 
-import { BaseView, PatternView, PadMidiView, NavigateView } from 'views';
+import { SceneView, PatternView, PadMidiView, NavigateView } from 'views';
 
 
-export class BaseViewButton extends components.AbstractViewButton {
-    View = BaseView;
+export class SceneViewButton extends components.AbstractViewButton {
+    View = SceneView;
 }
 
-export class OtherViewButton extends components.AbstractViewButton {
+export class PatternViewButton extends components.AbstractViewButton {
     View = PatternView;
 }
 
-export class OtherView2Button extends components.AbstractViewButton {
+export class PadMidiViewButton extends components.AbstractViewButton {
     View = PadMidiView;
 }
 
-export class OtherView3Button extends components.AbstractViewButton {
+export class NavigateViewButton extends components.AbstractViewButton {
     View = NavigateView;
 }
 

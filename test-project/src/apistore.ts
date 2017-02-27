@@ -5,6 +5,7 @@ export class Bitwig {
     trackBank: API.TrackBank;
     popupBrowser: API.PopupBrowser;
     sceneBank: API.SceneBank;
+    createScene: API.Action;
 
     init() {
         this.transport = host.createTransport();
@@ -20,6 +21,10 @@ export class Bitwig {
         this.trackBank = host.createMainTrackBank(8, 0, 0);
         this.popupBrowser = host.createPopupBrowser();
         this.sceneBank = host.createSceneBank(16);
+        this.createScene = bitwig.application.getAction('Create Scene');
+        for (let i = 0; i < 16; i++) {
+            this.sceneBank.getScene(i).exists().markInterested();
+        }
     }
 }
 

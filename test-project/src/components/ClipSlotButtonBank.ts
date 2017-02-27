@@ -21,10 +21,18 @@ export abstract class AbstractClipSlotButton extends AbstractButton {
         const color = isRecordingQueued || isRecording ? { r: 1, g: 0, b: 0 } : this.state.color;
         control.render({
             value, ...(color === undefined ? {} : { color }), disabled, flashing,
-        });
+        }, true);
     }
 
     onPress() {
+        const sceneExisits = bitwig.sceneBank.getScene(this.index).exists().get();
+        if (!sceneExisits) {
+            for (let i = 0; i <= this.index; i++) {
+                if (!bitwig.sceneBank.getScene(i).exists().get()) {
+                    bitwig.createScene.invoke();
+                }
+            }
+        }
         this.clipLauncherSlotBank.launch(this.index);
     }
 }

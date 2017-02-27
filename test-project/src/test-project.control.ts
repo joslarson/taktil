@@ -3,7 +3,7 @@ import { session } from 'typewig';
 
 import bitwig from './apistore';
 import controls from './controls';
-import { BaseView, PatternView, PadMidiView, NavigateView } from './views';
+import { BaseView, SceneView, PatternView, PadMidiView, NavigateView } from './views';
 
 
 // define controller script
@@ -30,11 +30,14 @@ session.on('init', () => {
     // 3. add views to session
     session.views = [
         BaseView,
+        SceneView,
         PatternView,
         PadMidiView,
         NavigateView,
     ];
 
     // 4. set the active view to trigger initial render of MidiControls
-    session.activeView = PatternView;
+    // session.activeView = PatternView;
+    session.activeView = SceneView;
+    // Array.prototype.slice.call(bitwig.application.getActions()).map(action => println(`${action.getId()}: ${action.getName()}`));
 });
