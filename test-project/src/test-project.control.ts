@@ -24,7 +24,7 @@ session.on('init', () => {
     // 1. init api sourced data
     bitwig.init();
 
-    // 2. set master midiControls list on session
+    // 2. set master midiControls map
     session.controls = controls;
 
     // 3. add views to session
@@ -37,7 +37,7 @@ session.on('init', () => {
     ];
 
     // 4. set the active view to trigger initial render of MidiControls
-    // session.activeView = PatternView;
-    session.activeView = SceneView;
+    session.activeView = PatternView;
+    // session.activeView = SceneView;
     // Array.prototype.slice.call(bitwig.application.getActions()).map(action => println(`${action.getId()}: ${action.getName()}`));
 });

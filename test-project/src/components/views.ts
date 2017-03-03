@@ -5,6 +5,16 @@ import { SceneView, PatternView, PadMidiView, NavigateView } from 'views';
 
 export class SceneViewButton extends components.AbstractViewButton {
     View = SceneView;
+
+    setState(state) {
+        super.setState(state);
+    }
+
+    updateControlState(control) {
+        console.log(this.state.on);
+        
+        super.updateControlState(control);
+    }
 }
 
 export class PatternViewButton extends components.AbstractViewButton {

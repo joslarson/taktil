@@ -13,10 +13,15 @@ export abstract class AbstractClipSlotButton extends AbstractButton {
         hasContent: false,
     };
 
+    setState(state) {
+        super.setState(state);
+    }
+
     updateControlState(control: SimpleControl) {
+        console.log(this.index, JSON.stringify(this.state, null, 4));
         const { isPlaying, isPlaybackQueued, isRecording, isRecordingQueued, hasContent } = this.state;
         const value = isPlaying || isPlaybackQueued || isRecording || isRecordingQueued ? control.resolution - 1 : 0;
-        const disabled = !hasContent && !isRecordingQueued ;
+        const disabled = !hasContent && !isRecordingQueued;
         const flashing = isPlaybackQueued || isRecordingQueued;
         const color = isRecordingQueued || isRecording ? { r: 1, g: 0, b: 0 } : this.state.color;
         control.setState({
@@ -43,27 +48,28 @@ export default class ClipSlotButtonBank extends AbstractComponentSet {
     onRegister() {
         this.clipLauncherSlotBank.addIsPlayingObserver((index, isPlaying) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ ...subComponent.state, isPlaying });
+            if (subComponent) subComponent.setState({ isPlaying });
         });
         this.clipLauncherSlotBank.addIsPlaybackQueuedObserver((index, isPlaybackQueued) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ ...subComponent.state, isPlaybackQueued });
+            if (subComponent) subComponent.setState({ isPlaybackQueued });
         });
         this.clipLauncherSlotBank.addIsRecordingObserver((index, isRecording) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ ...subComponent.state, isRecording });
+            if (subComponent) subComponent.setState({ isRecording });
         });
         this.clipLauncherSlotBank.addIsRecordingQueuedObserver((index, isRecordingQueued) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ ...subComponent.state, isRecordingQueued });
+            if (subComponent) subComponent.setState({ isRecordingQueued });
         });
         this.clipLauncherSlotBank.addColorObserver((index, r, g, b) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ ...subComponent.state, color: { r, g, b } });
+            if (subComponent) subComponent.setState({ color: { r, g, b } });
         });
         this.clipLauncherSlotBank.addHasContentObserver((index, hasContent) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ ...subComponent.state, hasContent });
+            if (subComponent) subComponent.setState({ hasContent });
+            console.log('hasContent', index, hasContent);
         });
     }
 

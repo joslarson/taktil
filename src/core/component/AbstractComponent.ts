@@ -44,10 +44,11 @@ abstract class AbstractComponent {
     }
 
     setState(state) {
+        const newState = { ...this.state, ...state };
         // if the state isn't changing, there's nothing to do.
-        if (areDeepEqual(state, this.state)) return;
+        if (areDeepEqual(newState, this.state)) return;
         // update object state
-        this.state = { ...this.state, ...state };
+        this.state = newState;
         // update hardware state if in view
         for (let control of this.controls) {
             if (control.activeComponent === this) this.updateControlState(control);

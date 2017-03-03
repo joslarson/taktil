@@ -46,9 +46,19 @@ abstract class AbstractControl {
     }
 
     set activeComponent(component: AbstractComponent) {
+        // component not changing? do nothing
+        if (component === this._activeComponent) return;
+        this._activeComponent = component;
+
         // on component change, reset state to default
         this.state = this.defaultState;
-        this._activeComponent = component;
+
+        // render new control state
+        if (component) {
+            component.updateControlState(this);
+        } else {
+            this.render();
+        }
     }
 
     abstract getRenderMessages(): (MidiMessage | SysexMessage)[];

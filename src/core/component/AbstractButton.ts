@@ -18,9 +18,10 @@ abstract class AbstractButton extends AbstractComponent {
     memory: { [key: string]: any } = {};
 
     updateControlState(control: SimpleControl, overrides: Object = {}) {
+        const { on, color } = this.state;
         control.setState({
-            value: this.state.on ? control.resolution - 1 : 0,
-            ...(this.state.color === undefined ? {} : { color: this.state.color }),
+            value: on ? control.resolution - 1 : 0,
+            ...(color === undefined ? {} : { color }),
             ...overrides
         });
     }

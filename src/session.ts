@@ -139,22 +139,13 @@ export class Session {
         return null;
     }
 
-    renderControls() {
-        if (!this.activeView) return;  // can't do anything until we have an active view
-
-        for (let controlName in this.controls) {
-            const control = this.controls[controlName];
-            const component = control.activeComponent;
-            // connect control to corresponding component in view (if any)
-            this.activeView.getInstance().connectControl(control);
-            // render the control
-            if (component) {
-                // if has component, render though component
-                component.updateControlState(control);
-            } else {
-                // otherwise render default state
-                control.render();
-            }
+    associateControlsInView() {
+        // no view, no components to associate controls with
+        if (!this.activeView) return;
+        // connect each control to the corresponding component in view (if any)
+        for (let controlName in session.controls) {
+            const control = session.controls[controlName];
+            this.activeView.getInstance().associateControl(control);
         }
     }
 
@@ -182,7 +173,7 @@ export class Session {
         if (this.views.indexOf(View) === -1) throw new Error(`${View.name} must first be registered before being set as the active view.`);
         this._activeView = View;
         this._callEventCallbacks('activateView', View);
-        this.renderControls();
+        this.associateControlsInView();  // re-associate controls in view
     }
 
     get activeView(): typeof AbstractView {
@@ -202,7 +193,7 @@ export class Session {
         if (modeIndex > -1) this._activeModes.splice(modeIndex, 1);
         this._activeModes.unshift(mode);  // prepend to modes
         this._callEventCallbacks('activateMode', mode);
-        this.renderControls(); // call refresh
+        this.associateControlsInView();  // re-associate controls in view
     }
 
     deactivateMode(mode: string) {
@@ -210,7 +201,7 @@ export class Session {
         if (modeIndex > -1) {
             this._activeModes.splice(modeIndex, 1);
             this._callEventCallbacks('deactivateMode', mode);
-            this.renderControls(); // call refresh
+            this.associateControlsInView();  // re-associate controls in view
         }
     }
 
