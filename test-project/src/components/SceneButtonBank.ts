@@ -8,11 +8,11 @@ export abstract class AbstractSceneButton extends AbstractButton {
     scene: API.Scene;
     state = { ...this.state, exists: false, color: { r: 1, g: 0, b: 1 } };
 
-    renderControl(control: SimpleControl) {
-        control.render({
+    updateControlState(control: SimpleControl) {
+        control.setState({
             value: this.state.on ? control.resolution - 1 : 0,
             disabled: !this.state.exists,
-            // color: this.state.color,
+            color: this.state.color,
         });
     }
 

@@ -8,8 +8,8 @@ import session from '../../session';
 abstract class AbstractRange extends AbstractComponent {
     state: { value: number } = { value: 0 };
 
-    renderControl(control: AbstractControl) {
-        control.render({ value: this.state.value });
+    updateControlState(control: AbstractControl) {
+        control.setState({ value: this.state.value });
     }
 
     onControlInput(control: AbstractControl, value: number) {

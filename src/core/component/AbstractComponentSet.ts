@@ -30,9 +30,9 @@ abstract class AbstractComponentSet extends AbstractComponent {
         }
     }
 
-    renderControl(control: AbstractControl) {
+    updateControlState(control: AbstractControl) {
         // pass on state to corresponding control
-        this.getSubComponent(control).renderControl(control);
+        this.getSubComponent(control).updateControlState(control);
     }
 
     onControlInput(control: AbstractControl, state: Object) {

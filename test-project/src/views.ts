@@ -11,6 +11,9 @@ export class BaseView extends AbstractView {
         this.registerComponent(components.ToggleBrowser, controls.BROWSE);
         this.registerComponent(components.EditLayoutButton, controls.SAMPLING);
 
+        // Performance
+        this.registerComponent(components.TempoButton, controls.TAP);
+
         // Groups
         this.registerComponent(components.TrackButtonBank, [
             controls.GROUP_A, controls.GROUP_B, controls.GROUP_C, controls.GROUP_D,
@@ -43,6 +46,7 @@ export class BaseView extends AbstractView {
         this.registerComponent(components.PasteButton, controls.PASTE);
         this.registerComponent(components.DeleteButton, controls.CLEAR);
         this.registerComponent(components.ToggleBrowser, controls.JOG_RING);
+        this.registerComponent(components.TempoRing, controls.JOG_RING, 'TEMPO');
         this.registerComponent(components.BrowserExitButton, controls.BACK);
     }
 }

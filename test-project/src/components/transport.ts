@@ -1,4 +1,4 @@
-import { AbstractButton } from 'typewig';
+import { session, AbstractButton } from 'typewig';
 import * as components from 'typewig/contrib/components';
 
 import bitwig from 'apistore';
@@ -43,4 +43,34 @@ export abstract class ArmToggle extends AbstractButton {
 
 export class LoopToggle extends components.AbstractLoopToggle {
     transport = bitwig.transport;
+}
+
+
+export abstract class TempoButton extends AbstractButton {
+    transport = bitwig.transport;
+
+    onPress() {
+        this.setState({ ...this.state, on: true });
+        this.transport.tapTempo();
+        session.activateMode('TEMPO');        
+    }
+
+    onRelease() {
+        session.deactivateMode('TEMPO');
+        this.setState({ ...this.state, on: false });
+    }
+}
+
+
+export class TempoRing extends AbstractButton {
+    transport = bitwig.transport;
+
+    onRegister() {
+        session.on('activateMode', mode => {
+            if (mode === 'TEMPO') this.setState({ ...this.state, on: true });
+        });
+        session.on('deactivateMode', mode => {
+            if (mode === 'TEMPO') this.setState({ ...this.state, on: false });
+        });
+    }
 }

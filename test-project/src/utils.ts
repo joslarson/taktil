@@ -89,15 +89,15 @@ function getOffsetHue(hue, offset) {
 }
 
 export class SyncedInterval {
-    static minBpm = 20;
-    static maxBpm = 666;
-    static codeLag = 35;
+    static MIN_BPM = 20;
+    static MAX_BPM = 666;
+    static CODE_LAG = 35;
 
     callback: Function;
     beats: number;
     cancelled = false;
     target: number = null;
-    even = false;
+    isOddInterval = true;
 
     constructor (callback, beats) {
         this.callback = callback;
@@ -111,34 +111,34 @@ export class SyncedInterval {
         
         const bpm = (bitwig.transport ?
                      bitwig.transport.tempo().get() * (
-                         SyncedInterval.maxBpm - SyncedInterval.minBpm
-                     ) + SyncedInterval.minBpm
+                         SyncedInterval.MAX_BPM - SyncedInterval.MIN_BPM
+                     ) + SyncedInterval.MIN_BPM
                      : 120);
         const beatLength = 60000 / bpm;
 
-        let delay = this.beats * beatLength - SyncedInterval.codeLag;
+        let delay = this.beats * beatLength - SyncedInterval.CODE_LAG;
 
         if (this.target === null && isPlaying) {
             const remainder = position % this.beats;
             const beatsUntilNextMark = this.beats - remainder;
             this.target = position + beatsUntilNextMark;
-            this.even = false;
+            this.isOddInterval = true;
         }
 
         if (isPlaying) {
-            delay = (this.target - position) * beatLength * this.beats - SyncedInterval.codeLag;
+            delay = (this.target - position) * beatLength * this.beats - SyncedInterval.CODE_LAG;
         } else {
             this.target = null;
         }
 
         host.scheduleTask(() => {
             if (!this.cancelled) {
-                this.even = !this.even;
-                const even = isPlaying ? this.target % (this.beats * 2) === 0 : this.even;
-                this.callback(even);
+                this.isOddInterval = !this.isOddInterval;
+                const isOddInterval = isPlaying ? this.target % (this.beats * 2) !== 0 : this.isOddInterval;
+                this.callback(isOddInterval);
                 // update codeLag
                 const endTime = new Date().getTime();
-                SyncedInterval.codeLag = ((endTime - (startTime + delay)) + SyncedInterval.codeLag * 29) / 30;
+                SyncedInterval.CODE_LAG = ((endTime - (startTime + delay)) + SyncedInterval.CODE_LAG * 29) / 30;
                 if (this.target !== null) this.target = this.target + this.beats;
                 this.start();  // repeat
             }

@@ -20,7 +20,7 @@ const colors = {
 
 class MaschineColorButton extends MaschineButton {
     // set the default state
-    state = { ...this.state, color: colors.offWhite, disabled: false, flashing: false };
+    state = { ...this.state, color: colors.offWhite, disabled: false, flashing: false, flashOn: true };
     flashInterval: SyncedInterval;
 
     constructor({ port, inPort, outPort, status, data1 }: {
@@ -53,7 +53,7 @@ class MaschineColorButton extends MaschineButton {
         const { status, data1 } = this;
         let brightnessData2 = !this.activeComponent || this.state.disabled ? 0 : (this.state.value === 0 ? 20 : 127);
         if (brightnessData2 === 127 && this.state.flashing) {
-            brightnessData2 = this.even ? 20 : 127;
+            brightnessData2 = this.state.flashOn ? 127 : 20;
         }
         return [
             ...super.getRenderMessages(),
@@ -71,15 +71,13 @@ class MaschineColorButton extends MaschineButton {
     postRender() {
         if (this.state.value > 0 && this.state.flashing) {
             if (!this.flashInterval) {
-                this.flashInterval = new SyncedInterval(even => {
-                    this.even = even;
-                    this.sendMidiMessages();
+                this.flashInterval = new SyncedInterval(isOddInterval => {
+                    this.setState({ flashOn: isOddInterval });
                 }, 1/2).start();
             }
         } else if (this.flashInterval) {
             this.flashInterval.cancel();
             delete this.flashInterval;
-            this.even = false;
         }
     }
 }

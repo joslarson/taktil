@@ -49,8 +49,6 @@ export abstract class LayoutButton extends AbstractButton {
     }
 
     onPress() {
-        console.log('press');
-        
         bitwig.application.setPanelLayout(this.layout);
     }
 }

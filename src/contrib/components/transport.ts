@@ -36,13 +36,13 @@ export abstract class AbstractPreRollToggle extends AbstractButton {
     abstract transport: API.Transport;
 
     onRegister() {
-        this.transport.addPreRollObserver((preRollState) => {
+        this.transport.preRoll().addValueObserver((preRollState) => {
             this.setState({ ...this.state, on: preRollState !== 'none' });
         });
     }
 
     onPress() {
-        this.transport.setPreRoll(this.state.on ? 'none' : 'one_bar');
+        this.transport.preRoll().set(this.state.on ? 'none' : 'one_bar');
     }
 }
 

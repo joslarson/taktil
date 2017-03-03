@@ -23,7 +23,7 @@ abstract class AbstractControl {
     cacheOnMidiIn: boolean = true;
     enableMidiOut: boolean = true;
 
-    activeComponent: AbstractComponent = null;
+    protected _activeComponent: AbstractComponent = null;
 
     constructor({ port, inPort, outPort, patterns }: {
         port?: number, inPort?: number, outPort?: number, patterns: (string | MidiPattern)[],  // patterns for all inPort and outPort MidiMessages
@@ -39,6 +39,16 @@ abstract class AbstractControl {
     get defaultState() {
         if (!this._defaultState) this._defaultState = { ...this.state };
         return this._defaultState;
+    }
+
+    get activeComponent() {
+        return this._activeComponent;
+    }
+
+    set activeComponent(component: AbstractComponent) {
+        // on component change, reset state to default
+        this.state = this.defaultState;
+        this._activeComponent = component;
     }
 
     abstract getRenderMessages(): (MidiMessage | SysexMessage)[];
@@ -63,7 +73,7 @@ abstract class AbstractControl {
             // update cache with input
             this.cacheMidiMessage(midiMessage);
             // re-render based on current state (messages will only be sent if they are different than what's in the cache)
-            this.render(this.state);
+            this.render();
         }
 
         if (this.activeComponent) {
@@ -73,53 +83,48 @@ abstract class AbstractControl {
         }
     }
 
-    sendMidiMessages(urgent = false) {
+    setState(state: { value?: number, color?: Color, [others: string]: any }) {
+        // validate input
+        if (state.value !== undefined && (state.value < 0 || state.value > this.resolution - 1)) throw new Error(`Invalid value "${state.value}" for Control "${this.name}" with resolution "${this.resolution}".`);
+        // update state
+        this.state = { ...this.state, ...state };
+        // re-render
+        this.render();
+    }
+
+    preRender() {
+        // ... optionally implemented in child class
+    }
+
+    render(renderThroughComponent = true) {
+        // no midi out? no render.
+        if (!this.enableMidiOut) return;
+
+        // pre render hook
+        this.preRender();
+
+        // send messages
         for (let message of this.getRenderMessages()) {
             if (message instanceof MidiMessage) {
                 // send message to cache, send to midi out if new
                 if (this.cacheMidiMessage(message)){
                     const { port, status, data1, data2 } = message;
-                    session.midiOut.sendMidi({ name: this.name, status, data1, data2, urgent });
+                    session.midiOut.sendMidi({ name: this.name, status, data1, data2 });
                 }
             } else if (message instanceof SysexMessage) {
                 const { port, data } = message;
-                session.midiOut.sendSysex({ port, data, urgent })
+                session.midiOut.sendSysex({ port, data })
             } else {
                 throw new Error('Unrecognized message type.');
             }
         }
-    }
 
-    render(state?: { value?: number, color?: Color, [others: string]: any}, urgent = false) {
-        // no midi out? no render.
-        if (!this.enableMidiOut) return;
-        // if render called with no args
-        if (state === undefined) {
-            // if control connected in view, recall render through component
-            if (this.activeComponent) {
-                this.activeComponent.renderControl(this);
-            } else {  // otherwise, render default state
-                this.renderDefaultState();
-            }
-        } else {
-            // validate input
-            if (state.value !== undefined && (state.value < 0 || state.value > this.resolution - 1)) throw new Error(`Invalid value "${state.value}" for Control "${this.name}" with resolution "${this.resolution}".`);
-            // remove undefined object property keys from incoming state to allow default state to override
-            Object.keys(state).forEach(key => state[key] === undefined && delete state[key]);
-            // update state
-            this.state = { ...this.defaultState, ...state };
-            // send messages
-            this.sendMidiMessages(urgent);
-        }
+        // post render hook
         this.postRender();
     }
 
     postRender() {
-
-    }
-
-    renderDefaultState(urgent = false) {
-        this.render({ ...this.defaultState }, urgent);
+        // ... optionally implemented in child class
     }
 }
 

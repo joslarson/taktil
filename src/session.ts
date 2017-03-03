@@ -37,7 +37,10 @@ export class Session {
 
         global.exit = () => {
             // reset all controls to default state
-            for (let controlName in this.controls) this.controls[controlName].renderDefaultState(true);
+            for (let controlName in this.controls) {
+                const control = this.controls[controlName];
+                control.setState(control.defaultState);
+            }
             // call registered exit callbacks
             this._callEventCallbacks('exit');
         };
@@ -141,10 +144,17 @@ export class Session {
 
         for (let controlName in this.controls) {
             const control = this.controls[controlName];
+            const component = control.activeComponent;
             // connect control to corresponding component in view (if any)
             this.activeView.getInstance().connectControl(control);
             // render the control
-            control.render();
+            if (component) {
+                // if has component, render though component
+                component.updateControlState(control);
+            } else {
+                // otherwise render default state
+                control.render();
+            }
         }
     }
 

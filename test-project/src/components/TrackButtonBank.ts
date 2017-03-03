@@ -8,11 +8,12 @@ export abstract class AbstractTrackButton extends AbstractButton {
     track: API.Track;
     state = { ...this.state, exists: false };
 
-    renderControl(control: SimpleControl) {
-        control.render({
+    updateControlState(control: SimpleControl) {
+        const color = this.state.color;
+        control.setState({
             value: this.state.on ? control.resolution - 1 : 0,
             disabled: !this.state.exists,
-            color: this.state.color,
+            ...(color === undefined ? {} : { color }),
         });
     }
 

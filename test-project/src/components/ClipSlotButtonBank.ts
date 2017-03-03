@@ -13,20 +13,20 @@ export abstract class AbstractClipSlotButton extends AbstractButton {
         hasContent: false,
     };
 
-    renderControl(control: SimpleControl) {
+    updateControlState(control: SimpleControl) {
         const { isPlaying, isPlaybackQueued, isRecording, isRecordingQueued, hasContent } = this.state;
         const value = isPlaying || isPlaybackQueued || isRecording || isRecordingQueued ? control.resolution - 1 : 0;
         const disabled = !hasContent && !isRecordingQueued ;
         const flashing = isPlaybackQueued || isRecordingQueued;
         const color = isRecordingQueued || isRecording ? { r: 1, g: 0, b: 0 } : this.state.color;
-        control.render({
+        control.setState({
             value, ...(color === undefined ? {} : { color }), disabled, flashing,
-        }, true);
+        });
     }
 
     onPress() {
-        const sceneExisits = bitwig.sceneBank.getScene(this.index).exists().get();
-        if (!sceneExisits) {
+        const sceneExists = bitwig.sceneBank.getScene(this.index).exists().get();
+        if (!sceneExists) {
             for (let i = 0; i <= this.index; i++) {
                 if (!bitwig.sceneBank.getScene(i).exists().get()) {
                     bitwig.createScene.invoke();

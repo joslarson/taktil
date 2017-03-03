@@ -47,15 +47,15 @@ abstract class AbstractComponent {
         // if the state isn't changing, there's nothing to do.
         if (areDeepEqual(state, this.state)) return;
         // update object state
-        this.state = state;
+        this.state = { ...this.state, ...state };
         // update hardware state if in view
         for (let control of this.controls) {
-            control.render();
+            if (control.activeComponent === this) this.updateControlState(control);
         }
     }
 
     // renders component state to hardware control
-    abstract renderControl(control: AbstractControl): void;
+    abstract updateControlState(control: AbstractControl): void;
 
     // handles midi messages routed to control
     abstract onControlInput(control: AbstractControl, controlState);
