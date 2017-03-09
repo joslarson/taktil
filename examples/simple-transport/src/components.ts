@@ -1,5 +1,5 @@
-import { session} from 'typewig';
-import * as components from 'typewig/contrib/components'
+import { session} from 'taktil';
+import * as components from 'taktil/contrib/components'
 import apiStore from './apistore';
 
 

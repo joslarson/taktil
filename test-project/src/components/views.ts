@@ -1,4 +1,4 @@
-import * as components from 'typewig/contrib/components';
+import * as components from 'taktil/contrib/components';
 
 import { SceneView, PatternView, PadMidiView, NavigateView } from 'views';
 
@@ -11,8 +11,6 @@ export class SceneViewButton extends components.AbstractViewButton {
     }
 
     updateControlState(control) {
-        console.log(this.state.on);
-        
         super.updateControlState(control);
     }
 }

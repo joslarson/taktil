@@ -1,4 +1,4 @@
-import { AbstractComponentSet, AbstractButton, SimpleControl, session } from 'typewig';
+import { AbstractComponentSet, AbstractButton, SimpleControl, session } from 'taktil';
 
 import bitwig from 'apistore';
 

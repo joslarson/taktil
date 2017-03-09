@@ -1,5 +1,5 @@
-import { session, AbstractButton } from 'typewig';
-import * as components from 'typewig/contrib/components';
+import { session, AbstractButton } from 'taktil';
+import * as components from 'taktil/contrib/components';
 
 import bitwig from 'apistore';
 
@@ -37,7 +37,6 @@ export abstract class ArmToggle extends AbstractButton {
 
     onPress() {
         this.track.getArm().set(!this.track.getArm().get());
-        console.log();
     }
 }
 

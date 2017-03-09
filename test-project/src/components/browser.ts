@@ -1,4 +1,4 @@
-import { AbstractButton } from 'typewig';
+import { AbstractButton } from 'taktil';
 
 import bitwig from 'apistore';
 

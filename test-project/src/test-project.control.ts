@@ -1,5 +1,5 @@
-import 'typewig/env'; // must be first in entry file (sets polyfills + globals)
-import { session } from 'typewig';
+import 'taktil/env'; // must be first in entry file (sets polyfills + globals)
+import { session } from 'taktil';
 
 import bitwig from './apistore';
 import controls from './controls';
@@ -8,7 +8,7 @@ import { BaseView, SceneView, PatternView, PadMidiView, NavigateView } from './v
 
 // define controller script
 host.defineController(
-    'Typewig Examples',  // vendor
+    'Taktil Examples',  // vendor
     'Test Project',  // name
     '1.0.0',  // version
     '2e6cf580-327b-409b-b87a-19f18643c43b',  // uuid

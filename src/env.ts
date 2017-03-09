@@ -1,7 +1,6 @@
 // setup environment
 import logger from './logger';
 
-
 loadAPI(2); // load bitwig api v2
 
 // set globals (make sure to add any new globals to the globals.d.ts file)

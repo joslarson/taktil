@@ -1,4 +1,4 @@
-import { api, host } from 'typewig';
+import { api, host } from 'taktil';
 
 
 export class ApiStore {

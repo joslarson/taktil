@@ -1,8 +1,8 @@
 {
-  "name": "typewig",
-  "description": "Typewig is a lightweight framework and integrated build tool designed to simplify the process of developing Bitwig controller scripts.",
+  "name": "taktil",
+  "description": "Taktil is a lightweight framework and integrated build tool designed to simplify the process of developing Bitwig controller scripts.",
   "version": "0.2.0",
-  "repository": "typewig/typewig",
+  "repository": "taktil/taktil",
   "author": "Joseph Larson",
   "tags": [
     "bitwig",
@@ -39,7 +39,7 @@
   },
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/typewig/typewig/issues"
+    "url": "https://github.com/taktil/taktil/issues"
   },
-  "homepage": "https://github.com/typewig/typewig#readme"
+  "homepage": "https://github.com/taktil/taktil#readme"
 }

@@ -1,4 +1,4 @@
-import { session, SimpleControl, MidiMessage, SysexMessage, MidiPattern, utils } from 'typewig';
+import { session, SimpleControl, MidiMessage, SysexMessage, MidiPattern, utils } from 'taktil';
 
 import { rgb2hsv, SyncedInterval } from './utils';
 import bitwig from 'apistore';

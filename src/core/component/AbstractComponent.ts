@@ -51,7 +51,19 @@ abstract class AbstractComponent {
         this.state = newState;
         // update hardware state if in view
         for (let control of this.controls) {
-            if (control.activeComponent === this) this.updateControlState(control);
+            if (control.activeComponent === null) continue;
+            let component = this as AbstractComponent;
+            let i = 0;
+            while(component) {
+                console.log(i, control.activeComponent.name, component.name, control.activeComponent === component);
+                // TODO: figure out why instances aren't equal as expected (should be singleton)
+                 if (control.activeComponent.constructor === component.constructor) {
+                    this.updateControlState(control);
+                    break;
+                } else {
+                    component = component.parent ? component.parent.getInstance() : null;
+                }
+            }
         }
     }
 

@@ -13,7 +13,7 @@
     "include": [
         "src/**/*.ts",
         "node_modules/bitwig-api-ts-stubs/bitwig-api.d.ts",
-        "node_modules/typewig/types/global.d.ts"
+        "node_modules/taktil/types/global.d.ts"
     ],
     "exclude": []
 }

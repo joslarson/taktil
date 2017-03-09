@@ -1,4 +1,4 @@
-import { AbstractView } from 'typewig';
+import { AbstractView } from 'taktil';
 import controls from './controls';
 import * as components from './components';
 
