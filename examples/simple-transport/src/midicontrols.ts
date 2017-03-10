@@ -1,4 +1,4 @@
-import { session, host, MidiControl } from 'typewig';
+import { session, host, MidiControl } from 'taktil';
 
 
 export default {

@@ -1,4 +1,3 @@
-import host from './host';
 import  { SimpleMidiMessage } from './core/midi';
 
 
@@ -9,32 +8,6 @@ export function guid() {
         date = Math.floor(date/16);
         return (c=='x' ? r : (r&0x3|0x8)).toString(16);
     });
-}
-
-
-export class TimeoutTask {
-    scope: any;
-    callback: Function;
-    interval: number;
-    cancelled = false;
-
-    constructor (scope, callback, interval) {
-        this.scope = scope;
-        this.callback = callback;
-        this.interval = interval;
-    }
-
-    start(...args) {
-        host.scheduleTask(() => {
-            if (!this.cancelled) this.callback.apply(this.scope, args);
-        }, [], this.interval);
-        return this;
-    }
-
-    cancel() {
-        this.cancelled = true;
-        return this;
-    }
 }
 
 

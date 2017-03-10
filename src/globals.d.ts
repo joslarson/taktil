@@ -1,5 +1,3 @@
 declare const global;
-declare const loadAPI;
-declare const load;
-
+declare let __is_init__: boolean;
 declare function toast(msg: string);

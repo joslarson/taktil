@@ -1,4 +1,3 @@
-import host from './host';
 import session from './session';
 
 
@@ -33,9 +32,9 @@ export class Logger {
                 this._filter = value;
                 if (value) {
                     const message = ` Log filter regex set to \\${value}\\gi `;
-                    console.log(`╭───┬${'─'.repeat(message.length)}╮`);
-                    console.log(`│ i │${message}` +               '│');
-                    console.log(`╰───┴${'─'.repeat(message.length)}╯`);
+                    this.log(`╭───┬${'─'.repeat(message.length)}╮`);
+                    this.log(`│ i │${message}` +               '│');
+                    this.log(`╰───┴${'─'.repeat(message.length)}╯`);
                 }
             });
 
@@ -46,7 +45,7 @@ export class Logger {
         });
     }
 
-    setLevel(level: Level) {
+    set level(level: Level) {
         if (this._levelSetting !== undefined) {
             this._levelSetting.set(level);
         } else {
@@ -54,12 +53,24 @@ export class Logger {
         }
     }
 
-    setFilter(value) {
+    get level() {
+        return this._level;
+    }
+
+    set filter(value) {
         if (this._filterSetting !== undefined) {
             this._filterSetting.set(value);
         } else {
             this._filter = value;
         }
+    }
+
+    get filter() {
+        return this._filter;
+    }
+
+    log(...messages) {
+        this._log(null, ...messages);
     }
 
     error(...messages) {
@@ -74,10 +85,6 @@ export class Logger {
         this._log('INFO', ...messages);
     }
 
-    log(...messages) {
-        this.info(...messages);
-    }
-
     debug(...messages) {
         this._log('DEBUG', ...messages);
     }
@@ -88,26 +95,25 @@ export class Logger {
             return;
         }
 
-        if (this._levels.indexOf(level) > this._levels.indexOf(this._level)) return;
+        if (level && this._levels.indexOf(level) > this._levels.indexOf(this._level)) return;
 
-        const message = `[${level.toUpperCase()}] ${messages.join(' ')}`;
+        const message = `${level ? `[${level.toUpperCase()}] ` : ''}${messages.join(' ')}`;
         if (this._filter) {
             const re = new RegExp(this._filter, 'gi');
             if (!re.test(message)) return;
         }
 
-        const isMidiInput = new RegExp('IN  [0-9]+ \=\=\> [A-Z0-9]{6}', 'gi').test(message);
-        const isMidiOutput = new RegExp('OUT [0-9]+ \<\=\=\ [A-Z0-9]{6}', 'gi').test(message);
+        const isMidiInput = new RegExp('\\[MIDI\\] IN', 'gi').test(message);
+        const isMidiOutput = new RegExp('\\[MIDI\\] OUT', 'gi').test(message);
 
         if (this._midiLevel === 'None' && (isMidiInput || isMidiOutput)) return;
         if (this._midiLevel === 'Input' && isMidiOutput) return;
         if (this._midiLevel === 'Output' && isMidiInput) return;
 
-        level === 'ERROR' ? console.error(message) : console.log(message);
+        level === 'ERROR' ? errorln(message) : println(message);
     }
 }
 
 const logger = new Logger();
-
 
 export default logger;

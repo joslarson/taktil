@@ -1,8 +1,7 @@
-import { MidiMessage, Sysex } from '../midi';
-import AbstractComponentBase from '../component/AbstractComponentBase';
-import MidiControl from '../midi/MidiControl';
+import { MidiMessage, SysexMessage } from '../midi';
+import { AbstractComponent } from '../component';
+import { AbstractControl } from '../control';
 import session from '../../session';
-import logger from '../../logger';
 
 
 abstract class AbstractView {
@@ -22,96 +21,59 @@ abstract class AbstractView {
 
     name = this.constructor.name;
     parent: typeof AbstractView;
-    _componentMap: { [mode: string]: { midiControls: MidiControl[], components: AbstractComponentBase[] } } = {};
+    _componentMap: { [mode: string]: { controls: AbstractControl[], components: AbstractComponent[] } } = {};
 
     protected constructor() {}
 
-    getComponent(midiControl: MidiControl, mode: string, ifDoesNotExists = undefined) {
-        if (this._componentMap[mode] === undefined) return ifDoesNotExists;
-        const componentMapIndex = this._componentMap[mode].midiControls.indexOf(midiControl);
-        if (componentMapIndex === -1) return ifDoesNotExists;
+    getComponent(control: AbstractControl, mode: string) {
+        if (this._componentMap[mode] === undefined) return;
+        const componentMapIndex = this._componentMap[mode].controls.indexOf(control);
+        if (componentMapIndex === -1) return;
         return this._componentMap[mode].components[componentMapIndex];
     }
 
-    renderMidiControl(midiControl: MidiControl) {
-        // check view modes in order for component/midiControl registration
-        for (let activeMode of session.getActiveModes()) {
+    associateControl(control: AbstractControl) {
+        // check view modes in order for component/control registration
+        for (let activeMode of session.activeModes) {
             if (!this._componentMap[activeMode]) continue;  // mode not used in view
-            const component = this.getComponent(midiControl, activeMode);
-            if (component) {
-                component.renderMidiControl(midiControl);
+            const component: AbstractComponent = this.getComponent(control, activeMode);
+            if (component) { 
+                control.activeComponent = component;
                 return;
             }
         }
         // component not found in view? send to parent
         if (this.parent) {
             const parentInstance = this.parent.getInstance();
-            parentInstance.renderMidiControl(midiControl);
+            parentInstance.associateControl(control);
         } else {
-            // no parent? no component to render, reset midi control
-            midiControl.reset();
+            // no parent? no component to connect to
+            control.activeComponent = null;
         }
     }
 
-    registerComponent(ComponentClass: typeof AbstractComponentBase, midiControls: MidiControl[]|MidiControl, mode = '__BASE__') {
-        type ComponentClassType = new () => AbstractComponentBase;
-        midiControls = midiControls instanceof MidiControl ? [<MidiControl>midiControls] : midiControls;
+    registerComponent(ComponentClass: typeof AbstractComponent, controls: AbstractControl[]|AbstractControl, mode = '__BASE__') {
+        type ComponentClassType = new () => AbstractComponent;
+        controls = controls instanceof AbstractControl ? [<AbstractControl>controls] : controls;
         const component = new (ComponentClass as any as ComponentClassType)();
 
-        // register midiControls w/ component
-        component.register(<MidiControl[]>midiControls, this);
-        for (let midiControl of midiControls as MidiControl[]) {
-            // register midiControl with view/mode
-            if (!this._componentMap[mode]) this._componentMap[mode] = { midiControls: [], components: [] };
+        // register controls w/ component
+        component.register(<AbstractControl[]>controls, this);
+        for (let control of controls as AbstractControl[]) {
+            // register control with view/mode
+            if (!this._componentMap[mode]) this._componentMap[mode] = { controls: [], components: [] };
 
-            // if midiControl already registered in view mode, throw error
-            if (this._componentMap[mode].midiControls.indexOf(midiControl) > -1) throw Error('Duplicate MidiControl registration in view mode.');
+            // if control already registered in view mode, throw error
+            if (this._componentMap[mode].controls.indexOf(control) > -1) throw Error('Duplicate Control registration in view mode.');
 
-            // add midiControl and component pair to component map
-            this._componentMap[mode].midiControls.push(midiControl);
+            // add control and component pair to component map
+            this._componentMap[mode].controls.push(control);
             this._componentMap[mode].components.push(component);
-
-            // add midiControl to registered midiControl list (if it's not already there)
-            if (session.getRegisteredMidiControls().indexOf(midiControl) === -1) session.registerMidiControl(midiControl);
         }
     }
 
     onRegister() {
         // optionally implemented in child class
-    }
-
-    onMidi(midiControl: MidiControl, midiMessage: MidiMessage) {
-        let mode: string;
-        let component: AbstractComponentBase;
-
-        // if component in an active mode, let the component in the first associated mode handle
-        for (let activeMode of session.getActiveModes()) {
-            component = this.getComponent(midiControl, activeMode);
-            if (component) {
-                mode = activeMode;
-                break;
-            }
-        }
-
-        if (mode && component) {
-            component.onMidi(midiControl, midiMessage);
-        } else {
-            if (this.parent) {
-                const parentInstance = this.parent.getInstance();
-                parentInstance.onMidi(midiControl, midiMessage);
-            } else {
-                midiControl.reset();
-                session.midiOut.updateMidiOutCacheWithMidiInput(midiMessage);
-                logger.info(`MidiControl "${midiControl.name}" is unused in active view stack.`);
-            }
-        }
-    }
-
-    onSysex(sysex: Sysex) {
-        const { port } = sysex;
-        let mode: string;
-        let component: AbstractComponentBase;
-        // TODO: sysex flow?
     }
 }
 

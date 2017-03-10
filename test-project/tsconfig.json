@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-        "target": "es3",
+        "target": "es5",
         "module": "es2015",
         "rootDir": "src",
         "baseUrl": "./src",
@@ -11,9 +11,9 @@
     },
     "compileOnSave": false,
     "include": [
-        "src/**/*.ts"
+        "src/**/*.ts",
+        "node_modules/bitwig-api-ts-stubs/bitwig-api.d.ts",
+        "node_modules/taktil/types/global.d.ts"
     ],
-    "exclude": [
-        "node_modules"
-    ]
+    "exclude": []
 }

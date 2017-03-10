@@ -1,5 +1,5 @@
-import 'typewig/env'; // must be first in entry file (sets polyfills + globals)
-import { host, session, logger } from 'typewig';
+import 'taktil/env'; // must be first in entry file (sets polyfills + globals)
+import { host, session, logger } from 'taktil';
 
 import apiStore from './apistore';
 import { BaseView } from './views';
@@ -8,7 +8,7 @@ import midiControls from './midicontrols';
 
 // define controller script
 host.defineController(
-    'Typewig Examples',  // vendor
+    'taktil Examples',  // vendor
     'Simple Transport',  // name
     '1.0.0',  // version
     'f7ccec7e-b1cc-11e6-80f5-76304dec7eb7',  // uuid

@@ -1,14 +1,14 @@
 {
-  "name": "typewig-simple-transport",
+  "name": "taktil-simple-transport",
   "version": "0.0.0",
   "description": "",
   "dependencies": {
-    "typewig": "^0.2.1"
+    "taktil": "^0.3.0"
   },
   "scripts": {},
   "author": "Joe Larson",
   "license": "ISC",
-  "typewig": {
+  "taktil": {
     "entries": "src/*.control.@(js|ts)",
     "copy": [
       "./src/README.md"

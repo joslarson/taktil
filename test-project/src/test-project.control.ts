@@ -1,14 +1,14 @@
-import 'typewig/env'; // must be first in entry file (sets polyfills + globals)
-import { host, session, logger } from 'typewig';
+import 'taktil/env'; // must be first in entry file (sets polyfills + globals)
+import { session } from 'taktil';
 
-import apiStore from './apistore';
-import midiControls from './midicontrols';
-import { BaseView, OtherView, OtherView2, OtherView3 } from './views';
+import bitwig from './apistore';
+import controls from './controls';
+import { BaseView, SceneView, PatternView, PadMidiView, NavigateView } from './views';
 
 
 // define controller script
 host.defineController(
-    'Typewig Examples',  // vendor
+    'Taktil Examples',  // vendor
     'Test Project',  // name
     '1.0.0',  // version
     '2e6cf580-327b-409b-b87a-19f18643c43b',  // uuid
@@ -22,18 +22,22 @@ host.addDeviceNameBasedDiscoveryPair(['Maschine Studio Virtual Input'], ['Maschi
 // init session
 session.on('init', () => {
     // 1. init api sourced data
-    apiStore.init();
+    bitwig.init();
 
-    // 2. set master midiControls list on session
-    session.setMidiControls(midiControls);
+    // 2. set master midiControls map
+    session.controls = controls;
 
     // 3. add views to session
-    session.registerView(BaseView);
-    session.registerView(OtherView);
-    session.registerView(OtherView2);
-    session.registerView(OtherView3);
-    // ... register more views here
+    session.views = [
+        BaseView,
+        SceneView,
+        PatternView,
+        PadMidiView,
+        NavigateView,
+    ];
 
     // 4. set the active view to trigger initial render of MidiControls
-    session.setActiveView(BaseView);
+    session.activeView = PatternView;
+    // session.activeView = SceneView;
+    // Array.prototype.slice.call(bitwig.application.getActions()).map(action => println(`${action.getId()}: ${action.getName()}`));
 });
