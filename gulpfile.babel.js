@@ -3,17 +3,17 @@ import typescript from 'typescript';
 import gts from 'gulp-typescript';
 import babel from 'gulp-babel';
 import merge from 'merge2';
+import { spawn } from 'child_process';
 
-
-const tsProject = gts.createProject('tsconfig.json', { typescript });
+const tsProject = gts.createProject('tsconfig.build.json', { typescript });
 gulp.task('js', () => {
     const tsResult = tsProject.src().pipe(tsProject());
     return merge([
         tsResult.dts.pipe(gulp.dest('dist')),
-        tsResult.js
-            .pipe(babel({ babelrc: false, presets: ['es3'] }))
-            .pipe(gulp.dest('dist')),
-    ]);
+        tsResult.js.pipe(gulp.dest('dist')),
+    ]).on('finish', () => {
+        spawn('npm', ['test'], { stdio: 'inherit' });
+    });
 });
 
 // copy

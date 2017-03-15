@@ -11,7 +11,9 @@ export interface Color {
 
 abstract class AbstractControl {
     name: string;
-    resolution: number = 128;
+    mode: 'ABSOLUTE' | 'RELATIVE' = 'ABSOLUTE';
+    minValue: number = 0;
+    maxValue: number = 127;
     state: { value: number, color: Color, [others: string]: any} = { value: 0, color: { r: 0, g: 0, b: 0 } };
     protected _defaultState: { value: number, color: Color, [others: string]: any };
 
@@ -95,7 +97,7 @@ abstract class AbstractControl {
 
     setState(state: { value?: number, color?: Color, [others: string]: any }) {
         // validate input
-        if (state.value !== undefined && (state.value < 0 || state.value > this.resolution - 1)) throw new Error(`Invalid value "${state.value}" for Control "${this.name}" with resolution "${this.resolution}".`);
+        if (state.value !== undefined && (state.value < this.minValue || state.value > this.maxValue)) throw new Error(`Invalid value "${state.value}" for Control "${this.name}" with value range ${this.minValue} to ${this.maxValue}.`);
         // update state
         this.state = { ...this.state, ...state };
         // re-render
@@ -106,7 +108,7 @@ abstract class AbstractControl {
         // ... optionally implemented in child class
     }
 
-    render(renderThroughComponent = true) {
+    render() {
         // no midi out? no render.
         if (!this.enableMidiOut) return;
 

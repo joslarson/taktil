@@ -1,33 +1,31 @@
 import { session, AbstractButton } from 'taktil';
 import * as components from 'taktil/contrib/components';
 
-import bitwig from 'apistore';
+import store from 'store';
 
 
 export class PlayToggle extends components.AbstractPlayToggle {
-    transport = bitwig.transport;
+    transport = store.transport;
 }
 
 export class MetronomeToggle extends components.AbstractMetronomeToggle {
-    state = { ...this.state, color: { r: 0.3, g: 0, b: 1 } };
-    transport = bitwig.transport;
+    transport = store.transport;
 }
 
 export class PreRollToggle extends components.AbstractPreRollToggle {
-    state = { ...this.state, color: { r: 0.3, g: 0, b: 1 } };
-    transport = bitwig.transport;
+    transport = store.transport;
 }
 
 export class RestartButton extends components.AbstractRestartButton {
-    transport = bitwig.transport;
+    transport = store.transport;
 }
 
 export class OverwriteToggle extends components.AbstractOverwriteToggle {
-    transport = bitwig.transport;
+    transport = store.transport;
 }
 
-export abstract class ArmToggle extends AbstractButton {
-    abstract track = bitwig.cursorTrack;
+export class ArmToggle extends AbstractButton {
+    track = store.cursorTrack;
 
     onRegister() {
         this.track.getArm().addValueObserver(isArmed => {
@@ -41,12 +39,11 @@ export abstract class ArmToggle extends AbstractButton {
 }
 
 export class LoopToggle extends components.AbstractLoopToggle {
-    transport = bitwig.transport;
+    transport = store.transport;
 }
 
-
-export abstract class TempoButton extends AbstractButton {
-    transport = bitwig.transport;
+export class TempoButton extends AbstractButton {
+    transport = store.transport;
 
     onPress() {
         this.setState({ ...this.state, on: true });
@@ -60,9 +57,8 @@ export abstract class TempoButton extends AbstractButton {
     }
 }
 
-
 export class TempoRing extends AbstractButton {
-    transport = bitwig.transport;
+    transport = store.transport;
 
     onRegister() {
         session.on('activateMode', mode => {

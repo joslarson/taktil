@@ -1,7 +1,7 @@
 import 'taktil/env'; // must be first in entry file (sets polyfills + globals)
 import { session } from 'taktil';
 
-import bitwig from './apistore';
+import store from './store';
 import controls from './controls';
 import { BaseView, SceneView, PatternView, PadMidiView, NavigateView } from './views';
 
@@ -22,7 +22,7 @@ host.addDeviceNameBasedDiscoveryPair(['Maschine Studio Virtual Input'], ['Maschi
 // init session
 session.on('init', () => {
     // 1. init api sourced data
-    bitwig.init();
+    store.init();
 
     // 2. set master midiControls map
     session.controls = controls;

@@ -55,7 +55,6 @@ abstract class AbstractComponent {
             let component = this as AbstractComponent;
             let i = 0;
             while(component) {
-                console.log(i, control.activeComponent.name, component.name, control.activeComponent === component);
                 // TODO: figure out why instances aren't equal as expected (should be singleton)
                  if (control.activeComponent.constructor === component.constructor) {
                     this.updateControlState(control);

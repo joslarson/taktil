@@ -6,7 +6,7 @@
     "taktil": "^0.3.0"
   },
   "scripts": {},
-  "author": "Joe Larson",
+  "author": "Joseph Larson",
   "license": "ISC",
   "taktil": {
     "entries": "src/*.control.@(js|ts)",
@@ -15,6 +15,6 @@
     ]
   },
   "devDependencies": {
-    "bitwig-api-ts-stubs": "^2.0.0-beta.1"
+    "bitwig-api-ts-stubs": "^2.0.0"
   }
 }

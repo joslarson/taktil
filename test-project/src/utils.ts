@@ -1,4 +1,4 @@
-import bitwig from 'apistore';
+import store from 'store';
 
 
 export function rgb2hsb({ r, g, b }: { r: number, g: number, b: number }) {
@@ -106,11 +106,11 @@ export class SyncedInterval {
 
     start() {
         const startTime = new Date().getTime();
-        const position = bitwig.transport ? bitwig.transport.getPosition().get() : 1;
-        const isPlaying = bitwig.transport ? bitwig.transport.isPlaying().get() : false;
+        const position = store.transport ? store.transport.getPosition().get() : 1;
+        const isPlaying = store.transport ? store.transport.isPlaying().get() : false;
         
-        const bpm = (bitwig.transport ?
-                     bitwig.transport.tempo().get() * (
+        const bpm = (store.transport ?
+                     store.transport.tempo().get() * (
                          SyncedInterval.MAX_BPM - SyncedInterval.MIN_BPM
                      ) + SyncedInterval.MIN_BPM
                      : 120);

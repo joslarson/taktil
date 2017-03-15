@@ -1,20 +1,20 @@
 import { AbstractButton } from 'taktil';
 
-import bitwig from 'apistore';
+import store from 'store';
 
 
 export class ToggleBrowser extends AbstractButton {
     onRegister() {
-        bitwig.popupBrowser.exists().addValueObserver(browserExists => {
+        store.popupBrowser.exists().addValueObserver(browserExists => {
             this.setState({ ...this.state, on: browserExists });
         });
     }
 
     onPress() {
-        if (bitwig.popupBrowser.exists().get()) {
-            bitwig.popupBrowser.cancel();
+        if (store.popupBrowser.exists().get()) {
+            store.popupBrowser.cancel();
         } else {
-            bitwig.cursorTrack.browseToInsertAtEndOfChain();
+            store.cursorTrack.browseToInsertAtEndOfChain();
         }
     }
 }
@@ -22,6 +22,6 @@ export class ToggleBrowser extends AbstractButton {
 
 export class BrowserExitButton extends AbstractButton {
     onPress() {
-        if (bitwig.popupBrowser.exists().get()) bitwig.popupBrowser.cancel();
+        if (store.popupBrowser.exists().get()) store.popupBrowser.cancel();
     }
 }

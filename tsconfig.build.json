@@ -1,6 +1,7 @@
 {
     "compilerOptions": {
         "target": "es5",
+        "module": "es2015",
         "sourceMap": false,
         "declaration": true,
         "rootDir": "src",
@@ -14,5 +15,8 @@
     "include": [
         "src/**/*.ts",
         "node_modules/bitwig-api-ts-stubs/bitwig-api.d.ts"
+    ],
+    "exclude": [
+        "src/**/*.spec.ts"
     ]
 }

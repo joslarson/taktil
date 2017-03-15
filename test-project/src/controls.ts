@@ -1,7 +1,7 @@
 import { session, SimpleControl, MidiMessage, SysexMessage, MidiPattern, utils } from 'taktil';
 
 import { rgb2hsv, SyncedInterval } from './utils';
-import bitwig from 'apistore';
+import store from 'store';
 
 
 class MaschineButton extends SimpleControl {

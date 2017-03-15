@@ -20,7 +20,7 @@ abstract class AbstractButton extends AbstractComponent {
     updateControlState(control: SimpleControl, overrides: Object = {}) {
         const { on, color } = this.state;
         control.setState({
-            value: on ? control.resolution - 1 : 0,
+            value: on ? control.maxValue : control.minValue,
             ...(color === undefined ? {} : { color }),
             ...overrides
         });

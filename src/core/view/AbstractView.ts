@@ -72,9 +72,7 @@ abstract class AbstractView {
         }
     }
 
-    onRegister() {
-        // optionally implemented in child class
-    }
+    abstract onRegister();
 }
 
 export default AbstractView;

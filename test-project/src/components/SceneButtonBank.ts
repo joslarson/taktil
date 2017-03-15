@@ -1,6 +1,6 @@
 import { AbstractComponentSet, AbstractButton, SimpleControl, session } from 'taktil';
 
-import bitwig from 'apistore';
+import store from 'store';
 
 
 export abstract class AbstractSceneButton extends AbstractButton {
@@ -10,14 +10,14 @@ export abstract class AbstractSceneButton extends AbstractButton {
 
     updateControlState(control: SimpleControl) {
         control.setState({
-            value: this.state.on ? control.resolution - 1 : 0,
+            value: this.state.on ? control.maxValue : control.minValue,
             disabled: !this.state.exists,
             color: this.state.color,
         });
     }
 
     onRegister() {
-        this.scene = bitwig.sceneBank.getScene(this.index);
+        this.scene = store.sceneBank.getScene(this.index);
 
         this.scene.addIsSelectedInEditorObserver(isSelected => {
             this.setState({ ...this.state, on: isSelected })
@@ -32,8 +32,8 @@ export abstract class AbstractSceneButton extends AbstractButton {
         if (!session.modeIsActive('SELECT')) {
             if (!this.scene.exists().get()) {
                 for (let i = 0; i <= this.index; i++) {
-                    if (!bitwig.sceneBank.getScene(i).exists().get()) {
-                        bitwig.createScene.invoke();
+                    if (!store.sceneBank.getScene(i).exists().get()) {
+                        store.createScene.invoke();
                     }
                 }
             } else {

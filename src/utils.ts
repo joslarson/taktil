@@ -39,7 +39,7 @@ export function unsignedInt7ToHex(x) {
 }
 
 
-export function areDeepEqual(obj1: {}, obj2: {}): boolean {
+export function areDeepEqual(obj1: object, obj2: object): boolean {
     let i, l, leftChain, rightChain;
 
     function compare2Objects (x, y) {

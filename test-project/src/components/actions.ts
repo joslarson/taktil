@@ -1,10 +1,10 @@
 import { AbstractButton } from 'taktil';
 
-import bitwig from 'apistore';
+import store from 'store';
 
 
-export abstract class ActionButton extends AbstractButton {
-    application = bitwig.application;
+export abstract class AbstractActionButton extends AbstractButton {
+    application = store.application;
     abstract action: string;
 
     onPress() {
@@ -17,50 +17,50 @@ export abstract class ActionButton extends AbstractButton {
     }
 }
 
-export class UndoButton extends ActionButton {
+export class UndoButton extends AbstractActionButton {
     action = 'undo';
 }
 
 
-export class RedoButton extends ActionButton {
+export class RedoButton extends AbstractActionButton {
     action = 'redo';
 }
 
 
-export class CopyButton extends ActionButton {
+export class CopyButton extends AbstractActionButton {
     action = 'copy';
 }
 
-export class PasteButton extends ActionButton {
+export class PasteButton extends AbstractActionButton {
     action = 'paste';
 }
 
-export class DeleteButton extends ActionButton {
+export class DeleteButton extends AbstractActionButton {
     action = 'delete';
 }
 
-export abstract class LayoutButton extends AbstractButton {
+export abstract class AbstractLayoutButton extends AbstractButton {
     abstract layout: string;
 
     onRegister() {
-        bitwig.application.panelLayout().addValueObserver(layout => {
+        store.application.panelLayout().addValueObserver(layout => {
             this.setState({ ...this.state, on: layout === this.layout });
         });
     }
 
     onPress() {
-        bitwig.application.setPanelLayout(this.layout);
+        store.application.setPanelLayout(this.layout);
     }
 }
 
-export class MixLayoutButton extends LayoutButton {
+export class MixLayoutButton extends AbstractLayoutButton {
     layout = 'MIX';
 }
 
-export class ArrangeLayoutButton extends LayoutButton {
+export class ArrangeLayoutButton extends AbstractLayoutButton {
     layout = 'ARRANGE';
 }
 
-export class EditLayoutButton extends LayoutButton {
+export class EditLayoutButton extends AbstractLayoutButton {
     layout = 'EDIT';
 }

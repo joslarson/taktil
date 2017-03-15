@@ -1,6 +1,6 @@
 import { AbstractComponentSet, AbstractButton, SimpleControl } from 'taktil';
 
-import bitwig from 'apistore';
+import store from 'store';
 
 
 export abstract class AbstractTrackButton extends AbstractButton {
@@ -11,14 +11,14 @@ export abstract class AbstractTrackButton extends AbstractButton {
     updateControlState(control: SimpleControl) {
         const color = this.state.color;
         control.setState({
-            value: this.state.on ? control.resolution - 1 : 0,
+            value: this.state.on ? control.maxValue : control.minValue,
             disabled: !this.state.exists,
             ...(color === undefined ? {} : { color }),
         });
     }
 
     onRegister() {
-        this.track = bitwig.trackBank.getChannel(this.index) as any as API.Track;
+        this.track = store.trackBank.getChannel(this.index) as any as API.Track;
         this.track.isGroup().markInterested();
 
         this.track.color().addValueObserver((r, g, b) => {
@@ -36,7 +36,7 @@ export abstract class AbstractTrackButton extends AbstractButton {
 
     onPress() {
         if (!this.track.exists().get()) {
-            bitwig.application.createInstrumentTrack(this.index);
+            store.application.createInstrumentTrack(this.index);
             this.track.browseToInsertAtStartOfChain();
         }
         this.track.selectInEditor();
@@ -44,15 +44,15 @@ export abstract class AbstractTrackButton extends AbstractButton {
 
     onLongPress() {
         if (this.track.isGroup().get() && !this.state.disabled) {
-            bitwig.application.navigateIntoTrackGroup(this.track);
-            bitwig.trackBank.getChannel(0).selectInEditor();
+            store.application.navigateIntoTrackGroup(this.track);
+            store.trackBank.getChannel(0).selectInEditor();
         }
     }
 
     onDoublePress() {
         if (!this.state.disabled) {
-            bitwig.application.navigateToParentTrackGroup();
-            bitwig.trackBank.getChannel(0).selectInEditor();
+            store.application.navigateToParentTrackGroup();
+            store.trackBank.getChannel(0).selectInEditor();
         }
     }
 }

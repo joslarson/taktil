@@ -1,6 +1,6 @@
 import { AbstractButton, AbstractComponentSet, SimpleControl } from 'taktil';
 
-import bitwig from 'apistore';
+import bitwig from 'store';
 
 
 export abstract class AbstractClipSlotButton extends AbstractButton {
@@ -18,9 +18,8 @@ export abstract class AbstractClipSlotButton extends AbstractButton {
     }
 
     updateControlState(control: SimpleControl) {
-        // console.log(this.index, JSON.stringify(this.state, null, 4));
         const { isPlaying, isPlaybackQueued, isRecording, isRecordingQueued, hasContent } = this.state;
-        const value = isPlaying || isPlaybackQueued || isRecording || isRecordingQueued ? control.resolution - 1 : 0;
+        const value = isPlaying || isPlaybackQueued || isRecording || isRecordingQueued ? control.maxValue : control.minValue;
         const disabled = !hasContent && !isRecordingQueued;
         const flashing = isPlaybackQueued || isRecordingQueued;
         const color = isRecordingQueued || isRecording ? { r: 1, g: 0, b: 0 } : this.state.color;
@@ -48,10 +47,7 @@ export default class ClipSlotButtonBank extends AbstractComponentSet {
     onRegister() {
         this.clipLauncherSlotBank.addIsPlayingObserver((index, isPlaying) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) {
-                console.log('onRegister: isPlaying', index, isPlaying);
-                subComponent.setState({ isPlaying });
-            }
+            if (subComponent) subComponent.setState({ isPlaying });
         });
         this.clipLauncherSlotBank.addIsPlaybackQueuedObserver((index, isPlaybackQueued) => {
             const subComponent = this._componentMap.components[index];
