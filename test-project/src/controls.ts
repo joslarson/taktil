@@ -29,9 +29,9 @@ class MaschineColorButton extends MaschineButton {
         super({ port, inPort, outPort, status, data1 });
         this.patterns = [
             ...this.patterns,
-            new MidiPattern({ status: this.hueStatus, data1, data2: undefined }),
-            new MidiPattern({ status: this.saturationStatus, data1, data2: undefined }),
-            new MidiPattern({ status: this.brightnessStatus, data1, data2: undefined }),
+            new MidiPattern({ status: this.hueStatus, data1 }),
+            new MidiPattern({ status: this.saturationStatus, data1 }),
+            new MidiPattern({ status: this.brightnessStatus, data1 }),
         ];
     }
 

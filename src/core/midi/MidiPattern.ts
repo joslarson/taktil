@@ -1,22 +1,28 @@
 import { SimpleMidiMessage } from './MidiMessage';
 
+export interface MidiPatternMessage {
+    status?: number;
+    data1?: number;
+    data2?: number;
+}
+
 export default class MidiPattern {
     string: string;
     regex: RegExp;
 
-    constructor(input: string | SimpleMidiMessage) {
+    constructor(input: string | MidiPatternMessage) {
         let string: string;
         if (typeof input === 'string') {  // handel string representation as input (e.g. 'B419??')
             if(!/[a-fA-F0-9\?]{6}/.test(input)) throw new Error(`Invalid midi pattern: "${input}"`)
             string = input.toUpperCase();
-        } else {  // handle SimpleMidiMessage as input
+        } else {  // handle MidiPatternMessage as input
             string = this._getPatternStringFromMidiMessage(input);
         }
         this.string = string;
         this.regex = new RegExp(string.slice().replace(/\?/g, '.'));
     }
 
-    get midi(): SimpleMidiMessage {
+    get midi(): MidiPatternMessage {
         const status = this.string.slice(0, 2);
         const data1 = this.string.slice(2, 4);
         const data2 = this.string.slice(4, 6);
@@ -32,7 +38,7 @@ export default class MidiPattern {
         return this.string;
     }
 
-    private _getPatternStringFromMidiMessage(midiMessage: SimpleMidiMessage) {
+    private _getPatternStringFromMidiMessage(midiMessage: MidiPatternMessage) {
         return [midiMessage.status, midiMessage.data1, midiMessage.data2].map(midiByte => {
             if (midiByte === undefined) return '??';
             let hexByteString = midiByte.toString(16).toUpperCase();

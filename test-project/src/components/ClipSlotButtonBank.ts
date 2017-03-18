@@ -47,27 +47,27 @@ export default class ClipSlotButtonBank extends AbstractComponentSet {
     onRegister() {
         this.clipLauncherSlotBank.addIsPlayingObserver((index, isPlaying) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ isPlaying });
+            if (subComponent) subComponent.instance.setState({ isPlaying });
         });
         this.clipLauncherSlotBank.addIsPlaybackQueuedObserver((index, isPlaybackQueued) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ isPlaybackQueued });
+            if (subComponent) subComponent.instance.setState({ isPlaybackQueued });
         });
         this.clipLauncherSlotBank.addIsRecordingObserver((index, isRecording) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ isRecording });
+            if (subComponent) subComponent.instance.setState({ isRecording });
         });
         this.clipLauncherSlotBank.addIsRecordingQueuedObserver((index, isRecordingQueued) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ isRecordingQueued });
+            if (subComponent) subComponent.instance.setState({ isRecordingQueued });
         });
         this.clipLauncherSlotBank.addColorObserver((index, r, g, b) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ color: { r, g, b } });
+            if (subComponent) subComponent.instance.setState({ color: { r, g, b } });
         });
         this.clipLauncherSlotBank.addHasContentObserver((index, hasContent) => {
             const subComponent = this._componentMap.components[index];
-            if (subComponent) subComponent.setState({ hasContent });
+            if (subComponent) subComponent.instance.setState({ hasContent });
         });
     }
 

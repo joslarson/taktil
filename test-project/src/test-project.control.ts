@@ -36,8 +36,6 @@ session.on('init', () => {
         NavigateView,
     ];
 
-    // 4. set the active view to trigger initial render of MidiControls
+    // 4. set initial active view to trigger initial render of MidiControls
     session.activeView = PatternView;
-    // session.activeView = SceneView;
-    // Array.prototype.slice.call(bitwig.application.getActions()).map(action => println(`${action.getId()}: ${action.getName()}`));
 });

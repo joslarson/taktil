@@ -4,9 +4,7 @@ import AbstractView from './AbstractView';
 
 
 class View extends AbstractView {
-    onRegister() {
-
-    }
+    
 }
 
 describe('AbstractView', () => {

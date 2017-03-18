@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "description": "",
   "dependencies": {
-    "taktil": "^0.3.0"
+    "taktil": "^0.3.1"
   },
   "scripts": {},
   "author": "Joseph Larson",

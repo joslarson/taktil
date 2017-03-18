@@ -145,23 +145,23 @@ export class Session {
         // connect each control to the corresponding component in view (if any)
         for (let controlName in session.controls) {
             const control = session.controls[controlName];
-            this.activeView.getInstance().associateControl(control);
+            this.activeView.associateControl(control);
         }
     }
 
     // Views
     //////////////////////////////
 
-    set views(Views: typeof AbstractView[]) {
+    set views(views: typeof AbstractView[]) {
         if (!global.__is_init__) throw new Error('Untimely view registration: views can only be registered from within the init callback.');
-        for (let View of Views) {
-            const instance = View.getInstance();  // getInstance must be called here to instantiate view during init
+        for (let view of views) {
+            view.instance;  // instance must be called here to instantiate view instance during init
             const views = this.views;
 
-            if (instance.parent && views.indexOf(instance.parent) === -1) throw `Invalid view registration order: Parent view "${instance.parent.name}" must be registered before child view "${View.name}".`;
+            if (view.parent && views.indexOf(view.parent) === -1) throw `Invalid view registration order: Parent view "${parent.name}" must be registered before child view "${view.name}".`;
 
-            if (views.indexOf(View) === -1) this._views = [...views, View];
-            instance.onRegister();
+            if (views.indexOf(view) === -1) this._views = [...views, view];
+            view.onRegister();
         }
     }
 
@@ -169,10 +169,10 @@ export class Session {
         return [...this._views];
     }
 
-    set activeView(View: typeof AbstractView) {
-        if (this.views.indexOf(View) === -1) throw new Error(`${View.name} must first be registered before being set as the active view.`);
-        this._activeView = View;
-        this._callEventCallbacks('activateView', View);
+    set activeView(view: typeof AbstractView) {
+        if (this.views.indexOf(view) === -1) throw new Error(`${view.name} must first be registered before being set as the active view.`);
+        this._activeView = view;
+        this._callEventCallbacks('activateView', view);
         this.associateControlsInView();  // re-associate controls in view
     }
 

@@ -4,7 +4,7 @@ import { SceneView, PatternView, PadMidiView, NavigateView } from 'views';
 
 
 export class SceneViewButton extends components.AbstractViewButton {
-    View = SceneView;
+    view = SceneView;
 
     setState(state) {
         super.setState(state);
@@ -16,15 +16,15 @@ export class SceneViewButton extends components.AbstractViewButton {
 }
 
 export class PatternViewButton extends components.AbstractViewButton {
-    View = PatternView;
+    view = PatternView;
 }
 
 export class PadMidiViewButton extends components.AbstractViewButton {
-    View = PadMidiView;
+    view = PadMidiView;
 }
 
 export class NavigateViewButton extends components.AbstractViewButton {
-    View = NavigateView;
+    view = NavigateView;
 }
 
 export class ShiftModeGate extends components.AbstractModeGate {

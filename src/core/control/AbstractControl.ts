@@ -25,7 +25,7 @@ abstract class AbstractControl {
     cacheOnMidiIn: boolean = true;
     enableMidiOut: boolean = true;
 
-    protected _activeComponent: AbstractComponent = null;
+    protected _activeComponent: typeof AbstractComponent = null;
 
     constructor({ port, inPort, outPort, patterns }: {
         port?: number, inPort?: number, outPort?: number, patterns: (string | MidiPattern)[],  // patterns for all inPort and outPort MidiMessages
@@ -47,7 +47,7 @@ abstract class AbstractControl {
         return this._activeComponent;
     }
 
-    set activeComponent(component: AbstractComponent) {
+    set activeComponent(component: typeof AbstractComponent) {
         // component not changing? do nothing
         if (component === this._activeComponent) return;
         this._activeComponent = component;
@@ -57,7 +57,7 @@ abstract class AbstractControl {
 
         // render new control state
         if (component) {
-            component.updateControlState(this);
+            component.instance.updateControlState(this);
         } else {
             this.render();
         }
@@ -89,7 +89,7 @@ abstract class AbstractControl {
         }
 
         if (this.activeComponent) {
-            this.activeComponent.onControlInput(this, this.getInputState(midiMessage));
+            this.activeComponent.instance.onControlInput(this, this.getInputState(midiMessage));
         } else {
             console.info(`Control "${this.name}" is not mapped in active view stack.`);
         }
