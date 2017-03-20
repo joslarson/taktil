@@ -3,7 +3,7 @@ import { AbstractButton } from 'taktil';
 import store from 'store';
 
 
-export abstract class AbstractActionButton extends AbstractButton {
+export abstract class AbstractActionButton extends AbstractButton<{}> {
     application = store.application;
     abstract action: string;
 
@@ -39,10 +39,10 @@ export class DeleteButton extends AbstractActionButton {
     action = 'delete';
 }
 
-export abstract class AbstractLayoutButton extends AbstractButton {
+export abstract class AbstractLayoutButton extends AbstractButton<{}> {
     abstract layout: string;
 
-    onRegister() {
+    onInit() {
         store.application.panelLayout().addValueObserver(layout => {
             this.setState({ ...this.state, on: layout === this.layout });
         });

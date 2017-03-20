@@ -24,10 +24,10 @@ export class OverwriteToggle extends components.AbstractOverwriteToggle {
     transport = store.transport;
 }
 
-export class ArmToggle extends AbstractButton {
+export class ArmToggle extends AbstractButton<{}> {
     track = store.cursorTrack;
 
-    onRegister() {
+    onInit() {
         this.track.getArm().addValueObserver(isArmed => {
             this.setState({ ...this.state, on: isArmed });
         });
@@ -42,13 +42,13 @@ export class LoopToggle extends components.AbstractLoopToggle {
     transport = store.transport;
 }
 
-export class TempoButton extends AbstractButton {
+export class TempoButton extends AbstractButton<{}> {
     transport = store.transport;
 
     onPress() {
         this.setState({ ...this.state, on: true });
         this.transport.tapTempo();
-        session.activateMode('TEMPO');        
+        session.activateMode('TEMPO');
     }
 
     onRelease() {
@@ -57,10 +57,10 @@ export class TempoButton extends AbstractButton {
     }
 }
 
-export class TempoRing extends AbstractButton {
+export class TempoRing extends AbstractButton<{}> {
     transport = store.transport;
 
-    onRegister() {
+    onInit() {
         session.on('activateMode', mode => {
             if (mode === 'TEMPO') this.setState({ ...this.state, on: true });
         });

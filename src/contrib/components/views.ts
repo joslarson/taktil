@@ -1,36 +1,33 @@
 import { AbstractButton } from '../../core/component';
 import { AbstractView } from '../../core/view';
+import { AbstractControl } from '../../core/control';
 import session from '../../session';
 
 
-export abstract class AbstractViewButton extends AbstractButton {
-    abstract view: typeof AbstractView;
-
-    onRegister() {
+export class ViewToggle extends AbstractButton<{ view: typeof AbstractView }> {
+    onInit() {
         session.on('activateView', (view: typeof AbstractView) => {
-            this.setState({ ...this.state, on: view === this.view });
+            this.setState({ ...this.state, on: view === this.options.view });
         });
     }
 
     onPress() {
-        if (session.activeView === this.view && this.view.parent) {
-            session.activeView = this.view.parent;
+        if (session.activeView === this.options.view && this.options.view.parent) {
+            session.activeView = this.options.view.parent;
         } else {
-            session.activeView = this.view;
+            session.activeView = this.options.view;
         }
     }
 }
 
-export abstract class AbstractModeGate extends AbstractButton {
-    abstract mode: string;
-
+export class ModeGate extends AbstractButton<{ mode: string }> {
     onPress() {
         this.setState({ ...this.state, on: true });
-        session.activateMode(this.mode);
+        session.activateMode(this.options.mode);
     }
 
     onRelease() {
         this.setState({ ...this.state, on: false });
-        session.deactivateMode(this.mode);
+        session.deactivateMode(this.options.mode);
     }
 }

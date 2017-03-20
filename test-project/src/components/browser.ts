@@ -3,8 +3,8 @@ import { AbstractButton } from 'taktil';
 import store from 'store';
 
 
-export class ToggleBrowser extends AbstractButton {
-    onRegister() {
+export class ToggleBrowser extends AbstractButton<{}> {
+    onInit() {
         store.popupBrowser.exists().addValueObserver(browserExists => {
             this.setState({ ...this.state, on: browserExists });
         });
@@ -20,7 +20,7 @@ export class ToggleBrowser extends AbstractButton {
 }
 
 
-export class BrowserExitButton extends AbstractButton {
+export class BrowserExitButton extends AbstractButton<{}> {
     onPress() {
         if (store.popupBrowser.exists().get()) store.popupBrowser.cancel();
     }

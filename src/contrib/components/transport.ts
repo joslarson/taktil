@@ -2,10 +2,10 @@ import { AbstractButton } from '../../core/component';
 import session from '../../session';
 
 
-export abstract class AbstractPlayToggle extends AbstractButton {
+export abstract class AbstractPlayToggle extends AbstractButton<{}> {
     abstract transport: API.Transport;
 
-    onRegister() {
+    onInit() {
         this.transport.isPlaying().addValueObserver(
             isPlaying => this.setState({ ...this.state, on: isPlaying })
         );
@@ -17,10 +17,10 @@ export abstract class AbstractPlayToggle extends AbstractButton {
 }
 
 
-export abstract class AbstractMetronomeToggle extends AbstractButton {
+export abstract class AbstractMetronomeToggle extends AbstractButton<{}> {
     abstract transport: API.Transport;
 
-    onRegister() {
+    onInit() {
         this.transport.isMetronomeEnabled().addValueObserver((isOn) => {
             this.setState({ ...this.state, on: isOn });
         });
@@ -32,10 +32,10 @@ export abstract class AbstractMetronomeToggle extends AbstractButton {
 }
 
 
-export abstract class AbstractPreRollToggle extends AbstractButton {
+export abstract class AbstractPreRollToggle extends AbstractButton<{}> {
     abstract transport: API.Transport;
 
-    onRegister() {
+    onInit() {
         this.transport.preRoll().addValueObserver((preRollState) => {
             this.setState({ ...this.state, on: preRollState !== 'none' });
         });
@@ -47,7 +47,7 @@ export abstract class AbstractPreRollToggle extends AbstractButton {
 }
 
 
-export abstract class AbstractRestartButton extends AbstractButton {
+export abstract class AbstractRestartButton extends AbstractButton<{}> {
     abstract transport: API.Transport;
 
     onPress() {
@@ -61,10 +61,10 @@ export abstract class AbstractRestartButton extends AbstractButton {
 }
 
 
-export abstract class AbstractOverwriteToggle extends AbstractButton {
+export abstract class AbstractOverwriteToggle extends AbstractButton<{}> {
     abstract transport: API.Transport;
 
-    onRegister() {
+    onInit() {
         this.transport.isClipLauncherOverdubEnabled().addValueObserver(
             isActive => this.setState({ ...this.state, on: isActive })
         );
@@ -76,10 +76,10 @@ export abstract class AbstractOverwriteToggle extends AbstractButton {
 }
 
 
-export abstract class AbstractLoopToggle extends AbstractButton {
+export abstract class AbstractLoopToggle extends AbstractButton<{}> {
     abstract transport: API.Transport;
 
-    onRegister() {
+    onInit() {
         this.transport.isArrangerLoopEnabled().addValueObserver(
             isActive => this.setState({ ...this.state, on: isActive })
         );

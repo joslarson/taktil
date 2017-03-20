@@ -1,10 +1,9 @@
-import { AbstractComponentSet, AbstractButton, SimpleControl, session } from 'taktil';
+import { AbstractButton, SimpleControl, session } from 'taktil';
 
 import store from 'store';
 
 
-export abstract class AbstractSceneButton extends AbstractButton {
-    abstract index: number;
+export default class SceneButton extends AbstractButton<{ index: number }> {
     scene: API.Scene;
     state = { ...this.state, exists: false, color: { r: 1, g: 0, b: 1 } };
 
@@ -16,8 +15,8 @@ export abstract class AbstractSceneButton extends AbstractButton {
         });
     }
 
-    onRegister() {
-        this.scene = store.sceneBank.getScene(this.index);
+    onInit() {
+        this.scene = store.sceneBank.getScene(this.options.index);
 
         this.scene.addIsSelectedInEditorObserver(isSelected => {
             this.setState({ ...this.state, on: isSelected })
@@ -31,23 +30,13 @@ export abstract class AbstractSceneButton extends AbstractButton {
     onPress() {
         if (!session.modeIsActive('SELECT')) {
             if (!this.scene.exists().get()) {
-                for (let i = 0; i <= this.index; i++) {
-                    if (!store.sceneBank.getScene(i).exists().get()) {
-                        store.createScene.invoke();
-                    }
+                for (let i = 0; i <= this.options.index; i++) {
+                    if (!store.sceneBank.getScene(i).exists().get()) store.createScene.invoke();
                 }
             } else {
                 this.scene.launch();
             }
         }
         this.scene.selectInEditor();
-    }
-}
-
-export default class SceneButtonBank extends AbstractComponentSet {
-    getComponentClass(index: number) {
-        return class SceneButton extends AbstractSceneButton {
-            index = index;
-        }
     }
 }

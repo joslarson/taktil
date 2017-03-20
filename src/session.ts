@@ -154,15 +154,15 @@ export class Session {
 
     set views(views: typeof AbstractView[]) {
         if (!global.__is_init__) throw new Error('Untimely view registration: views can only be registered from within the init callback.');
+        // validate view registration order and initialize views
+        let validatedViews = [];
         for (let view of views) {
-            view.instance;  // instance must be called here to instantiate view instance during init
-            const views = this.views;
-
-            if (view.parent && views.indexOf(view.parent) === -1) throw `Invalid view registration order: Parent view "${parent.name}" must be registered before child view "${view.name}".`;
-
-            if (views.indexOf(view) === -1) this._views = [...views, view];
-            view.onRegister();
+            if (view.parent && validatedViews.indexOf(view.parent) === -1) throw `Invalid view registration order: Parent view "${parent.name}" must be registered before child view "${view.name}".`;
+            if (validatedViews.indexOf(view) === -1) validatedViews = [...validatedViews, view];
+            view.init();
         }
+        // set session views
+        this._views = validatedViews;
     }
 
     get views() {

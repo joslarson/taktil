@@ -5,7 +5,7 @@ import MidiMessage from '../midi/MidiMessage';
 import session from '../../session';
 
 
-abstract class AbstractRange extends AbstractComponent {
+abstract class AbstractRange<Options extends { [key: string]: any }> extends AbstractComponent<Options> {
     state: { value: number } = { value: 0 };
 
     updateControlState(control: AbstractControl) {
@@ -19,3 +19,7 @@ abstract class AbstractRange extends AbstractComponent {
 
 
 export default AbstractRange;
+
+let a: { [key: string]: any };
+
+a = { b: 'b' };

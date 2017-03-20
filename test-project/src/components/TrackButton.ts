@@ -1,10 +1,9 @@
-import { AbstractComponentSet, AbstractButton, SimpleControl } from 'taktil';
+import { AbstractButton, SimpleControl } from 'taktil';
 
 import store from 'store';
 
 
-export abstract class AbstractTrackButton extends AbstractButton {
-    abstract index: number;
+export default class TrackButton extends AbstractButton<{ index: number }> {
     track: API.Track;
     state = { ...this.state, exists: false };
 
@@ -17,8 +16,8 @@ export abstract class AbstractTrackButton extends AbstractButton {
         });
     }
 
-    onRegister() {
-        this.track = store.trackBank.getChannel(this.index) as any as API.Track;
+    onInit() {
+        this.track = store.trackBank.getChannel(this.options.index) as API.Track;
         this.track.isGroup().markInterested();
 
         this.track.color().addValueObserver((r, g, b) => {
@@ -36,7 +35,7 @@ export abstract class AbstractTrackButton extends AbstractButton {
 
     onPress() {
         if (!this.track.exists().get()) {
-            store.application.createInstrumentTrack(this.index);
+            store.application.createInstrumentTrack(this.options.index);
             this.track.browseToInsertAtStartOfChain();
         }
         this.track.selectInEditor();
@@ -53,14 +52,6 @@ export abstract class AbstractTrackButton extends AbstractButton {
         if (!this.state.disabled) {
             store.application.navigateToParentTrackGroup();
             store.trackBank.getChannel(0).selectInEditor();
-        }
-    }
-}
-
-export default class TrackButtonBank extends AbstractComponentSet {
-    getComponentClass(index: number) {
-        return class TrackButton extends AbstractTrackButton {
-            index = index;
         }
     }
 }

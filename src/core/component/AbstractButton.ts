@@ -2,7 +2,7 @@ import AbstractComponent from './AbstractComponent';
 import { AbstractControl, SimpleControl } from '../control';
 
 
-interface AbstractButton {
+interface AbstractButton<Options extends { [key: string]: any }> {
     onPress?();
     onLongPress?();
     onDoublePress?();
@@ -10,7 +10,7 @@ interface AbstractButton {
     onDoubleRelease?();
 }
 
-abstract class AbstractButton extends AbstractComponent {
+abstract class AbstractButton<Options extends { [key: string]: any }> extends AbstractComponent<Options> {
     LONG_PRESS_DELAY = 350;
     DOUBLE_PRESS_DELAY = 350;
 

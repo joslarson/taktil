@@ -24,7 +24,7 @@ session.on('init', () => {
     // 1. init api sourced data
     store.init();
 
-    // 2. set master midiControls map
+    // 2. set master controls map
     session.controls = controls;
 
     // 3. add views to session
@@ -36,6 +36,6 @@ session.on('init', () => {
         NavigateView,
     ];
 
-    // 4. set initial active view to trigger initial render of MidiControls
+    // 4. set initial active view to trigger initial render of Controls
     session.activeView = PatternView;
 });

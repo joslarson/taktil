@@ -1,7 +1,6 @@
 export * from './actions';
 export * from './transport';
-export * from './views';
 export * from './browser';
-export { default as SceneButtonBank } from './SceneButtonBank';
-export { default as ClipSlotButtonBank } from './ClipSlotButtonBank';
-export { default as TrackButtonBank } from './TrackButtonBank';
+export { default as SceneButton } from './SceneButton';
+export { default as ClipSlotButton } from './ClipSlotButton';
+export { default as TrackButton } from './TrackButton';

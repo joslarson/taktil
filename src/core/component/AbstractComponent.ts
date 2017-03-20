@@ -3,69 +3,27 @@ import { areDeepEqual } from '../../utils';
 import session from '../../session';
 import AbstractControl from '../control/AbstractControl';
 
-
-abstract class AbstractComponent {
-    private static _instance: AbstractComponent;
-    static parent: typeof AbstractComponent;
-    static controls: AbstractControl[] = [];
-    static registrations: Object[] = [];
-    static views: typeof AbstractView[] = [];
-
-    static get instance() {
-        // inheritance safe singleton pattern (each child class will have its own singleton)
-        const Component = this as any as { new (): AbstractComponent, _instance: AbstractComponent };
-        let instance = Component._instance;
-
-        if (instance instanceof Component) return instance;
-
-        instance = new Component();
-        Component._instance = instance; 
-        return instance;
-    }
+// TODO: add generic default when TypeScript 2.3 lands:
+// abstract class AbstractComponent<Options extends { [key: string]: any } = { [key: string]: any }> {
+abstract class AbstractComponent<Options extends { [key: string]: any }> {
+    view: typeof AbstractView;
+    mode: string;
+    controls: AbstractControl[];
+    options: Options;
 
     abstract state: Object; // contents depends on component type
 
-    protected constructor() {}
-
-    get class(): typeof AbstractComponent {
-        return this.constructor as typeof AbstractComponent;
-    }
-
-    get controls() {
-        return this.class.controls;
-    }
-
-    set controls(controls: AbstractControl[]) {
-        this.class.controls = controls;
-    }
-
-    get registrations() {
-        return this.class.registrations;
-    }
-
-    set registrations(registrations) {
-        this.class.registrations = registrations;
-    }
-
-    get views() {
-        return this.class.views;
-    }
-
-    set views(views: typeof AbstractView[]) {
-        this.class.views = views;
+    constructor(controls: AbstractControl[] | AbstractControl, mode?: string, options?: Options);
+    constructor(controls: AbstractControl[] | AbstractControl, options?: Options);
+    constructor(controls: AbstractControl[] | AbstractControl, ...rest) {
+        this.controls = Array.isArray(controls) ? controls : [controls];
+        this.mode = typeof rest[0] === 'string' ? rest[0] : '__BASE__';
+        this.options = typeof rest[rest.length - 1] === 'object' ? rest[rest.length - 1] : {};
     }
 
     // called when button is registered to a view for the first time
-    // allows running of code that is only aloud in the api's init function
-    register(controls: AbstractControl[], view: typeof AbstractView) {
-        this.registrations.push({'view': view, 'controls': controls});
-        this.controls = [...this.controls, ...controls];
-        if (this.views.indexOf(view) === -1) this.views.push(view);
-        // call onRegister()
-        this.onRegister();
-    }
-
-    onRegister() {
+    // allows running of code that is only allowed in the api's init function
+    onInit() {
         // optionally implemented in child class
     }
 
@@ -77,16 +35,7 @@ abstract class AbstractComponent {
         this.state = newState;
         // update hardware state if in view
         for (let control of this.controls) {
-            if (control.activeComponent === null) continue;
-            let component = this.constructor as typeof AbstractComponent;
-            while(component) {
-                 if (control.activeComponent === component) {
-                    this.updateControlState(control);
-                    break;
-                } else {
-                    component = component.parent ? component.parent : null;
-                }
-            }
+            if (control.activeComponent === this) this.updateControlState(control);
         }
     }
 
