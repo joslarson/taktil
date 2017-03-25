@@ -9,12 +9,14 @@
         "moduleResolution": "node",
         "outDir": "./dist",
         "lib": ["dom", "es6", "dom.iterable", "scripthost"],
-        "importHelpers": true
+        "importHelpers": true,
+        "types": [
+            "typed-bitwig-api"
+        ]
     },
     "compileOnSave": false,
     "include": [
-        "src/**/*.ts",
-        "node_modules/bitwig-api-ts-stubs/bitwig-api.d.ts"
+        "src/**/*.ts"
     ],
     "exclude": [
         "src/**/*.spec.ts"

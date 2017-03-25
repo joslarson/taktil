@@ -6,6 +6,7 @@ import AbstractControl from '../control/AbstractControl';
 // TODO: add generic default when TypeScript 2.3 lands:
 // abstract class AbstractComponent<Options extends { [key: string]: any } = { [key: string]: any }> {
 abstract class AbstractComponent<Options extends { [key: string]: any }> {
+    name: string;
     view: typeof AbstractView;
     mode: string;
     controls: AbstractControl[];
@@ -34,6 +35,7 @@ abstract class AbstractComponent<Options extends { [key: string]: any }> {
         // update object state
         this.state = newState;
         // update hardware state if in view
+        
         for (let control of this.controls) {
             if (control.activeComponent === this) this.updateControlState(control);
         }

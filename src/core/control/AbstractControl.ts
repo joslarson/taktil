@@ -81,16 +81,14 @@ abstract class AbstractControl {
     }
 
     onMidi(midiMessage: MidiMessage) {
-        if (this.cacheOnMidiIn) {
-            // update cache with input
-            this.cacheMidiMessage(midiMessage);
-            // re-render based on current state (messages will only be sent if they are different than what's in the cache)
-            this.render();
-        }
+        // update cache with input
+        if (this.cacheOnMidiIn) this.cacheMidiMessage(midiMessage);
 
         if (this.activeComponent) {
             this.activeComponent.onControlInput(this, this.getInputState(midiMessage));
         } else {
+            // re-render based on current state (messages will only be sent if they are different than what's in the cache)
+            this.render();
             console.info(`Control "${this.name}" is not mapped in active view stack.`);
         }
     }

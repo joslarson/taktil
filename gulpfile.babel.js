@@ -17,7 +17,7 @@ gulp.task('js', () => {
 });
 
 // copy
-gulp.task('copy', () => gulp.src(['README.md', 'LICENSE', 'package.json', 'src/types/*'])
+gulp.task('copy', () => gulp.src(['README.md', 'LICENSE', 'package.json', 'src/globals.d.ts'])
      .pipe(gulp.dest('dist')));
 
 gulp.task('copy-types', () => gulp.src('src/types/**/*')
@@ -25,9 +25,8 @@ gulp.task('copy-types', () => gulp.src('src/types/**/*')
 
 // gulp watch
 gulp.task('watch', ['js', 'copy', 'copy-types'], () => {
-    gulp.watch(['src/**/*.ts', 'node_modules/bitwig-api-proxy/lib/index.js'], ['js']);
-    gulp.watch(['README.md', 'LICENSE', 'package.json'], ['copy']);
-    gulp.watch(['src/types/**/*'], ['copy-types']);
+    gulp.watch(['src/**/*.ts'], ['js']);
+    gulp.watch(['README.md', 'LICENSE', 'package.json', 'src/globals.d.ts'], ['copy']);
 });
 
 // default task

@@ -7,13 +7,16 @@
         "sourceMap": false,
         "moduleResolution": "node",
         "allowJs": true,
-        "importHelpers": true
+        "importHelpers": true,
+        "lib": ["dom", "es6", "dom.iterable", "scripthost"],
+        "types": [
+            "taktil/globals",
+            "typed-bitwig-api"
+        ]
     },
     "compileOnSave": false,
     "include": [
-        "src/**/*.ts",
-        "node_modules/bitwig-api-ts-stubs/bitwig-api.d.ts",
-        "node_modules/taktil/types/global.d.ts"
+        "src/**/*.ts"
     ],
     "exclude": []
 }

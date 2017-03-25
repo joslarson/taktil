@@ -5,7 +5,7 @@ import session from '../../session';
 
 
 interface AbstractView {
-    [key: string]: AbstractComponent<any>;
+    [key: string]: AbstractComponent<any> | AbstractComponent<any>[] | (() => AbstractComponent<any> | AbstractComponent<any>[]);
 }
 
 abstract class AbstractView {
@@ -28,7 +28,6 @@ abstract class AbstractView {
     }
 
     static getComponent(control: AbstractControl, mode: string): AbstractComponent<any> {
-        const instance = this.instance;
         if (this._componentMap[mode] === undefined) return;
         const componentMapIndex = this._componentMap[mode].controls.indexOf(control);
         if (componentMapIndex === -1) return;
@@ -58,22 +57,32 @@ abstract class AbstractView {
     static init() {
         const instance = this.instance;
         Object.getOwnPropertyNames(instance).map(key => {
-            const component = instance[key];
-            if (component instanceof AbstractComponent === false) return;
-            // run `onInit()` for each component
-            component.onInit();
-            // register components and controls in view
-            const { controls, mode } = component;
-            for (let control of controls as AbstractControl[]) {
-                // register control with view/mode
-                if (!this._componentMap[mode]) this._componentMap[mode] = { controls: [], components: [] };
+            let value = instance[key];
+            value = typeof value === 'function' ? value() : value;
+            const components = value instanceof Array ? value : [value];
+            for (let i = 0; i < components.length; i += 1) {
+                const component = components[i];
+                const isSingleComponent = components.length === 1;
+                // skip non-component properties
+                if (component instanceof AbstractComponent === false) continue;
+                // set component name and view
+                component.name = isSingleComponent ? key : `${key}[${i}]`;
+                component.view = this;
+                // register components and controls in view
+                const { controls, mode } = component;
+                for (let control of controls as AbstractControl[]) {
+                    // register control with view/mode
+                    if (!this._componentMap[mode]) this._componentMap[mode] = { controls: [], components: [] };
 
-                // if control already registered in view mode, throw error
-                if (this._componentMap[mode].controls.indexOf(control) > -1) throw Error('Duplicate Control registration in view mode.');
+                    // if control already registered in view mode, throw error
+                    if (this._componentMap[mode].controls.indexOf(control) > -1) throw Error('Duplicate Control registration in view mode.');
 
-                // add control and component pair to component map
-                this._componentMap[mode].controls.push(control);
-                this._componentMap[mode].components.push(component);
+                    // add control and component pair to component map
+                    this._componentMap[mode].controls.push(control);
+                    this._componentMap[mode].components.push(component);
+                    // initialize component
+                    component.onInit();
+                }
             }
         });
     }

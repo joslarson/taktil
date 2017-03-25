@@ -15,14 +15,20 @@ export class BaseView extends AbstractView {
     tempoButton = new components.TempoButton(controls.TAP);
 
     // Groups
-    trackAButton = new components.TrackButton(controls.GROUP_A, { index: 0 });
-    trackBButton = new components.TrackButton(controls.GROUP_B, { index: 1 });
-    trackCButton = new components.TrackButton(controls.GROUP_C, { index: 2 });
-    trackDButton = new components.TrackButton(controls.GROUP_D, { index: 3 });
-    trackEButton = new components.TrackButton(controls.GROUP_E, { index: 4 });
-    trackFButton = new components.TrackButton(controls.GROUP_F, { index: 5 });
-    trackGButton = new components.TrackButton(controls.GROUP_G, { index: 6 });
-    trackHButton = new components.TrackButton(controls.GROUP_H, { index: 7 });
+    trackButtons = [
+        controls.GROUP_A, controls.GROUP_B, controls.GROUP_C, controls.GROUP_D,
+        controls.GROUP_E, controls.GROUP_F, controls.GROUP_G, controls.GROUP_H,
+    ].map((control, index) => new components.TrackButton(control, { index }));
+
+    volumeKnobs = [
+        controls.VOL_A, controls.VOL_B, controls.VOL_C, controls.VOL_D,
+        controls.VOL_E, controls.VOL_F, controls.VOL_G, controls.VOL_H,
+    ].map((control, index) => new components.VolumeRange(control, { index }));
+
+    volumeKnobsTouch = [
+        controls.VOL_TOUCH_A, controls.VOL_TOUCH_B, controls.VOL_TOUCH_C, controls.VOL_TOUCH_D,
+        controls.VOL_TOUCH_E, controls.VOL_TOUCH_F, controls.VOL_TOUCH_G, controls.VOL_TOUCH_H,
+    ].map((control, index) => new components.VolumeKnobTouch(control, { index }));
 
     // Transport
     restartButton = new components.RestartButton(controls.RESTART);
@@ -56,44 +62,23 @@ export class BaseView extends AbstractView {
 
 export class SceneView extends AbstractView {
     static parent = BaseView;
-
-    sceneButton1 = new components.SceneButton(controls.PAD_1, { index: 0 });
-    sceneButton2 = new components.SceneButton(controls.PAD_2, { index: 1 });
-    sceneButton3 = new components.SceneButton(controls.PAD_3, { index: 2 });
-    sceneButton4 = new components.SceneButton(controls.PAD_4, { index: 3 });
-    sceneButton5 = new components.SceneButton(controls.PAD_5, { index: 4 });
-    sceneButton6 = new components.SceneButton(controls.PAD_6, { index: 5 });
-    sceneButton7 = new components.SceneButton(controls.PAD_7, { index: 6 });
-    sceneButton8 = new components.SceneButton(controls.PAD_8, { index: 7 });
-    sceneButton9 = new components.SceneButton(controls.PAD_9, { index: 8 });
-    sceneButton10 = new components.SceneButton(controls.PAD_10, { index: 9 });
-    sceneButton11 = new components.SceneButton(controls.PAD_11, { index: 10 });
-    sceneButton12 = new components.SceneButton(controls.PAD_12, { index: 11 });
-    sceneButton13 = new components.SceneButton(controls.PAD_13, { index: 12 });
-    sceneButton14 = new components.SceneButton(controls.PAD_14, { index: 13 });
-    sceneButton15 = new components.SceneButton(controls.PAD_15, { index: 14 });
-    sceneButton16 = new components.SceneButton(controls.PAD_16, { index: 15 });
+    sceneButtons = [
+        controls.PAD_1, controls.PAD_2, controls.PAD_3, controls.PAD_4,
+        controls.PAD_5, controls.PAD_6, controls.PAD_7, controls.PAD_8,
+        controls.PAD_9, controls.PAD_10, controls.PAD_11, controls.PAD_12,
+        controls.PAD_13, controls.PAD_14, controls.PAD_15, controls.PAD_16,
+    ].map((control, index) => new components.SceneButton(control, { index }));
 }
 
 export class PatternView extends AbstractView {
     static parent = BaseView;
 
-    clipSlotButton0 = new components.ClipSlotButton(controls.PAD_1, { index: 0 });
-    clipSlotButton1 = new components.ClipSlotButton(controls.PAD_2, { index: 1 });
-    clipSlotButton2 = new components.ClipSlotButton(controls.PAD_3, { index: 2 });
-    clipSlotButton3 = new components.ClipSlotButton(controls.PAD_4, { index: 3 });
-    clipSlotButton4 = new components.ClipSlotButton(controls.PAD_5, { index: 4 });
-    clipSlotButton5 = new components.ClipSlotButton(controls.PAD_6, { index: 5 });
-    clipSlotButton6 = new components.ClipSlotButton(controls.PAD_7, { index: 6 });
-    clipSlotButton7 = new components.ClipSlotButton(controls.PAD_8, { index: 7 });
-    clipSlotButton8 = new components.ClipSlotButton(controls.PAD_9, { index: 8 });
-    clipSlotButton9 = new components.ClipSlotButton(controls.PAD_10, { index: 9 });
-    clipSlotButton10 = new components.ClipSlotButton(controls.PAD_11, { index: 10 });
-    clipSlotButton11 = new components.ClipSlotButton(controls.PAD_12, { index: 11 });
-    clipSlotButton12 = new components.ClipSlotButton(controls.PAD_13, { index: 12 });
-    clipSlotButton13 = new components.ClipSlotButton(controls.PAD_14, { index: 13 });
-    clipSlotButton14 = new components.ClipSlotButton(controls.PAD_15, { index: 14 });
-    clipSlotButton15 = new components.ClipSlotButton(controls.PAD_16, { index: 15 });
+    clipSlotButtons = [
+        controls.PAD_1, controls.PAD_2, controls.PAD_3, controls.PAD_4,
+        controls.PAD_5, controls.PAD_6, controls.PAD_7, controls.PAD_8,
+        controls.PAD_9, controls.PAD_10, controls.PAD_11, controls.PAD_12,
+        controls.PAD_13, controls.PAD_14, controls.PAD_15, controls.PAD_16,
+    ].map((control, index) => new components.ClipSlotButton(control, { index }));
 }
 
 export class PadMidiView extends AbstractView {
