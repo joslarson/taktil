@@ -3,10 +3,10 @@ import { AbstractButton } from 'taktil';
 import store from 'store';
 
 
-export class ToggleBrowser extends AbstractButton<{}> {
+export default class BrowserToggle extends AbstractButton {
     onInit() {
         store.popupBrowser.exists().addValueObserver(browserExists => {
-            this.setState({ ...this.state, on: browserExists });
+            this.setState({ on: browserExists });
         });
     }
 
@@ -16,12 +16,5 @@ export class ToggleBrowser extends AbstractButton<{}> {
         } else {
             store.cursorTrack.browseToInsertAtEndOfChain();
         }
-    }
-}
-
-
-export class BrowserExitButton extends AbstractButton<{}> {
-    onPress() {
-        if (store.popupBrowser.exists().get()) store.popupBrowser.cancel();
     }
 }

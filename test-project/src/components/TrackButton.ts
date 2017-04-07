@@ -1,19 +1,30 @@
-import { AbstractButton, SimpleControl } from 'taktil';
+import { AbstractButton, AbstractSimpleControl, Color } from 'taktil';
 
 import store from 'store';
 
 
-export default class TrackButton extends AbstractButton<{ index: number }> {
-    track: API.Track;
-    state = { ...this.state, exists: false };
+interface TrackButtonState {
+    on: boolean;
+    color?: Color;
+    exists: boolean;
+    disabled: boolean;
+}
 
-    updateControlState(control: SimpleControl) {
-        const color = this.state.color;
-        control.setState({
-            value: this.state.on ? control.maxValue : control.minValue,
-            disabled: !this.state.exists,
+
+export default class TrackButton extends AbstractButton<{ index: number }, TrackButtonState> {
+    track: API.Track;
+
+    getInitialState() {
+        return { on: false, disabled: false, exists: false };
+    }
+
+    getControlOutput(control: AbstractSimpleControl) {
+        const { on, exists, color } = this.state;
+        return {
+            value: on ? 1 : 0,
+            disabled: !exists,
             ...(color === undefined ? {} : { color }),
-        });
+        };
     }
 
     onInit() {
@@ -34,7 +45,7 @@ export default class TrackButton extends AbstractButton<{ index: number }> {
     }
 
     onPress() {
-        if (!this.track.exists().get()) {
+        if (this.options.index === store.trackBank.channelCount().get()) {
             store.application.createInstrumentTrack(this.options.index);
             this.track.browseToInsertAtStartOfChain();
         }

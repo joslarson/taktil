@@ -5,13 +5,13 @@ import session from '../../session';
 
 
 interface AbstractView {
-    [key: string]: AbstractComponent<any> | AbstractComponent<any>[] | (() => AbstractComponent<any> | AbstractComponent<any>[]);
+    [key: string]: AbstractComponent | AbstractComponent[] | (() => AbstractComponent | AbstractComponent[]);
 }
 
 abstract class AbstractView {
     static parent: typeof AbstractView;
     private static _instance: AbstractView;
-    private static _componentMap: { [mode: string]: { controls: AbstractControl[], components: AbstractComponent<any>[] } };
+    private static _componentMap: { [mode: string]: { controls: AbstractControl[], components: AbstractComponent[] } };
 
     static get instance() {
         // inheritance safe singleton pattern (each child class will have its own singleton)
@@ -27,7 +27,7 @@ abstract class AbstractView {
         return instance;
     }
 
-    static getComponent(control: AbstractControl, mode: string): AbstractComponent<any> {
+    static getComponent(control: AbstractControl, mode: string): AbstractComponent {
         if (this._componentMap[mode] === undefined) return;
         const componentMapIndex = this._componentMap[mode].controls.indexOf(control);
         if (componentMapIndex === -1) return;

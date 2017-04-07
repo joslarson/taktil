@@ -1,21 +1,25 @@
 import { SimpleMidiMessage, MidiMessage, SysexMessage, MidiPattern } from '../midi/';
 import { AbstractComponent } from '../component'
+import { Color } from '../helpers';
 import session from '../../session';
 
 
-export interface Color {
-    r: number;
-    g: number;
-    b: number;
+export interface AbstractControlState {
+    value: number;
+    color?: Color;
+    [key: string]: any;
 }
 
-abstract class AbstractControl {
+export type AbstractControlConstructor = {
+    port?: number, inPort?: number, outPort?: number,
+    patterns: (string | MidiPattern)[],  // patterns for all inPort and outPort MidiMessages
+};
+
+abstract class AbstractControl<State extends AbstractControlState = AbstractControlState> {
     name: string;
     mode: 'ABSOLUTE' | 'RELATIVE' = 'ABSOLUTE';
-    minValue: number = 0;
-    maxValue: number = 127;
-    state: { value: number, color: Color, [others: string]: any} = { value: 0, color: { r: 0, g: 0, b: 0 } };
-    protected _defaultState: { value: number, color: Color, [others: string]: any };
+    abstract state: State;
+    private _defaultState: State;
 
     inPort: number = 0;
     outPort: number = 0;
@@ -25,11 +29,9 @@ abstract class AbstractControl {
     cacheOnMidiIn: boolean = true;
     enableMidiOut: boolean = true;
 
-    protected _activeComponent: AbstractComponent<any> = null;
+    private _activeComponent: AbstractComponent = null;
 
-    constructor({ port, inPort, outPort, patterns }: {
-        port?: number, inPort?: number, outPort?: number, patterns: (string | MidiPattern)[],  // patterns for all inPort and outPort MidiMessages
-    }) {
+    constructor({ port, inPort, outPort, patterns }: AbstractControlConstructor) {
         if (!patterns || patterns.length === 0) throw new Error(`Error, Control must specify at least one pattern.`);
 
         // set object properties
@@ -39,7 +41,7 @@ abstract class AbstractControl {
     }
 
     get defaultState() {
-        if (!this._defaultState) this._defaultState = { ...this.state };
+        if (!this._defaultState) this._defaultState = JSON.parse(JSON.stringify(this.state)) as State;
         return this._defaultState;
     }
 
@@ -47,7 +49,7 @@ abstract class AbstractControl {
         return this._activeComponent;
     }
 
-    set activeComponent(component: AbstractComponent<any>) {
+    set activeComponent(component: AbstractComponent | null) {
         // component not changing? do nothing
         if (component === this._activeComponent) return;
         this._activeComponent = component;
@@ -57,15 +59,15 @@ abstract class AbstractControl {
 
         // render new control state
         if (component) {
-            component.updateControlState(this);
+            component.render();
         } else {
             this.render();
         }
     }
 
-    abstract getRenderMessages(): (MidiMessage | SysexMessage)[];
+    abstract getOutput(): (MidiMessage | SysexMessage)[];
 
-    abstract getInputState(message: MidiMessage | SysexMessage): { value: number, color: Color, [others: string]: any };
+    abstract getInput(message: MidiMessage | SysexMessage): State;
 
     cacheMidiMessage(midiMessage: MidiMessage): boolean {
         if (this.cache.indexOf(midiMessage.hex) !== -1) return false;
@@ -85,7 +87,7 @@ abstract class AbstractControl {
         if (this.cacheOnMidiIn) this.cacheMidiMessage(midiMessage);
 
         if (this.activeComponent) {
-            this.activeComponent.onControlInput(this, this.getInputState(midiMessage));
+            this.activeComponent.onControlInput(this, this.getInput(midiMessage));
         } else {
             // re-render based on current state (messages will only be sent if they are different than what's in the cache)
             this.render();
@@ -93,28 +95,28 @@ abstract class AbstractControl {
         }
     }
 
-    setState(state: { value?: number, color?: Color, [others: string]: any }) {
+    setState(partialState: Partial<State>) {
         // validate input
-        if (state.value !== undefined && (state.value < this.minValue || state.value > this.maxValue)) throw new Error(`Invalid value "${state.value}" for Control "${this.name}" with value range ${this.minValue} to ${this.maxValue}.`);
+        const invalidAbsoluteValue = this.mode === 'ABSOLUTE' && (partialState.value > 1 || partialState.value < 0);
+        const invalidRelativeValue = this.mode === 'RELATIVE' && (partialState.value > 1 || partialState.value < -1);
+        if (invalidAbsoluteValue || invalidRelativeValue) throw new Error(`Invalid value "${partialState.value}" for Control "${this.name}" with value range ${this.mode === 'ABSOLUTE' ? 0 : -1} to 1.`);
         // update state
-        this.state = { ...this.state, ...state };
-        // re-render
+        this.state = { ...this.state as object, ...partialState as object } as State;  // TODO: should be able to remove type casting in typescript 2.3.1
+        // re-render with new state
         this.render();
     }
 
-    preRender() {
-        // ... optionally implemented in child class
-    }
+    preRender?();
 
     render() {
         // no midi out? no render.
         if (!this.enableMidiOut) return;
 
         // pre render hook
-        this.preRender();
+        if (this.preRender) this.preRender();
 
         // send messages
-        for (let message of this.getRenderMessages()) {
+        for (let message of this.getOutput()) {
             if (message instanceof MidiMessage) {
                 // send message to cache, send to midi out if new
                 if (this.cacheMidiMessage(message)){
@@ -130,12 +132,10 @@ abstract class AbstractControl {
         }
 
         // post render hook
-        this.postRender();
+        if (this.postRender) this.postRender();
     }
 
-    postRender() {
-        // ... optionally implemented in child class
-    }
+    postRender?();
 }
 
 

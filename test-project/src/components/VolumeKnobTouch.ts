@@ -1,4 +1,4 @@
-import { AbstractButton, SimpleControl } from 'taktil';
+import { AbstractButton } from 'taktil';
 import store from '../store';
 
 

@@ -5,26 +5,35 @@ import MidiMessage from '../midi/MidiMessage';
 import session from '../../session';
 
 
-abstract class AbstractRange<Options extends { [key: string]: any }> extends AbstractComponent<Options> {
-    INPUT_DELAY = 100;
+export interface AbstractRangeState {
+    value: number;
+};
 
-    state: { value: number } = { value: 0 };
+abstract class AbstractRange<Options extends object = {}, State extends AbstractRangeState = AbstractRangeState> extends AbstractComponent<Options, State> {
+    INPUT_DELAY = 350;
+
     memory: { [key: string]: any } = {};
 
-    updateControlState(control: AbstractControl) {
+    getInitialState() {
+        return { value: 0 } as State;
+    }
+
+    render() {
         if (this.memory.update) clearInterval(this.memory.update);
         this.memory.update = setInterval(() => {
-            control.setState({ value: this.state.value });
+            super.render();
         }, this.memory.input ? this.INPUT_DELAY : 0);
     }
 
-    onControlInput(control: AbstractControl, { value }) {
+    getControlOutput(control: AbstractControl): object {
+        return { value: this.state.value };
+    }
+
+    onControlInput(control: AbstractControl, { value }: { value: number }) {
         if (this.memory.input) clearTimeout(this.memory.input);
         this.memory.input = setTimeout(() => {
             delete this.memory.input;
         }, this.INPUT_DELAY);
-
-        this.setState({ value });
     }
 }
 

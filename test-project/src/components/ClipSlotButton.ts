@@ -1,26 +1,39 @@
-import { AbstractButton, SimpleControl } from 'taktil';
+import { AbstractButton, AbstractSimpleControl, Color } from 'taktil';
 
 import store from 'store';
 
 
-export default class ClipSlotButton extends AbstractButton<{ index: number }> {
-    clipLauncherSlotBank = store.cursorTrack.clipLauncherSlotBank();
-    state = {
-        color: undefined,
-        isPlaying: false, isPlaybackQueued: false,
-        isRecording: false, isRecordingQueued: false,
-        hasContent: false,
-    };
+interface ClipSlotButtonState {
+    on: boolean;
+    color: Color;
+    isPlaying: boolean;
+    isPlaybackQueued: boolean;
+    isRecording: boolean;
+    isRecordingQueued: boolean;
+    hasContent: boolean;
+}
 
-    updateControlState(control: SimpleControl) {
+
+export default class ClipSlotButton extends AbstractButton<{ index: number }, ClipSlotButtonState> {
+    clipLauncherSlotBank = store.cursorTrack.clipLauncherSlotBank();
+
+    getInitialState() {
+        return {
+            on: false,
+            color: undefined,
+            isPlaying: false, isPlaybackQueued: false,
+            isRecording: false, isRecordingQueued: false,
+            hasContent: false,
+        };
+    }
+
+    getControlOutput(control: AbstractSimpleControl): object {
         const { isPlaying, isPlaybackQueued, isRecording, isRecordingQueued, hasContent } = this.state;
-        const value = isPlaying || isPlaybackQueued || isRecording || isRecordingQueued ? control.maxValue : control.minValue;
+        const value = isPlaying || isPlaybackQueued || isRecording || isRecordingQueued ? 1 : 0;
         const disabled = !hasContent && !isRecordingQueued;
         const flashing = isPlaybackQueued || isRecordingQueued;
         const color = isRecordingQueued || isRecording ? { r: 1, g: 0, b: 0 } : this.state.color;
-        control.setState({
-            value, ...(color === undefined ? {} : { color }), disabled, flashing,
-        });
+        return { value, ...(color === undefined ? {} : { color }), disabled, flashing };
     }
 
     onInit() {

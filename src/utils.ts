@@ -1,16 +1,6 @@
 import  { SimpleMidiMessage } from './core/midi';
 
 
-export function guid() {
-    let date = new Date().getTime();
-     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        const r = (date + Math.random() * 16) % 16 | 0;
-        date = Math.floor(date/16);
-        return (c=='x' ? r : (r&0x3|0x8)).toString(16);
-    });
-}
-
-
 export function midiMessageToHex(midiMessage: SimpleMidiMessage): string {
     const { status, data1, data2 } = midiMessage;
     let result = '';

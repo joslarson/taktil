@@ -1,13 +1,15 @@
-import { default as AbstractControl, Color } from './AbstractControl';
+import AbstractControl from './AbstractControl';
 import { SimpleMidiMessage, MidiMessage, SysexMessage, MidiPattern } from '../midi/';
 
 
 class Control extends AbstractControl {
-    getRenderMessages(): (MidiMessage | SysexMessage)[] {
+    state = { value: 0 };
+
+    getOutput(): (MidiMessage | SysexMessage)[] {
         return [];
     }
 
-    getInputState(message: MidiMessage | SysexMessage) {
+    getInput(message: MidiMessage | SysexMessage) {
         return { ...this.state };
     }
 }

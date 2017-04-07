@@ -1,29 +1,40 @@
-import { AbstractButton, SimpleControl, session } from 'taktil';
+import { AbstractButton, AbstractSimpleControl, Color, session } from 'taktil';
 
 import store from 'store';
 
 
-export default class SceneButton extends AbstractButton<{ index: number }> {
-    scene: API.Scene;
-    state = { ...this.state, exists: false, color: { r: 1, g: 0, b: 1 } };
+interface SceneButtonState {
+    on: boolean;
+    color: Color;
+    exists: boolean;
+    empty: boolean;
+}
 
-    updateControlState(control: SimpleControl) {
-        control.setState({
-            value: this.state.on ? control.maxValue : control.minValue,
-            disabled: !this.state.exists,
-            color: this.state.color,
-        });
+export default class SceneButton extends AbstractButton<{ index: number }, SceneButtonState> {
+    scene: API.Scene;
+    
+    getInitialState() {
+        return { on: false, exists: false, empty: true, color: { r: .5, g: 0, b: 1 } };
+    }
+
+    getControlOutput(control: AbstractSimpleControl) {
+        const { on, empty, color } = this.state;
+        return { value: on ? 1 : 0, disabled: empty, color: color };
     }
 
     onInit() {
         this.scene = store.sceneBank.getScene(this.options.index);
 
         this.scene.addIsSelectedInEditorObserver(isSelected => {
-            this.setState({ ...this.state, on: isSelected })
+            this.setState({ on: isSelected })
         });
 
         this.scene.exists().addValueObserver(sceneExists => {
-            this.setState({ ...this.state, exists: sceneExists });
+            this.setState({ exists: sceneExists });
+        });
+
+        this.scene.clipCount().addValueObserver(clipCount => {
+            this.setState({ empty: clipCount === 0 });
         });
     }
 

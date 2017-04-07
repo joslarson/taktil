@@ -1,91 +1,11 @@
-import { session, SimpleControl, MidiMessage, SysexMessage, MidiPattern, utils } from 'taktil';
-
-import { rgb2hsv, SyncedInterval } from './utils';
-import store from 'store';
-
-
-class MaschineButton extends SimpleControl {
-    cacheOnMidiIn = false;
-}
-
-
-class PanKnob extends SimpleControl {
-    state = { ...this.state, value: 65 };
-}
-
-const colors = {
-    playGreen: { r: 0.02, g: 1.00, b: 0.06 },  // matches machine play button color
-    offWhite:  { r: 0.75, g: 1.00, b: 0.35 },  // warm to match default maschine buttons
-};
-
-class MaschineColorButton extends MaschineButton {
-    // set the default state
-    state = { ...this.state, color: colors.offWhite, disabled: false, flashing: false, flashOn: true };
-    flashInterval: SyncedInterval;
-
-    constructor({ port, inPort, outPort, status, data1 }: {
-        port?: number, inPort?: number, outPort?: number, status: number, data1: number
-    }) {
-        super({ port, inPort, outPort, status, data1 });
-        this.patterns = [
-            ...this.patterns,
-            new MidiPattern({ status: this.hueStatus, data1 }),
-            new MidiPattern({ status: this.saturationStatus, data1 }),
-            new MidiPattern({ status: this.brightnessStatus, data1 }),
-        ];
-    }
-
-    get hueStatus() {
-        return this.status & 0xF0;
-    }
-
-    get saturationStatus() {
-        return this.hueStatus + 1;
-    }
-
-    get brightnessStatus() {
-        return this.hueStatus + 2;
-    }
-
-    getRenderMessages(): (MidiMessage | SysexMessage)[] {
-        const doNotSaturate = utils.areDeepEqual(this.state.color, colors.offWhite);
-        const hsb = rgb2hsv(this.state.color);
-        const { status, data1 } = this;
-        let brightnessData2 = !this.activeComponent || this.state.disabled ? 0 : (this.state.value === 0 ? 20 : 127);
-        if (brightnessData2 === 127 && this.state.flashing) {
-            brightnessData2 = this.state.flashOn ? 127 : 20;
-        }
-        return [
-            ...super.getRenderMessages(),
-            new MidiMessage({ status: this.hueStatus, data1, data2: hsb.h }),
-            new MidiMessage({
-                status: this.saturationStatus, data1,
-                data2: doNotSaturate ? hsb.s : (hsb.s === 0 ? 0 : 100 + Math.round((hsb.s / 127) * 27)) }),
-            new MidiMessage({
-                status: this.brightnessStatus, data1,
-                data2: brightnessData2,
-            }),
-        ];
-    }
-
-    postRender() {
-        if (this.state.value > 0 && this.state.flashing) {
-            if (!this.flashInterval) {
-                this.flashInterval = new SyncedInterval(isOddInterval => {
-                    this.setState({ flashOn: isOddInterval });
-                }, 1/2).start();
-            }
-        } else if (this.flashInterval) {
-            this.flashInterval.cancel();
-            delete this.flashInterval;
-        }
-    }
-}
+import MaschineButton from './MaschineButton';
+import MaschineColorButton from './MaschineColorButton';
+import MaschineKnob from './MaschineKnob';
+import MaschinePanKnob from './MaschinePanKnob';
 
 
 export default {
     // TOP LEFT
-
     CHANNEL:  new MaschineButton({ status: 0xB0, data1: 0x15 }),
     PLUGIN:   new MaschineButton({ status: 0xB0, data1: 0x16 }),
     ARRANGE:  new MaschineButton({ status: 0xB0, data1: 0x17 }),
@@ -97,9 +17,7 @@ export default {
     FS1:      new MaschineButton({ status: 0xB0, data1: 0x1D }),
     FS2:      new MaschineButton({ status: 0xB0, data1: 0x1E }),
 
-
     // METERS
-
     IN1:  new MaschineButton({ status: 0xB1, data1: 0x15 }),
     IN2:  new MaschineButton({ status: 0xB1, data1: 0x16 }),
     IN3:  new MaschineButton({ status: 0xB1, data1: 0x17 }),
@@ -108,19 +26,15 @@ export default {
     GRP:  new MaschineButton({ status: 0xB1, data1: 0x1A }),
     SND:  new MaschineButton({ status: 0xB1, data1: 0x1B }),
     CUE:  new MaschineButton({ status: 0xB1, data1: 0x1C }),
-    KNOB: new SimpleControl({ status: 0xB1, data1: 0x1D }),
-
+    KNOB: new MaschineKnob({ status: 0xB1, data1: 0x1D }),
 
     // PERFORMANCE
-
     TAP:         new MaschineButton({ status: 0xB2, data1: 0x15 }),
     STEP_MODE:   new MaschineButton({ status: 0xB2, data1: 0x16 }),
     MACRO:       new MaschineButton({ status: 0xB2, data1: 0x17 }),
     NOTE_REPEAT: new MaschineButton({ status: 0xB2, data1: 0x18 }),
 
-
     // GROUPS
-
     GROUP_A: new MaschineColorButton({ status: 0xB3, data1: 0x66 }),
     GROUP_B: new MaschineColorButton({ status: 0xB3, data1: 0x67 }),
     GROUP_C: new MaschineColorButton({ status: 0xB3, data1: 0x68 }),
@@ -130,9 +44,7 @@ export default {
     GROUP_G: new MaschineColorButton({ status: 0xB3, data1: 0x6C }),
     GROUP_H: new MaschineColorButton({ status: 0xB3, data1: 0x6D }),
 
-
     // TRANSPORT
-
     RESTART: new MaschineButton({ status: 0xB4, data1: 0x15 }),
     METRO:   new MaschineButton({ status: 0xB4, data1: 0x16 }),
     EVENTS:  new MaschineButton({ status: 0xB4, data1: 0x17 }),
@@ -141,9 +53,7 @@ export default {
     REC:     new MaschineButton({ status: 0xB4, data1: 0x1A }),
     ERASE:   new MaschineButton({ status: 0xB4, data1: 0x1B }),
 
-
     // MIDDLE
-
     SCENE:     new MaschineButton({ status: 0xB5, data1: 0x15 }),
     PATTERN:   new MaschineButton({ status: 0xB5, data1: 0x16 }),
     PAD_MODE:  new MaschineButton({ status: 0xB5, data1: 0x17 }),
@@ -153,9 +63,7 @@ export default {
     SOLO:      new MaschineButton({ status: 0xB5, data1: 0x1B }),
     MUTE:      new MaschineButton({ status: 0xB5, data1: 0x1C }),
 
-
     // PADS
-
     PAD_1:  new MaschineColorButton({ status: 0x95, data1: 0x24 }),
     PAD_2:  new MaschineColorButton({ status: 0x95, data1: 0x25 }),
     PAD_3:  new MaschineColorButton({ status: 0x95, data1: 0x26 }),
@@ -173,9 +81,7 @@ export default {
     PAD_15: new MaschineColorButton({ status: 0x95, data1: 0x32 }),
     PAD_16: new MaschineColorButton({ status: 0x95, data1: 0x33 }),
 
-
     // EDIT
-
     COPY:        new MaschineButton({ status: 0xB6, data1: 0x15 }),
     PASTE:       new MaschineButton({ status: 0xB6, data1: 0x16 }),
     NOTE:        new MaschineButton({ status: 0xB6, data1: 0x17 }),
@@ -191,9 +97,7 @@ export default {
     RIGHT_ARROW: new MaschineButton({ status: 0xB6, data1: 0x68 }),
     ENTER:       new MaschineButton({ status: 0xB6, data1: 0x69 }),
 
-
     // SCREENS
-
     ARM_A: new MaschineButton({ status: 0xB7, data1: 0x15 }),
     ARM_B: new MaschineButton({ status: 0xB7, data1: 0x16 }),
     ARM_C: new MaschineButton({ status: 0xB7, data1: 0x17 }),
@@ -219,14 +123,14 @@ export default {
     VOL_TOUCH_G: new MaschineButton({ status: 0xB7, data1: 0x72 }),
     VOL_TOUCH_H: new MaschineButton({ status: 0xB7, data1: 0x74 }),
 
-    VOL_A: new SimpleControl({ status: 0xB7, data1: 0x67 }),
-    VOL_B: new SimpleControl({ status: 0xB7, data1: 0x69 }),
-    VOL_C: new SimpleControl({ status: 0xB7, data1: 0x6B }),
-    VOL_D: new SimpleControl({ status: 0xB7, data1: 0x6D }),
-    VOL_E: new SimpleControl({ status: 0xB7, data1: 0x6F }),
-    VOL_F: new SimpleControl({ status: 0xB7, data1: 0x71 }),
-    VOL_G: new SimpleControl({ status: 0xB7, data1: 0x73 }),
-    VOL_H: new SimpleControl({ status: 0xB7, data1: 0x75 }),
+    VOL_A: new MaschineKnob({ status: 0xB7, data1: 0x67 }),
+    VOL_B: new MaschineKnob({ status: 0xB7, data1: 0x69 }),
+    VOL_C: new MaschineKnob({ status: 0xB7, data1: 0x6B }),
+    VOL_D: new MaschineKnob({ status: 0xB7, data1: 0x6D }),
+    VOL_E: new MaschineKnob({ status: 0xB7, data1: 0x6F }),
+    VOL_F: new MaschineKnob({ status: 0xB7, data1: 0x71 }),
+    VOL_G: new MaschineKnob({ status: 0xB7, data1: 0x73 }),
+    VOL_H: new MaschineKnob({ status: 0xB7, data1: 0x75 }),
 
     PAN_TOUCH_A: new MaschineButton({ status: 0xB8, data1: 0x66 }),
     PAN_TOUCH_B: new MaschineButton({ status: 0xB8, data1: 0x68 }),
@@ -237,14 +141,14 @@ export default {
     PAN_TOUCH_G: new MaschineButton({ status: 0xB8, data1: 0x72 }),
     PAN_TOUCH_H: new MaschineButton({ status: 0xB8, data1: 0x74 }),
 
-    PAN_A: new PanKnob({ status: 0xB8, data1: 0x67 }),
-    PAN_B: new PanKnob({ status: 0xB8, data1: 0x69 }),
-    PAN_C: new PanKnob({ status: 0xB8, data1: 0x6B }),
-    PAN_D: new PanKnob({ status: 0xB8, data1: 0x6D }),
-    PAN_E: new PanKnob({ status: 0xB8, data1: 0x6F }),
-    PAN_F: new PanKnob({ status: 0xB8, data1: 0x71 }),
-    PAN_G: new PanKnob({ status: 0xB8, data1: 0x73 }),
-    PAN_H: new PanKnob({ status: 0xB8, data1: 0x75 }),
+    PAN_A: new MaschinePanKnob({ status: 0xB8, data1: 0x67 }),
+    PAN_B: new MaschinePanKnob({ status: 0xB8, data1: 0x69 }),
+    PAN_C: new MaschinePanKnob({ status: 0xB8, data1: 0x6B }),
+    PAN_D: new MaschinePanKnob({ status: 0xB8, data1: 0x6D }),
+    PAN_E: new MaschinePanKnob({ status: 0xB8, data1: 0x6F }),
+    PAN_F: new MaschinePanKnob({ status: 0xB8, data1: 0x71 }),
+    PAN_G: new MaschinePanKnob({ status: 0xB8, data1: 0x73 }),
+    PAN_H: new MaschinePanKnob({ status: 0xB8, data1: 0x75 }),
 
     // MACRO_TOUCH_1: new MaschineButton({ status: 0xB0, data1: 0x66 }),
     // MACRO_TOUCH_2: new MaschineButton({ status: 0xB0, data1: 0x68 }),

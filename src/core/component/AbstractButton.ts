@@ -1,32 +1,37 @@
-import AbstractComponent from './AbstractComponent';
-import { AbstractControl, SimpleControl } from '../control';
+import { default as AbstractComponent, AbstractComponentState } from './AbstractComponent';
+import { AbstractControl, AbstractSimpleControl } from '../control';
 
 
-interface AbstractButton<Options extends { [key: string]: any }> {
-    onPress?();
-    onLongPress?();
-    onDoublePress?();
-    onRelease?();
-    onDoubleRelease?();
-}
+export interface AbstractButtonState extends AbstractComponentState {
+    on: boolean;
+    color?: { r: number, g: number, b: number };
+};
 
-abstract class AbstractButton<Options extends { [key: string]: any }> extends AbstractComponent<Options> {
+abstract class AbstractButton<Options extends object = {}, State extends AbstractButtonState = AbstractButtonState> extends AbstractComponent<Options, State> {
     LONG_PRESS_DELAY = 350;
     DOUBLE_PRESS_DELAY = 350;
 
-    state: { on?: boolean, color?: { r: number, g: number, b: number } } = { on: false };
     memory: { [key: string]: any } = {};
 
-    updateControlState(control: SimpleControl, overrides: Object = {}) {
-        const { on, color } = this.state;
-        control.setState({
-            value: on ? control.maxValue : control.minValue,
-            ...(color === undefined ? {} : { color }),
-            ...overrides
-        });
+    getInitialState() {
+        return { on: false } as State;
     }
 
-    onControlInput(control: SimpleControl, controlInput) {
+    getControlOutput(control: AbstractSimpleControl): object {
+        const { on, color } = this.state;
+        return {
+            value: on ? 1 : 0,
+            ...(color && { color }),
+        };
+    }
+
+    onPress?(): void;
+    onLongPress?(): void;
+    onDoublePress?(): void;
+    onRelease?(): void;
+    onDoubleRelease?(): void;
+
+    onControlInput(control: AbstractSimpleControl, controlInput) {
         if (this.onPress) this._handlePress(controlInput.value);
         if (this.onLongPress) this._handleLongPress(controlInput.value);
         if (this.onDoublePress) this._handleDoublePress(controlInput.value);

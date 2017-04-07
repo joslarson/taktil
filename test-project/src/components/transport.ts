@@ -24,7 +24,7 @@ export class OverwriteToggle extends components.AbstractOverwriteToggle {
     transport = store.transport;
 }
 
-export class ArmToggle extends AbstractButton<{}> {
+export class ArmToggle extends AbstractButton {
     track = store.cursorTrack;
 
     onInit() {
@@ -42,7 +42,7 @@ export class LoopToggle extends components.AbstractLoopToggle {
     transport = store.transport;
 }
 
-export class TempoButton extends AbstractButton<{}> {
+export class TempoButton extends AbstractButton {
     transport = store.transport;
 
     onPress() {
@@ -57,7 +57,7 @@ export class TempoButton extends AbstractButton<{}> {
     }
 }
 
-export class TempoRing extends AbstractButton<{}> {
+export class TempoRing extends AbstractButton {
     transport = store.transport;
 
     onInit() {
