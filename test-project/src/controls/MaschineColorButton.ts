@@ -13,11 +13,12 @@ interface MaschineColorButtonState {
     disabled: boolean;
     flashing: boolean;
     flashOn: boolean;
+    accent: boolean;
 }
 
 export default class MaschineColorButton extends AbstractSimpleControl<MaschineColorButtonState> {
     // set the default state
-    state: MaschineColorButtonState = { value: 0, color: colors.offWhite, disabled: false, flashing: false, flashOn: true };
+    state: MaschineColorButtonState = { value: 0, color: colors.offWhite, accent: false, disabled: false, flashing: false, flashOn: true };
     flashInterval: SyncedInterval;
 
     constructor({ port, inPort, outPort, status, data1 }: {
@@ -49,15 +50,17 @@ export default class MaschineColorButton extends AbstractSimpleControl<MaschineC
         const hsb = rgb2hsv(this.state.color);
         const { status, data1 } = this;
         let brightnessData2 = !this.activeComponent || this.state.disabled ? 0 : (this.state.value === 0 ? 20 : 127);
-        if (brightnessData2 === 127 && this.state.flashing) {
-            brightnessData2 = this.state.flashOn ? 127 : 20;
-        }
+        if (brightnessData2 === 127 && this.state.flashing) brightnessData2 = this.state.flashOn ? 127 : 20;
+        if (this.state.accent)  brightnessData2 = brightnessData2 === 127 ? 127 : Math.min(brightnessData2 + 20, 127);
+        let saturationData2 =  doNotSaturate ? hsb.s : (hsb.s === 0 ? 0 : 100 + Math.round((hsb.s / 127) * 27));
+        if (this.state.accent) saturationData2 = Math.max(saturationData2 - 20, 0);
         return [
             ...super.getOutput(),
             new MidiMessage({ status: this.hueStatus, data1, data2: hsb.h }),
             new MidiMessage({
                 status: this.saturationStatus, data1,
-                data2: doNotSaturate ? hsb.s : (hsb.s === 0 ? 0 : 100 + Math.round((hsb.s / 127) * 27)) }),
+                data2: saturationData2,
+            }),
             new MidiMessage({
                 status: this.brightnessStatus, data1,
                 data2: brightnessData2,

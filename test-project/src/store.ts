@@ -9,10 +9,6 @@ export class Store {
     createScene: API.Action;
     masterTrack: API.MasterTrack;
 
-    knobTouchStates: {
-        
-    };
-
     init() {
         this.transport = host.createTransport();
         this.transport.tempo().markInterested();

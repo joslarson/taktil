@@ -8,21 +8,25 @@ interface TrackButtonState {
     color?: Color;
     exists: boolean;
     disabled: boolean;
+    noteOn: boolean;
 }
 
 
 export default class TrackButton extends AbstractButton<{ index: number }, TrackButtonState> {
     track: API.Track;
 
+    notes: API.PlayingNote[] = [];
+
     getInitialState() {
-        return { on: false, disabled: false, exists: false };
+        return { on: false, disabled: false, exists: false, noteOn: false };
     }
 
     getControlOutput(control: AbstractSimpleControl) {
-        const { on, exists, color } = this.state;
+        const { on, exists, color, noteOn } = this.state;
         return {
             value: on ? 1 : 0,
             disabled: !exists,
+            accent: noteOn,
             ...(color === undefined ? {} : { color }),
         };
     }
@@ -41,6 +45,29 @@ export default class TrackButton extends AbstractButton<{ index: number }, Track
 
         this.track.exists().addValueObserver(trackExists => {
             this.setState({ ...this.state, exists: trackExists });
+        });
+        this.track.playingNotes().addValueObserver((notes: API.PlayingNote[]) => {
+            notes = Array.prototype.slice.call(notes);
+            let noteOn = false;
+            for (let note of notes) {
+                if (this.notes.indexOf(note) === -1) {
+                    noteOn = true;
+                    break;
+                }
+            }
+            this.notes = notes;
+            const delay = 60000 / (store.transport.tempo().get() * (666 - 20) + 20) / 8;
+            if (noteOn) {
+                if (this.memory.noteOn) {
+                    clearTimeout(this.memory.noteOn);
+                } else {
+                    this.setState({ noteOn: true })
+                }
+                this.memory.noteOn = setTimeout(() => {
+                    delete this.memory.noteOn;
+                    this.setState({ noteOn: false });
+                }, Math.max(delay, 100));
+            }
         });
     }
 
