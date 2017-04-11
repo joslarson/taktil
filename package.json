@@ -6,8 +6,7 @@
   "author": "Joseph Larson",
   "tags": [
     "bitwig",
-    "control surface",
-    "script",
+    "control surface script",
     "framework",
     "typescript"
   ],
@@ -33,7 +32,7 @@
     "mocha": "^3.2.0",
     "ts-node": "^2.1.0",
     "typed-bitwig-api": "^2.0.0",
-    "typescript": "^2.3.0-dev.20170405"
+    "typescript": "^2.3.0"
   },
   "scripts": {
     "test": "mocha -r ts-node/register src/**/*.spec.ts"
