@@ -4,7 +4,7 @@ import logger from './logger';
 loadAPI(2); // load bitwig api v2
 
 // set globals (make sure to add any new globals to the globals.d.ts file)
-global.toast = message => {
+global.toast = (message: string) => {
     host.showPopupNotification(message);
 }
 
@@ -42,13 +42,13 @@ class DelayedTask {
     repeat: boolean;
     cancelled = false;
 
-    constructor (callback, delay = 0, repeat = false) {
+    constructor (callback: (...args: any[]) => any, delay = 0, repeat = false) {
         this.callback = callback;
         this.delay = delay;
         this.repeat = repeat;
     }
 
-    start(...args) {
+    start(...args: any[]) {
         host.scheduleTask(() => {
             if (!this.cancelled) {
                 this.callback.call(args);
@@ -64,7 +64,7 @@ class DelayedTask {
     }
 }
 
-global.setTimeout = function setTimeout(callback: Function, delay = 0, ...params) {
+global.setTimeout = function setTimeout(callback: (...args: any[]) => any, delay = 0, ...params: any[]) {
     return new DelayedTask(callback, delay).start(...params);
 }
 
@@ -72,7 +72,7 @@ global.clearTimeout = function clearTimeout(timeout: DelayedTask) {
     timeout.cancel();
 }
 
-global.setInterval = function setInterval(callback: Function, delay = 0, ...params) {
+global.setInterval = function setInterval(callback: (...args: any[]) => any, delay = 0, ...params: any[]) {
     return new DelayedTask(callback, delay, true).start(...params);
 }
 

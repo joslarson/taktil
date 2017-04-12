@@ -31,12 +31,12 @@ abstract class AbstractButton<Options extends object = {}, State extends Abstrac
     onRelease?(): void;
     onDoubleRelease?(): void;
 
-    onControlInput(control: AbstractSimpleControl, controlInput) {
-        if (this.onPress) this._handlePress(controlInput.value);
-        if (this.onLongPress) this._handleLongPress(controlInput.value);
-        if (this.onDoublePress) this._handleDoublePress(controlInput.value);
-        if (this.onRelease) this._handleRelease(controlInput.value);
-        if (this.onDoubleRelease) this._handleDoubleRelease(controlInput.value);
+    onControlInput(control: AbstractSimpleControl, input: { value: number, [others: string]: any }) {
+        if (this.onPress) this._handlePress(input.value);
+        if (this.onLongPress) this._handleLongPress(input.value);
+        if (this.onDoublePress) this._handleDoublePress(input.value);
+        if (this.onRelease) this._handleRelease(input.value);
+        if (this.onDoubleRelease) this._handleDoubleRelease(input.value);
     }
 
     protected _isPress(value: number) {
@@ -59,7 +59,7 @@ abstract class AbstractButton<Options extends object = {}, State extends Abstrac
         // if it's not a press, not implemented or is a doublePress, ignore it
         if (!this._isPress(value) || this.memory['doublePress']) return;
         // handle single press
-        this.onPress();
+        if (this.onPress) this.onPress();
     }
 
     private _handleDoublePress(value: number) {
@@ -68,7 +68,7 @@ abstract class AbstractButton<Options extends object = {}, State extends Abstrac
 
         // if is doublePress
         if (this._isDoublePress(value)) {
-            this.onDoublePress();
+            if (this.onDoublePress) this.onDoublePress();
         } else {
             // setup interval task to remove self after DOUBLE_PRESS_DURATION
             this.memory['doublePress'] = setTimeout(() => {
@@ -85,7 +85,7 @@ abstract class AbstractButton<Options extends object = {}, State extends Abstrac
         if (this._isPress(value)) {
             // schedule callback
             this.memory['longPress'] = setTimeout(() => {
-                this.onLongPress();
+                if (this.onLongPress) this.onLongPress();
             }, this.LONG_PRESS_DELAY);
         } else { // otherwise cancel existing scheduled callback
             // cancel longPress task if button released too early
@@ -100,7 +100,7 @@ abstract class AbstractButton<Options extends object = {}, State extends Abstrac
         // if it's not a release, not implemented or is a doubleRelease, ignore it
         if (!this._isRelease(value) || this.memory['doubleRelease']) return;
         // handle single release
-        this.onRelease();
+        if (this.onRelease) this.onRelease();
     }
 
     private _handleDoubleRelease(value: number) {
@@ -108,7 +108,7 @@ abstract class AbstractButton<Options extends object = {}, State extends Abstrac
         if (!this._isRelease(value)) return;
 
         // if is doubleRelease
-        if (this._isDoubleRelease(value)) {
+        if (this._isDoubleRelease(value) && this.onDoubleRelease) {
             this.onDoubleRelease();
         } else {
             // setup timeout task to remove self after this.DOUBLE_PRESS_DELAY

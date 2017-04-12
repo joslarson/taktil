@@ -12,7 +12,8 @@
         "importHelpers": true,
         "types": [
             "typed-bitwig-api"
-        ]
+        ],
+        "strict": true
     },
     "compileOnSave": false,
     "include": [

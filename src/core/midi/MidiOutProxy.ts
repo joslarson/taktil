@@ -1,6 +1,8 @@
-import { default as MidiMessage, SimpleMidiMessage } from './MidiMessage';
+import { SimpleMidiMessage } from './MidiMessage';
+import SysexMessage from './SysexMessage';
 import { areDeepEqual } from '../../utils';
 import { midiMessageToHex } from '../../utils';
+import Session from '../Session';
 
 
 export interface NaiveMidiMessage extends SimpleMidiMessage {
@@ -11,9 +13,9 @@ export interface NaiveMidiMessage extends SimpleMidiMessage {
 
 export default class MidiOutProxy {
     private _midiQueue: NaiveMidiMessage[] = [];
-    private _sysexQueue: { port: number, data: string }[] = [];
+    private _sysexQueue: SysexMessage[] = [];
 
-    constructor(session) {
+    constructor(session: Session) {
         session.on('flush', () => this._flushQueues());
     }
 
@@ -65,7 +67,7 @@ export default class MidiOutProxy {
         // 1. async flush queued midi messages
         setTimeout(() => {
             while (this._midiQueue.length > 0) {
-                const { name, port, status, data1, data2 } = this._midiQueue.shift();
+                const { name, port, status, data1, data2 } = this._midiQueue.shift() as NaiveMidiMessage;
                 console.log(`[MIDI] OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}${name ? ` "${name}"` : ''}`);
                 host.getMidiOutPort(port).sendMidi(status, data1, data2);
             }
@@ -73,7 +75,7 @@ export default class MidiOutProxy {
         // 2. async flush queued sysex messages
         setTimeout(() => {
             while (this._sysexQueue.length > 0) {
-                const { port, data } = this._sysexQueue.shift();
+                const { port, data } = this._sysexQueue.shift() as SysexMessage;
                 host.getMidiOutPort(port).sendSysex(data)
             }
         });

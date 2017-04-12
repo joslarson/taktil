@@ -27,10 +27,10 @@ abstract class AbstractView {
         return instance;
     }
 
-    static getComponent(control: AbstractControl, mode: string): AbstractComponent {
-        if (this._componentMap[mode] === undefined) return;
+    static getComponent(control: AbstractControl, mode: string): AbstractComponent | null {
+        if (this._componentMap[mode] === undefined) return null;
         const componentMapIndex = this._componentMap[mode].controls.indexOf(control);
-        if (componentMapIndex === -1) return;
+        if (componentMapIndex === -1) return null;
         return this._componentMap[mode].components[componentMapIndex];
     }
 

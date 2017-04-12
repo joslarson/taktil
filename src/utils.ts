@@ -13,7 +13,7 @@ export function midiMessageToHex(midiMessage: SimpleMidiMessage): string {
 }
 
 
-export function unsignedInt8ToHex(x) {
+export function unsignedInt8ToHex(x: number) {
     const upper = (x >> 4) & 0xF;
     const lower = x & 0xF;
 
@@ -21,7 +21,7 @@ export function unsignedInt8ToHex(x) {
 }
 
 
-export function unsignedInt7ToHex(x) {
+export function unsignedInt7ToHex(x: number) {
     const upper = (x >> 4) & 0x7;
     const lower = x & 0xF;
 
@@ -30,9 +30,9 @@ export function unsignedInt7ToHex(x) {
 
 
 export function areDeepEqual(obj1: object, obj2: object): boolean {
-    let i, l, leftChain, rightChain;
+    let i, l, leftChain: any[], rightChain: any[];
 
-    function compare2Objects (x, y) {
+    function compare2Objects (x: any, y: any) {
         let p;
 
         // remember that NaN === NaN returns false

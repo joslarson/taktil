@@ -3,7 +3,6 @@
         "target": "es5",
         "sourceMap": false,
         "declaration": true,
-        "rootDir": "src",
         "baseUrl": "./src",
         "moduleResolution": "node",
         "outDir": "./dist",
@@ -13,7 +12,8 @@
             "typed-bitwig-api",
             "@types/mocha",
             "@types/chai"
-        ]
+        ],
+        "strict": true
     },
     "compileOnSave": false,
     "include": [

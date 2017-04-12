@@ -29,7 +29,7 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
     cacheOnMidiIn: boolean = true;
     enableMidiOut: boolean = true;
 
-    private _activeComponent: AbstractComponent = null;
+    private _activeComponent: AbstractComponent | null = null;
 
     constructor({ port, inPort, outPort, patterns }: AbstractControlConstructor) {
         if (!patterns || patterns.length === 0) throw new Error(`Error, Control must specify at least one pattern.`);
@@ -96,17 +96,19 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
     }
 
     setState(partialState: Partial<State>) {
-        // validate input
-        const invalidAbsoluteValue = this.mode === 'ABSOLUTE' && (partialState.value > 1 || partialState.value < 0);
-        const invalidRelativeValue = this.mode === 'RELATIVE' && (partialState.value > 1 || partialState.value < -1);
-        if (invalidAbsoluteValue || invalidRelativeValue) throw new Error(`Invalid value "${partialState.value}" for Control "${this.name}" with value range ${this.mode === 'ABSOLUTE' ? 0 : -1} to 1.`);
+        if (partialState.value) {
+            // validate input
+            const invalidAbsoluteValue = this.mode === 'ABSOLUTE' && (partialState.value > 1 || partialState.value < 0);
+            const invalidRelativeValue = this.mode === 'RELATIVE' && (partialState.value > 1 || partialState.value < -1);
+            if (invalidAbsoluteValue || invalidRelativeValue) throw new Error(`Invalid value "${partialState.value}" for Control "${this.name}" with value range ${this.mode === 'ABSOLUTE' ? 0 : -1} to 1.`);
+        }
         // update state
         this.state = { ...this.state as object, ...partialState as object } as State;  // TODO: should be able to remove type casting in typescript 2.3.1
         // re-render with new state
         this.render();
     }
 
-    preRender?();
+    preRender?(): void;
 
     render() {
         // no midi out? no render.
@@ -135,7 +137,7 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
         if (this.postRender) this.postRender();
     }
 
-    postRender?();
+    postRender?(): void;
 }
 
 

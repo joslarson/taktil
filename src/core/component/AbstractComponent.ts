@@ -19,7 +19,7 @@ abstract class AbstractComponent<Options extends object = {}, State extends Abst
 
     constructor(controls: AbstractControl[] | AbstractControl, mode?: string, options?: Options);
     constructor(controls: AbstractControl[] | AbstractControl, options?: Options);
-    constructor(controls: AbstractControl[] | AbstractControl, ...rest) {
+    constructor(controls: AbstractControl[] | AbstractControl, ...rest: any[]) {
         this.controls = Array.isArray(controls) ? controls : [controls];
         this.mode = typeof rest[0] === 'string' ? rest[0] : '__BASE__';
         this.options = typeof rest[rest.length - 1] === 'object' ? rest[rest.length - 1] : {};
@@ -28,7 +28,7 @@ abstract class AbstractComponent<Options extends object = {}, State extends Abst
 
     // called when button is registered to a view for the first time
     // allows running of code that is only allowed in the api's init function
-    onInit() {
+    onInit(): void {
         // optionally implemented in child class
     }
 
@@ -56,7 +56,7 @@ abstract class AbstractComponent<Options extends object = {}, State extends Abst
     abstract getControlOutput(control: AbstractControl): object;
 
     // handles midi messages routed to control
-    abstract onControlInput(control: AbstractControl, inputState): void;
+    abstract onControlInput(control: AbstractControl, input: { value: number, [others: string]: any }): void;
 }
 
 
