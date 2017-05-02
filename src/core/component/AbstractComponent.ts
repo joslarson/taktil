@@ -4,25 +4,27 @@ import session from '../../session';
 import AbstractControl from '../control/AbstractControl';
 
 
-export interface AbstractComponentState {
+export interface ObjectLiteral {
     [key: string]: any;
 }
 
-abstract class AbstractComponent<Options extends object = {}, State extends AbstractComponentState = AbstractComponentState> {
+abstract class AbstractComponent<Props extends ObjectLiteral = ObjectLiteral, State extends ObjectLiteral = ObjectLiteral> {
     name: string;
     view: typeof AbstractView;
     mode: string;
     controls: AbstractControl[];
-    options: Options;
+    props: Props;
 
     private _state: State;
 
-    constructor(controls: AbstractControl[] | AbstractControl, mode?: string, options?: Options);
-    constructor(controls: AbstractControl[] | AbstractControl, options?: Options);
+    constructor(controls: AbstractControl[], mode: string, props: Props);
+    constructor(control: AbstractControl, mode: string, props: Props);
+    constructor(controls: AbstractControl[], props: Props);
+    constructor(control: AbstractControl, props: Props);
     constructor(controls: AbstractControl[] | AbstractControl, ...rest: any[]) {
         this.controls = Array.isArray(controls) ? controls : [controls];
         this.mode = typeof rest[0] === 'string' ? rest[0] : '__BASE__';
-        this.options = typeof rest[rest.length - 1] === 'object' ? rest[rest.length - 1] : {};
+        this.props = typeof rest[rest.length - 1] === 'object' ? rest[rest.length - 1] : {};
         this._state = this.getInitialState() as State;
     }
 

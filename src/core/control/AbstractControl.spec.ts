@@ -3,7 +3,9 @@ import { SimpleMidiMessage, MidiMessage, SysexMessage, MidiPattern } from '../mi
 
 
 class Control extends AbstractControl {
-    state = { value: 0 };
+    getInitialState() { 
+        return { value: 0 };
+    }
 
     getOutput(): (MidiMessage | SysexMessage)[] {
         return [];

@@ -38,7 +38,7 @@ export default class Session {
             // reset all controls to default state
             for (let controlName in this.controls) {
                 const control = this.controls[controlName];
-                control.setState(control.defaultState);
+                control.setState(control.getInitialState());
             }
             // call registered exit callbacks
             this._callEventCallbacks('exit');

@@ -2,7 +2,7 @@ import { default as AbstractControl, AbstractControlState } from './AbstractCont
 import { MidiMessage, SysexMessage, MidiPattern } from '../midi';
 
 
-abstract class AbstractSimpleControl<State extends AbstractControlState = AbstractControlState> extends AbstractControl<State> {
+class SimpleControl<State extends AbstractControlState = AbstractControlState> extends AbstractControl<State> {
     status: number;
     data1: number;
 
@@ -14,6 +14,10 @@ abstract class AbstractSimpleControl<State extends AbstractControlState = Abstra
         ]});
         this.status = status;
         this.data1 = data1;
+    }
+
+    getInitialState() {
+        return { value: 0 } as State;
     }
 
     getOutput(): (MidiMessage | SysexMessage)[] {
@@ -33,4 +37,4 @@ abstract class AbstractSimpleControl<State extends AbstractControlState = Abstra
     }
 }
 
-export default AbstractSimpleControl;
+export default SimpleControl;

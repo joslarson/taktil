@@ -18,8 +18,7 @@ export type AbstractControlConstructor = {
 abstract class AbstractControl<State extends AbstractControlState = AbstractControlState> {
     name: string;
     mode: 'ABSOLUTE' | 'RELATIVE' = 'ABSOLUTE';
-    abstract state: State;
-    private _defaultState: State;
+    private _state: State;
 
     inPort: number = 0;
     outPort: number = 0;
@@ -38,12 +37,27 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
         this.inPort = port !== undefined ?  port : (inPort !== undefined ? inPort : this.inPort);
         this.outPort = port !== undefined ?  port : (outPort !== undefined ? outPort : this.outPort);
         this.patterns = patterns.map(pattern => typeof pattern === 'string' ? new MidiPattern(pattern) : pattern);
+        this._state = this.getInitialState();
     }
 
-    get defaultState() {
-        if (!this._defaultState) this._defaultState = JSON.parse(JSON.stringify(this.state)) as State;
-        return this._defaultState;
+    get state(): State {
+        return { ...this._state as object } as State;
     }
+
+    setState(partialState: Partial<State>, render = true): void {
+        if (partialState.value) {
+            // validate input
+            const invalidAbsoluteValue = this.mode === 'ABSOLUTE' && (partialState.value > 1 || partialState.value < 0);
+            const invalidRelativeValue = this.mode === 'RELATIVE' && (partialState.value > 1 || partialState.value < -1);
+            if (invalidAbsoluteValue || invalidRelativeValue) throw new Error(`Invalid value "${partialState.value}" for Control "${this.name}" with value range ${this.mode === 'ABSOLUTE' ? 0 : -1} to 1.`);
+        }
+        // update state
+        this._state = { ...this.state as object, ...partialState as object } as State;  // TODO: should be able to remove type casting in typescript 2.3.1
+        // re-render with new state
+        if (render) this.render();
+    }
+
+    abstract getInitialState(): State;
 
     get activeComponent() {
         return this._activeComponent;
@@ -55,7 +69,7 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
         this._activeComponent = component;
 
         // on component change, reset state to default
-        this.state = this.defaultState;
+        this.setState(this.getInitialState(), false);
 
         // render new control state
         if (component) {
@@ -93,19 +107,6 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
             this.render();
             console.info(`Control "${this.name}" is not mapped in active view stack.`);
         }
-    }
-
-    setState(partialState: Partial<State>) {
-        if (partialState.value) {
-            // validate input
-            const invalidAbsoluteValue = this.mode === 'ABSOLUTE' && (partialState.value > 1 || partialState.value < 0);
-            const invalidRelativeValue = this.mode === 'RELATIVE' && (partialState.value > 1 || partialState.value < -1);
-            if (invalidAbsoluteValue || invalidRelativeValue) throw new Error(`Invalid value "${partialState.value}" for Control "${this.name}" with value range ${this.mode === 'ABSOLUTE' ? 0 : -1} to 1.`);
-        }
-        // update state
-        this.state = { ...this.state as object, ...partialState as object } as State;  // TODO: should be able to remove type casting in typescript 2.3.1
-        // re-render with new state
-        this.render();
     }
 
     preRender?(): void;

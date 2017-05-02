@@ -1,13 +1,13 @@
-import { default as AbstractComponent, AbstractComponentState } from './AbstractComponent';
-import { AbstractControl, AbstractSimpleControl } from '../control';
+import { default as AbstractComponent, ObjectLiteral } from './AbstractComponent';
+import { AbstractControl, SimpleControl } from '../control';
 
 
-export interface AbstractButtonState extends AbstractComponentState {
+export interface AbstractButtonState extends ObjectLiteral {
     on: boolean;
     color?: { r: number, g: number, b: number };
 };
 
-abstract class AbstractButton<Options extends object = {}, State extends AbstractButtonState = AbstractButtonState> extends AbstractComponent<Options, State> {
+abstract class AbstractButton<Props extends ObjectLiteral = ObjectLiteral, State extends AbstractButtonState = AbstractButtonState> extends AbstractComponent<Props, State> {
     LONG_PRESS_DELAY = 350;
     DOUBLE_PRESS_DELAY = 350;
 
@@ -17,7 +17,7 @@ abstract class AbstractButton<Options extends object = {}, State extends Abstrac
         return { on: false } as State;
     }
 
-    getControlOutput(control: AbstractSimpleControl): object {
+    getControlOutput(control: SimpleControl): object {
         const { on, color } = this.state;
         return {
             value: on ? 1 : 0,
@@ -31,7 +31,7 @@ abstract class AbstractButton<Options extends object = {}, State extends Abstrac
     onRelease?(): void;
     onDoubleRelease?(): void;
 
-    onControlInput(control: AbstractSimpleControl, input: { value: number, [others: string]: any }) {
+    onControlInput(control: SimpleControl, input: { value: number, [others: string]: any }) {
         if (this.onPress) this._handlePress(input.value);
         if (this.onLongPress) this._handleLongPress(input.value);
         if (this.onDoublePress) this._handleDoublePress(input.value);

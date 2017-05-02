@@ -1,4 +1,4 @@
-import AbstractComponent from './AbstractComponent';
+import { default as AbstractComponent, ObjectLiteral } from './AbstractComponent';
 import { AbstractControl } from '../control';
 import * as utils from '../../utils';
 import MidiMessage from '../midi/MidiMessage';
@@ -9,7 +9,7 @@ export interface AbstractRangeState {
     value: number;
 };
 
-abstract class AbstractRange<Options extends object = {}, State extends AbstractRangeState = AbstractRangeState> extends AbstractComponent<Options, State> {
+abstract class AbstractRange<Props extends ObjectLiteral = ObjectLiteral, State extends AbstractRangeState = AbstractRangeState> extends AbstractComponent<Props, State> {
     INPUT_DELAY = 350;
 
     memory: { [key: string]: any } = {};
