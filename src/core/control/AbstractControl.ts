@@ -1,4 +1,4 @@
-import { SimpleMidiMessage, MidiMessage, SysexMessage, MidiPattern } from '../midi/';
+import { SimpleMidiMessage, MidiMessage, SysexMessage, MessagePattern } from '../midi/';
 import { AbstractComponent } from '../component'
 import { Color } from '../helpers';
 import session from '../../session';
@@ -12,7 +12,7 @@ export interface AbstractControlState {
 
 export type AbstractControlConstructor = {
     port?: number, inPort?: number, outPort?: number,
-    patterns: (string | MidiPattern)[],  // patterns for all inPort and outPort MidiMessages
+    patterns: (string | MessagePattern)[],  // patterns for all inPort and outPort MidiMessages
 };
 
 abstract class AbstractControl<State extends AbstractControlState = AbstractControlState> {
@@ -22,7 +22,7 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
 
     inPort: number = 0;
     outPort: number = 0;
-    patterns: MidiPattern[];
+    patterns: MessagePattern[];
 
     cache: string[] = [];
     cacheOnMidiIn: boolean = true;
@@ -36,7 +36,7 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
         // set object properties
         this.inPort = port !== undefined ?  port : (inPort !== undefined ? inPort : this.inPort);
         this.outPort = port !== undefined ?  port : (outPort !== undefined ? outPort : this.outPort);
-        this.patterns = patterns.map(pattern => typeof pattern === 'string' ? new MidiPattern(pattern) : pattern);
+        this.patterns = patterns.map(pattern => typeof pattern === 'string' ? new MessagePattern(pattern) : pattern);
         this._state = this.getInitialState();
     }
 
@@ -52,7 +52,7 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
             if (invalidAbsoluteValue || invalidRelativeValue) throw new Error(`Invalid value "${partialState.value}" for Control "${this.name}" with value range ${this.mode === 'ABSOLUTE' ? 0 : -1} to 1.`);
         }
         // update state
-        this._state = { ...this.state as object, ...partialState as object } as State;  // TODO: should be able to remove type casting in typescript 2.3.1
+        this._state = { ...this.state as object, ...partialState as object } as State;  // TODO: should be able to remove type casting in typescript 2.4
         // re-render with new state
         if (render) this.render();
     }
@@ -79,7 +79,7 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
         }
     }
 
-    abstract getOutput(): (MidiMessage | SysexMessage)[];
+    getOutput?(state: State): (MidiMessage | SysexMessage)[];
 
     abstract getInput(message: MidiMessage | SysexMessage): State;
 
@@ -109,6 +109,15 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
         }
     }
 
+    onSysex(sysexMessage: SysexMessage) {
+        if (this.activeComponent) {
+            this.activeComponent.onControlInput(this, this.getInput(sysexMessage));
+        } else {
+            this.render();
+            console.info(`Control "${this.name}" is not mapped in active view stack.`);
+        }
+    }
+
     preRender?(): void;
 
     render() {
@@ -119,18 +128,20 @@ abstract class AbstractControl<State extends AbstractControlState = AbstractCont
         if (this.preRender) this.preRender();
 
         // send messages
-        for (let message of this.getOutput()) {
-            if (message instanceof MidiMessage) {
-                // send message to cache, send to midi out if new
-                if (this.cacheMidiMessage(message)){
-                    const { port, status, data1, data2 } = message;
-                    session.midiOut.sendMidi({ name: this.name, status, data1, data2 });
+        if (this.getOutput) {
+            for (let message of this.getOutput(this.state)) {
+                if (message instanceof MidiMessage) {
+                    // send message to cache, send to midi out if new
+                    if (this.cacheMidiMessage(message)){
+                        const { port, status, data1, data2 } = message;
+                        session.midiOut.sendMidi({ name: this.name, status, data1, data2 });
+                    }
+                } else if (message instanceof SysexMessage) {
+                    const { port, data } = message;
+                    session.midiOut.sendSysex({ port, data })
+                } else {
+                    throw new Error('Unrecognized message type.');
                 }
-            } else if (message instanceof SysexMessage) {
-                const { port, data } = message;
-                session.midiOut.sendSysex({ port, data })
-            } else {
-                throw new Error('Unrecognized message type.');
             }
         }
 

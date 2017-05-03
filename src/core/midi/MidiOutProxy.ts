@@ -22,7 +22,7 @@ export default class MidiOutProxy {
     sendMidi({ name, port = 0, status, data1, data2, urgent = false, cacheKey }: { name?: string, port?: number, status: number, data1: number, data2: number, urgent?: boolean, cacheKey?: string }) {
         // if urgent, fire midi message immediately, otherwise queue it up for next flush
         if (urgent) {
-            console.log(`[MIDI] OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}${name ? ` "${name}"` : ''}`);
+            console.log(`[MIDI]  OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}${name ? ` "${name}"` : ''}`);
             host.getMidiOutPort(port).sendMidi(status, data1, data2);
         } else {
             this._midiQueue.push({ name, port, status, data1, data2 });
@@ -31,7 +31,12 @@ export default class MidiOutProxy {
 
     sendSysex({ port = 0, data, urgent = false }: { port?: number, data: string, urgent?: boolean }) {
         // if urgent, fire sysex immediately, otherwise queue it up for next flush
-        urgent ? host.getMidiOutPort(port).sendSysex(data): this._sysexQueue.push({ port, data });
+        if (urgent) {
+            console.log(`[SYSEX] OUT ${String(port)} <== ${data}${name ? ` "${name}"` : ''}`);
+            host.getMidiOutPort(port).sendSysex(data);
+        } else {
+            this._sysexQueue.push({ port, data });
+        }
     }
 
     sendNoteOn({ port = 0, channel, key, velocity, urgent = false }: { port?: number, channel: number, key: number, velocity: number, urgent?: boolean }) {
@@ -68,7 +73,7 @@ export default class MidiOutProxy {
         setTimeout(() => {
             while (this._midiQueue.length > 0) {
                 const { name, port, status, data1, data2 } = this._midiQueue.shift() as NaiveMidiMessage;
-                console.log(`[MIDI] OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}${name ? ` "${name}"` : ''}`);
+                console.log(`[MIDI]  OUT ${String(port)} <== ${midiMessageToHex({ status, data1, data2 })}${name ? ` "${name}"` : ''}`);
                 host.getMidiOutPort(port).sendMidi(status, data1, data2);
             }
         });

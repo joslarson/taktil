@@ -1,5 +1,5 @@
 import AbstractControl from './AbstractControl';
-import { SimpleMidiMessage, MidiMessage, SysexMessage, MidiPattern } from '../midi/';
+import { SimpleMidiMessage, MidiMessage, SysexMessage, MessagePattern } from '../midi/';
 
 
 class Control extends AbstractControl {

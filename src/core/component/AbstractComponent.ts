@@ -42,7 +42,7 @@ abstract class AbstractComponent<Props extends ObjectLiteral = ObjectLiteral, St
 
     setState(partialState: Partial<State>, render = true): void {
         // update object state
-        this._state = { ...this._state as object, ...partialState as object } as State; // TODO: should be able to remove type casting in typescript 2.3.1
+        this._state = { ...this._state as object, ...partialState as object } as State; // TODO: should be able to remove type casting in typescript 2.4
         // re-render associated controls
         if (render) this.render();
     }

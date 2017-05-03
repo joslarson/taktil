@@ -103,8 +103,8 @@ export default class Logger {
             if (!re.test(message)) return;
         }
 
-        const isMidiInput = new RegExp('\\[MIDI\\] IN', 'gi').test(message);
-        const isMidiOutput = new RegExp('\\[MIDI\\] OUT', 'gi').test(message);
+        const isMidiInput =   new RegExp('^\\[(MIDI|SYSEX)\\] ? IN', 'gi').test(message);
+        const isMidiOutput =  new RegExp('^\\[(MIDI|SYSEX)\\] ? OUT', 'gi').test(message);
 
         if (this._midiLevel === 'None' && (isMidiInput || isMidiOutput)) return;
         if (this._midiLevel === 'Input' && isMidiOutput) return;

@@ -64,15 +64,22 @@ export default class Session {
         const control = this.findControl(midiMessage);
 
         if (control) {
-            console.log(`[MIDI] IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${control.name ? ` "${control.name}"` : ''}`);
+            console.log(`[MIDI]  IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${control.name ? ` "${control.name}"` : ''}`);
             control.onMidi(midiMessage);
         } else {
-            console.log(`[MIDI] IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);
+            console.log(`[MIDI]  IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);
         }
     }
 
-    onSysex(sysex: SysexMessage) {
-        console.log(`[MIDI] IN ${String(sysex.port)} => ${sysex.data}`);
+    onSysex(sysexMessage: SysexMessage) {
+        const control = this.findControl(sysexMessage);
+
+        if (control) {
+            console.log(`[SYSEX] IN  ${String(sysexMessage.port)} ==> ${sysexMessage.data}${control.name ? ` "${control.name}"` : ''}`);
+            control.onSysex(sysexMessage);
+        } else {
+            console.log(`[SYSEX] IN  ${String(sysexMessage.port)} ==> ${sysexMessage.data}`);
+        }
     }
 
     // Event Hooks
@@ -121,17 +128,17 @@ export default class Session {
         return { ...this._controls };
     }
 
-    findControl(midiMessage: MidiMessage): AbstractControl | null {
+    findControl(message: MidiMessage | SysexMessage): AbstractControl | null {
         // look for a matching registered control
         for (let controlName in this.controls) {
             const control = this.controls[controlName];
 
             // skip controls with an inPort that does not match the midiMessage port
-            if (control.inPort !== midiMessage.port) continue;
+            if (control.inPort !== message.port) continue;
 
             for (let pattern of control.patterns) {
                 // if pattern matches midiMessage, return control
-                if (pattern.test(midiMessage)) return control;
+                if (pattern.test(message)) return control;
             }
         }
         // not found, return null
