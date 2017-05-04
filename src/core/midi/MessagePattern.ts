@@ -15,7 +15,7 @@ export default class MessagePattern {
             string = this._getPatternStringFromMidiMessage(input);
         }
         this.string = string;
-        this.regex = new RegExp(string.slice().replace(/\?/g, '.'));
+        this.regex = new RegExp(`^${string.slice().replace(/\?/g, '.')}$`);
     }
 
     toString() {
