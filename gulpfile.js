@@ -1,11 +1,12 @@
-import gulp from 'gulp';
-import typescript from 'typescript';
-import gts from 'gulp-typescript';
-import babel from 'gulp-babel';
-import merge from 'merge2';
-import { spawn } from 'child_process';
+const gulp = require('gulp');
+const typescript = require('typescript');
+const gts = require('gulp-typescript');
+const merge = require('merge2');
+const spawn = require('child_process').spawn;
+
 
 const tsProject = gts.createProject('tsconfig.build.json', { typescript });
+
 gulp.task('js', () => {
     const tsResult = tsProject.src().pipe(tsProject());
     return merge([
