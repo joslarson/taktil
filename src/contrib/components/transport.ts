@@ -1,5 +1,4 @@
 import { AbstractButton } from '../../core/component';
-import session from '../../session';
 
 
 export class PlayToggle extends AbstractButton<{ transport: API.Transport }> {

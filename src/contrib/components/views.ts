@@ -1,6 +1,5 @@
 import { AbstractButton } from '../../core/component';
 import { AbstractView } from '../../core/view';
-import { AbstractControl } from '../../core/control';
 import session from '../../session';
 
 

@@ -11,7 +11,8 @@
         "types": [
             "typed-bitwig-api",
             "@types/mocha",
-            "@types/chai"
+            "@types/chai",
+            "@types/node"
         ],
         "strict": true
     },

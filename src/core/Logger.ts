@@ -3,6 +3,11 @@ import session from '../session';
 
 export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
 
+/**
+ * Simple logger implementation including integration with the Bitwig
+ * API's preferences system for setting log level, log filtering via
+ * regular expressions, and midi IO filtering.
+ */
 export default class Logger {
     private _levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
     private _level: Level = 'DEBUG';
@@ -27,7 +32,8 @@ export default class Logger {
             
             this._levelSetting.addValueObserver(level => this._level = level);
 
-            this._filterSetting = host.getPreferences().getStringSetting('Log filter (Regex)', 'Development', 1000, this._filter);
+            this._filterSetting = host.getPreferences()
+                .getStringSetting('Log filter (Regex)', 'Development', 1000, this._filter);
             this._filterSetting.addValueObserver(value => {
                 this._filter = value;
                 if (value) {
@@ -110,6 +116,6 @@ export default class Logger {
         if (this._midiLevel === 'Input' && isMidiOutput) return;
         if (this._midiLevel === 'Output' && isMidiInput) return;
 
-        level === 'ERROR' ? errorln(message) : println(message);
+        level === 'ERROR' ? host.errorln(message) : host.println(message);
     }
 }

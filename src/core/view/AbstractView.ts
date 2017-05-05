@@ -1,17 +1,20 @@
-import { MidiMessage, SysexMessage } from '../midi';
 import { AbstractComponent } from '../component';
 import { AbstractControl } from '../control';
 import session from '../../session';
 
 
 interface AbstractView {
-    [key: string]: AbstractComponent | AbstractComponent[] | (() => AbstractComponent | AbstractComponent[]);
+    [key: string]: (
+        AbstractComponent | AbstractComponent[] | (() => AbstractComponent | AbstractComponent[])
+    );
 }
 
 abstract class AbstractView {
     static parent: typeof AbstractView;
     private static _instance: AbstractView;
-    private static _componentMap: { [mode: string]: { controls: AbstractControl[], components: AbstractComponent[] } };
+    private static _componentMap: { [mode: string]: {
+        controls: AbstractControl[], components: AbstractComponent[],
+    } };
 
     static get instance() {
         // inheritance safe singleton pattern (each child class will have its own singleton)
@@ -19,7 +22,8 @@ abstract class AbstractView {
         let instance = View._instance;
 
         if (instance instanceof View) return instance;
-        // force every child class to create/use its own static _componentMap object, instead of sharing one.
+        // force every child class to create/use its own static _componentMap
+        // object, instead of sharing one.
         this._componentMap = {};
         instance = new View();
         View._instance = instance;
@@ -72,7 +76,9 @@ abstract class AbstractView {
                 const { controls, mode } = component;
                 for (let control of controls as AbstractControl[]) {
                     // register control with view/mode
-                    if (!this._componentMap[mode]) this._componentMap[mode] = { controls: [], components: [] };
+                    if (!this._componentMap[mode]) this._componentMap[mode] = {
+                        controls: [], components: [],
+                    };
 
                     // if control already registered in view mode, throw error
                     if (this._componentMap[mode].controls.indexOf(control) > -1) throw Error('Duplicate Control registration in view mode.');
@@ -81,7 +87,7 @@ abstract class AbstractView {
                     this._componentMap[mode].controls.push(control);
                     this._componentMap[mode].components.push(component);
                     // initialize component
-                    component.onInit();
+                    if (component.onInit) component.onInit();
                 }
             }
         });

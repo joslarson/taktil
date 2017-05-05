@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 
 import { midiMessageToHex } from './utils';
-import  { SimpleMidiMessage } from './core/midi';
+
 
 describe('midiMessageToHex', () => {
     it('should return midi message hex representation string', () => {

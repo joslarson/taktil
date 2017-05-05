@@ -4,6 +4,13 @@ import { AbstractView } from '../core/view';
 import { midiMessageToHex } from '../utils';
 
 
+/**
+ * A representation of the current scripting session / active Bitwig
+ * Studio tab.
+ * 
+ * Assists in managing shared state and session level event
+ * subscriptions between Taktil and the control surface script.
+ */
 export default class Session {
     private _controls: { [key: string]: AbstractControl } = {};
     private _views: typeof AbstractView[] = [];
@@ -20,9 +27,11 @@ export default class Session {
             // setup midi/sysex callbacks per port
             const midiInPorts = this.midiInPorts;
             for (let port = 0; port < midiInPorts.length; port++) {
-                midiInPorts[port].setMidiCallback((status: number, data1: number, data2: number) => {
-                    this.onMidi(new MidiMessage({port, status, data1, data2}));
-                });
+                midiInPorts[port].setMidiCallback(
+                    (status: number, data1: number, data2: number) => {
+                        this.onMidi(new MidiMessage({port, status, data1, data2}))
+                    }
+                );
                 midiInPorts[port].setSysexCallback((data: string) => {
                     this.onSysex(new SysexMessage({ port, data }));
                 });
@@ -38,7 +47,7 @@ export default class Session {
             // reset all controls to default state
             for (let controlName in this.controls) {
                 const control = this.controls[controlName];
-                control.setState(control.getInitialState());
+                control.setState(control.initialState);
             }
             // call registered exit callbacks
             this._callEventCallbacks('exit');
@@ -85,7 +94,10 @@ export default class Session {
     // Event Hooks
     //////////////////////////////
 
-    on(eventName: 'init' | 'flush' | 'exit' | 'activateView' | 'activateMode' | 'deactivateMode', callback: (...args: any[]) => any) {
+    on(
+        eventName: 'init' | 'flush' | 'exit' | 'activateView' | 'activateMode' | 'deactivateMode',
+        callback: (...args: any[]) => any
+    ) {
         if (!this._eventHandlers[eventName]) this._eventHandlers[eventName] = [];
         this._eventHandlers[eventName].push(callback);
         return this;
@@ -111,7 +123,8 @@ export default class Session {
             control.name = controlName;
             for (let existingControl of controlsArray) {
                 // if no of the ports match up, then there's no conflict
-                if (control.outPort !== existingControl.outPort && control.inPort !== existingControl.inPort) continue;
+                if (control.outPort !== existingControl.outPort
+                    && control.inPort !== existingControl.inPort) continue;
                 for (let pattern of control.patterns) {
                     for (let existingPattern of existingControl.patterns) {
                         if (pattern.conflictsWith(existingPattern)) throw new Error(`Control "${control.name}" conflicts with existing Control "${existingControl.name}".`);
