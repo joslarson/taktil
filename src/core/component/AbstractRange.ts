@@ -1,22 +1,22 @@
-import { default as AbstractComponent, ObjectLiteral } from './AbstractComponent';
+import AbstractComponent from './AbstractComponent';
 import { AbstractControl } from '../control';
-import * as utils from '../../utils';
-import MidiMessage from '../midi/MidiMessage';
-import session from '../../session';
+import { AbstractControlBaseState } from '../control/AbstractControl';
+import { AbstractComponentBaseState, AbstractComponentBaseProps } from './AbstractComponent';
 
 
-export interface AbstractRangeState {
+export type AbstractRangeBaseProps = AbstractComponentBaseProps;
+export interface AbstractRangeBaseState extends AbstractComponentBaseState {
     value: number;
 };
 
-abstract class AbstractRange<Props extends ObjectLiteral = ObjectLiteral, State extends AbstractRangeState = AbstractRangeState> extends AbstractComponent<Props, State> {
-    INPUT_DELAY = 350;
-
+abstract class AbstractRange<
+    Props extends AbstractRangeBaseProps = AbstractRangeBaseProps,
+    State extends AbstractRangeBaseState = AbstractRangeBaseState
+> extends AbstractComponent<Props, State> {
+    state: State = { value: 0 } as State;
     memory: { [key: string]: any } = {};
 
-    getInitialState() {
-        return { value: 0 } as State;
-    }
+    INPUT_DELAY = 350;
 
     render() {
         if (this.memory.update) clearInterval(this.memory.update);
@@ -29,7 +29,7 @@ abstract class AbstractRange<Props extends ObjectLiteral = ObjectLiteral, State 
         return { value: this.state.value };
     }
 
-    onControlInput(control: AbstractControl, { value }: { value: number }) {
+    onControlInput(control: AbstractControl, { value }: AbstractControlBaseState) {
         if (this.memory.input) clearTimeout(this.memory.input);
         this.memory.input = setTimeout(() => {
             delete this.memory.input;

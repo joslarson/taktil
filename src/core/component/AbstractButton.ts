@@ -1,23 +1,30 @@
-import { default as AbstractComponent, ObjectLiteral } from './AbstractComponent';
-import { AbstractControl, SimpleControl } from '../control';
+import AbstractComponent from './AbstractComponent';
+import { AbstractComponentBaseState, AbstractComponentBaseProps } from './AbstractComponent';
+import { AbstractControl } from '../control';
+import { AbstractControlBaseState } from '../control/AbstractControl';
 
 
-export interface AbstractButtonState extends ObjectLiteral {
+export type AbstractButtonBaseProps = AbstractComponentBaseProps;
+export interface AbstractButtonBaseState extends AbstractComponentBaseState {
     on: boolean;
     color?: { r: number, g: number, b: number };
 };
 
-abstract class AbstractButton<Props extends ObjectLiteral = ObjectLiteral, State extends AbstractButtonState = AbstractButtonState> extends AbstractComponent<Props, State> {
+/**
+ * A button component providing method hooks for press, long press,
+ * double press, release, and double release events.
+ */
+abstract class AbstractButton<
+    Props extends AbstractButtonBaseProps = AbstractButtonBaseProps,
+    State extends AbstractButtonBaseState = AbstractButtonBaseState
+> extends AbstractComponent<Props, State> {
+    state: State = { on: false } as State;
+    memory: { [key: string]: any } = {};
+
     LONG_PRESS_DELAY = 350;
     DOUBLE_PRESS_DELAY = 350;
 
-    memory: { [key: string]: any } = {};
-
-    getInitialState() {
-        return { on: false } as State;
-    }
-
-    getControlOutput(control: SimpleControl): object {
+    getControlOutput(control: AbstractControl): object {
         const { on, color } = this.state;
         return {
             value: on ? 1 : 0,
@@ -31,7 +38,7 @@ abstract class AbstractButton<Props extends ObjectLiteral = ObjectLiteral, State
     onRelease?(): void;
     onDoubleRelease?(): void;
 
-    onControlInput(control: SimpleControl, input: { value: number, [others: string]: any }) {
+    onControlInput(control: AbstractControl, input: AbstractControlBaseState) {
         if (this.onPress) this._handlePress(input.value);
         if (this.onLongPress) this._handleLongPress(input.value);
         if (this.onDoublePress) this._handleDoublePress(input.value);

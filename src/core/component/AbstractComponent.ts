@@ -1,21 +1,29 @@
 import AbstractView from '../view/AbstractView';
-import { areDeepEqual } from '../../utils';
-import session from '../../session';
-import AbstractControl from '../control/AbstractControl';
+import { AbstractControl } from '../control';
+import { AbstractControlBaseState } from '../control/AbstractControl';
+import ObjectLiteral from '../helpers/ObjectLiteral';
 
 
-export interface ObjectLiteral {
-    [key: string]: any;
-}
+export type AbstractComponentBaseState = ObjectLiteral;
+export type AbstractComponentBaseProps = ObjectLiteral;
 
-abstract class AbstractComponent<Props extends ObjectLiteral = ObjectLiteral, State extends ObjectLiteral = ObjectLiteral> {
+/**
+ * Abstract class defining the the base functionality from which all
+ * other components must extend.
+ */
+abstract class AbstractComponent<
+    Props extends AbstractComponentBaseProps = AbstractComponentBaseProps,
+    State extends AbstractComponentBaseState = AbstractComponentBaseState
+> {
     name: string;
     view: typeof AbstractView;
     mode: string;
     controls: AbstractControl[];
+
+    state: State
     props: Props;
 
-    private _state: State;
+    private _initialState: State;
 
     constructor(controls: AbstractControl[], mode: string, props: Props);
     constructor(control: AbstractControl, mode: string, props: Props);
@@ -25,24 +33,24 @@ abstract class AbstractComponent<Props extends ObjectLiteral = ObjectLiteral, St
         this.controls = Array.isArray(controls) ? controls : [controls];
         this.mode = typeof rest[0] === 'string' ? rest[0] : '__BASE__';
         this.props = typeof rest[rest.length - 1] === 'object' ? rest[rest.length - 1] : {};
-        this._state = this.getInitialState() as State;
     }
 
-    // called when button is registered to a view for the first time
-    // allows running of code that is only allowed in the api's init function
-    onInit(): void {
-        // optionally implemented in child class
-    }
+    // called when component is registered to a view for the first time
+    // allows running of code that is only allowed in the API's init function
+    onInit?(): void;
 
-    get state(): State {
-        return { ...this._state as object } as State;
+    get initialState(): State {
+        // if not set by setState, store initialized state value
+        if (!this._initialState) this._initialState = JSON.parse(JSON.stringify(this.state));
+        return this._initialState;
     }
-
-    abstract getInitialState(): State;
 
     setState(partialState: Partial<State>, render = true): void {
+        // if not set by initialState getter, store initialized state value
+        if (!this.initialState) this._initialState = JSON.parse(JSON.stringify(this.state));
+
         // update object state
-        this._state = { ...this._state as object, ...partialState as object } as State; // TODO: should be able to remove type casting in typescript 2.4
+        this.state = { ...this.state as object, ...partialState as object } as State; // TODO: should be able to remove type casting in typescript 2.4
         // re-render associated controls
         if (render) this.render();
     }
@@ -58,7 +66,7 @@ abstract class AbstractComponent<Props extends ObjectLiteral = ObjectLiteral, St
     abstract getControlOutput(control: AbstractControl): object;
 
     // handles midi messages routed to control
-    abstract onControlInput(control: AbstractControl, input: { value: number, [others: string]: any }): void;
+    abstract onControlInput(control: AbstractControl, input: AbstractControlBaseState): void;
 }
 
 
