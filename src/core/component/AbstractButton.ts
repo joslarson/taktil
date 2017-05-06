@@ -14,7 +14,7 @@ export interface AbstractButtonBaseState extends AbstractComponentBaseState {
  * A button component providing method hooks for press, long press,
  * double press, release, and double release events.
  */
-abstract class AbstractButton<
+export default abstract class AbstractButton<
     Props extends AbstractButtonBaseProps = AbstractButtonBaseProps,
     State extends AbstractButtonBaseState = AbstractButtonBaseState
 > extends AbstractComponent<Props, State> {
@@ -125,6 +125,3 @@ abstract class AbstractButton<
         }
     }
 }
-
-
-export default AbstractButton;

@@ -4,7 +4,7 @@ import { MidiMessage, SysexMessage, MessagePattern } from '../midi';
 
 export type SimpleControlBaseState = AbstractControlBaseState;
 
-class SimpleControl<
+export default class SimpleControl<
     State extends SimpleControlBaseState = SimpleControlBaseState
 > extends AbstractControl<State> {
     state = { value: 0 } as State;
@@ -38,5 +38,3 @@ class SimpleControl<
         }
     }
 }
-
-export default SimpleControl;

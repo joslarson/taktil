@@ -9,7 +9,6 @@ export interface NaiveMidiMessage extends SimpleMidiMessage {
     port: number,
 }
 
-
 export default class MidiOutProxy {
     private _midiQueue: NaiveMidiMessage[] = [];
     private _sysexQueue: SysexMessage[] = [];

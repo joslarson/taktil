@@ -44,7 +44,7 @@ abstract class AbstractView {
         for (let activeMode of session.activeModes) {
             if (!this._componentMap[activeMode]) continue;  // mode not used in view
             const component = this.getComponent(control, activeMode);
-            if (component) { 
+            if (component) {
                 control.activeComponent = component;
                 return;
             }

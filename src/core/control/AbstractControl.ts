@@ -10,7 +10,11 @@ export interface AbstractControlBaseState {
     [key: string]: any;
 }
 
-abstract class AbstractControl<State extends AbstractControlBaseState = AbstractControlBaseState> {
+/**
+ * Abstract class defining the the base functionality from which all
+ * other controls must extend.
+ */
+export default abstract class AbstractControl<State extends AbstractControlBaseState = AbstractControlBaseState> {
     name: string;
     mode: 'ABSOLUTE' | 'RELATIVE' = 'ABSOLUTE';
 
@@ -126,37 +130,33 @@ abstract class AbstractControl<State extends AbstractControlBaseState = Abstract
 
     preRender?(): void;
 
-    render() {
+    render(): boolean {
         // no midi out? no render.
-        if (!this.enableMidiOut) return;
+        if (!this.enableMidiOut || !this.getOutput) return false;
 
         // pre render hook
         if (this.preRender) this.preRender();
 
         // send messages
-        if (this.getOutput) {
-            for (let message of this.getOutput(this.state)) {
-                if (message instanceof MidiMessage) {
-                    // send message to cache, send to midi out if new
-                    if (this.cacheMidiMessage(message)){
-                        const { port, status, data1, data2 } = message;
-                        session.midiOut.sendMidi({ name: this.name, port, status, data1, data2 });
-                    }
-                } else if (message instanceof SysexMessage) {
-                    const { port, data } = message;
-                    session.midiOut.sendSysex({ port, data })
-                } else {
-                    throw new Error('Unrecognized message type.');
+        for (let message of this.getOutput(this.state)) {
+            if (message instanceof MidiMessage) {
+                // send message to cache, send to midi out if new
+                if (this.cacheMidiMessage(message)){
+                    const { port, status, data1, data2 } = message;
+                    session.midiOut.sendMidi({ name: this.name, port, status, data1, data2 });
                 }
+            } else if (message instanceof SysexMessage) {
+                const { port, data } = message;
+                session.midiOut.sendSysex({ port, data })
+            } else {
+                throw new Error('Unrecognized message type.');
             }
         }
 
         // post render hook
         if (this.postRender) this.postRender();
+        return true;
     }
 
     postRender?(): void;
 }
-
-
-export default AbstractControl;

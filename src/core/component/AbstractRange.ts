@@ -9,7 +9,7 @@ export interface AbstractRangeBaseState extends AbstractComponentBaseState {
     value: number;
 };
 
-abstract class AbstractRange<
+export default abstract class AbstractRange<
     Props extends AbstractRangeBaseProps = AbstractRangeBaseProps,
     State extends AbstractRangeBaseState = AbstractRangeBaseState
 > extends AbstractComponent<Props, State> {
@@ -36,6 +36,3 @@ abstract class AbstractRange<
         }, this.INPUT_DELAY);
     }
 }
-
-
-export default AbstractRange;

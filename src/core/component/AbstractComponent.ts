@@ -11,7 +11,7 @@ export type AbstractComponentBaseProps = ObjectLiteral;
  * Abstract class defining the the base functionality from which all
  * other components must extend.
  */
-abstract class AbstractComponent<
+export default abstract class AbstractComponent<
     Props extends AbstractComponentBaseProps = AbstractComponentBaseProps,
     State extends AbstractComponentBaseState = AbstractComponentBaseState
 > {
@@ -68,6 +68,3 @@ abstract class AbstractComponent<
     // handles midi messages routed to control
     abstract onControlInput(control: AbstractControl, input: AbstractControlBaseState): void;
 }
-
-
-export default AbstractComponent;
