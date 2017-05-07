@@ -6,28 +6,23 @@ import { MidiMessage, SysexMessage } from '../midi/';
 import session from '../../session';
 
 
-type ControlState = { value: number, nested: { value: number } };
-
-class Control extends SimpleControl<ControlState> {
-    state = { value: 1, nested: { value: 0 } };
-
-    getInput(message: MidiMessage | SysexMessage) {
-        return { ...this.state };
-    }
-
-    getOutput(state: ControlState) {
-        return [
-            new MidiMessage({
-                status: 0xB0, data1: 0x1F, data2: this.state.value || 127,
-            })
-        ]
-    }
-}
-
-const control = new Control({ status: 0xB0, data1: 21 });
+const control = new SimpleControl({ status: 0xB0, data1: 21 });
 
 describe('SimpleControl', () => {
-    it('should initialize state correctly', () => {
-        expect(control.state).to.deep.equal({ value: 1, nested: { value: 0 } });
+    it('should generate correct input', () => {
+        const { status, data1 } = control;
+        expect(control.getInput(
+            new MidiMessage({ status, data1, data2: 127 })
+        )).to.deep.equal({
+            value: 1
+        });
+    });
+
+    it('should generate correct output', () => {
+        const { status, data1 } = control;
+        const data2 = Math.round(control.state.value * 127);
+        expect(control.getOutput(control.state)).to.deep.equal([
+            new MidiMessage({ status, data1, data2 })
+        ]);
     });
 });

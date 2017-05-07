@@ -17,11 +17,11 @@ interface State extends AbstractComponentBaseState {
 class Component extends AbstractComponent<Props, State> {
     state: State = { value: 0, foo: { bar: 0 } };
 
-    getControlOutput(control: AbstractControl): AbstractControlBaseState {
+    getOutput(control: AbstractControl): AbstractControlBaseState {
         return { value: this.state.value };
     }
 
-    onControlInput(control: AbstractControl, input: AbstractControlBaseState) {
+    onInput(control: AbstractControl, input: AbstractControlBaseState) {
         this.setState({ value: input.value });
     }
 }
