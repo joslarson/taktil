@@ -110,7 +110,7 @@ export default abstract class AbstractControl<State extends AbstractControlBaseS
         if (this.cacheOnMidiIn) this.cacheMidiMessage(midiMessage);
 
         if (this.activeComponent) {
-            this.activeComponent.onControlInput(this, this.getInput(midiMessage));
+            this.activeComponent.onInput(this, this.getInput(midiMessage));
         } else {
             // re-render based on current state (messages will only be sent if they are
             // different than what's in the cache)
@@ -121,7 +121,7 @@ export default abstract class AbstractControl<State extends AbstractControlBaseS
 
     onSysex(sysexMessage: SysexMessage) {
         if (this.activeComponent) {
-            this.activeComponent.onControlInput(this, this.getInput(sysexMessage));
+            this.activeComponent.onInput(this, this.getInput(sysexMessage));
         } else {
             this.render();
             console.info(`Control "${this.name}" is not mapped in active view stack.`);

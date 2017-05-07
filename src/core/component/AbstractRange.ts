@@ -25,11 +25,11 @@ export default abstract class AbstractRange<
         }, this.memory.input ? this.INPUT_DELAY : 0);
     }
 
-    getControlOutput(control: AbstractControl): AbstractControlBaseState {
+    getOutput(control: AbstractControl): AbstractControlBaseState {
         return { value: this.state.value };
     }
 
-    onControlInput(control: AbstractControl, { value }: AbstractControlBaseState) {
+    onInput(control: AbstractControl, { value }: AbstractControlBaseState) {
         if (this.memory.input) clearTimeout(this.memory.input);
         this.memory.input = setTimeout(() => {
             delete this.memory.input;

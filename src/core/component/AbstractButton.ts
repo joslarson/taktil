@@ -30,20 +30,20 @@ export default abstract class AbstractButton<
     onRelease?(): void;
     onDoubleRelease?(): void;
 
-    getControlOutput(control: AbstractControl): AbstractControlBaseState {
-        const { on, color } = this.state;
-        return {
-            value: on ? 1 : 0,
-            ...(color && { color }),
-        };
-    }
-
-    onControlInput(control: AbstractControl, input: AbstractControlBaseState) {
+    onInput(control: AbstractControl, input: AbstractControlBaseState) {
         if (this.onPress) this.handlePress(input.value);
         if (this.onLongPress) this.handleLongPress(input.value);
         if (this.onDoublePress) this.handleDoublePress(input.value);
         if (this.onRelease) this.handleRelease(input.value);
         if (this.onDoubleRelease) this.handleDoubleRelease(input.value);
+    }
+
+    getOutput(control: AbstractControl): AbstractControlBaseState {
+        const { on, color } = this.state;
+        return {
+            value: on ? 1 : 0,
+            ...(color && { color }),
+        };
     }
 
     isPress(value: number) {

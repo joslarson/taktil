@@ -25,10 +25,10 @@ export default abstract class AbstractComponent<
 
     private _initialState: State;
 
-    constructor(controls: AbstractControl[], mode: string, props: Props);
-    constructor(control: AbstractControl, mode: string, props: Props);
-    constructor(controls: AbstractControl[], props: Props);
-    constructor(control: AbstractControl, props: Props);
+    constructor(controls: AbstractControl[], mode: string, props?: Props);
+    constructor(control: AbstractControl, mode: string, props?: Props);
+    constructor(controls: AbstractControl[], props?: Props);
+    constructor(control: AbstractControl, props?: Props);
     constructor(controls: AbstractControl[] | AbstractControl, ...rest: any[]) {
         this.controls = Array.isArray(controls) ? controls : [controls];
         this.mode = typeof rest[0] === 'string' ? rest[0] : '__BASE__';
@@ -58,13 +58,13 @@ export default abstract class AbstractComponent<
     render(): void {
         this.controls.map(control => {
             // update hardware state if in view
-            if (control.activeComponent === this) control.setState(this.getControlOutput(control));
+            if (control.activeComponent === this) control.setState(this.getOutput(control));
         });
     }
 
     // renders component state to hardware control
-    abstract getControlOutput(control: AbstractControl): AbstractControlBaseState;
+    abstract getOutput(control: AbstractControl): AbstractControlBaseState;
 
     // handles midi messages routed to control
-    abstract onControlInput(control: AbstractControl, input: AbstractControlBaseState): void;
+    abstract onInput(control: AbstractControl, input: AbstractControlBaseState): void;
 }
