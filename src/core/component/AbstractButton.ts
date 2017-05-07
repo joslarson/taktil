@@ -24,19 +24,19 @@ export default abstract class AbstractButton<
     LONG_PRESS_DELAY = 350;
     DOUBLE_PRESS_DELAY = 350;
 
-    getControlOutput(control: AbstractControl): object {
+    onPress?(): void;
+    onLongPress?(): void;
+    onDoublePress?(): void;
+    onRelease?(): void;
+    onDoubleRelease?(): void;
+
+    getControlOutput(control: AbstractControl): AbstractControlBaseState {
         const { on, color } = this.state;
         return {
             value: on ? 1 : 0,
             ...(color && { color }),
         };
     }
-
-    onPress?(): void;
-    onLongPress?(): void;
-    onDoublePress?(): void;
-    onRelease?(): void;
-    onDoubleRelease?(): void;
 
     onControlInput(control: AbstractControl, input: AbstractControlBaseState) {
         if (this.onPress) this.handlePress(input.value);

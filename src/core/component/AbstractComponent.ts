@@ -20,8 +20,8 @@ export default abstract class AbstractComponent<
     mode: string;
     controls: AbstractControl[];
 
-    state: State
-    props: Props;
+    state: State = {} as State;
+    props: Props = {} as Props;
 
     private _initialState: State;
 
@@ -63,7 +63,7 @@ export default abstract class AbstractComponent<
     }
 
     // renders component state to hardware control
-    abstract getControlOutput(control: AbstractControl): object;
+    abstract getControlOutput(control: AbstractControl): AbstractControlBaseState;
 
     // handles midi messages routed to control
     abstract onControlInput(control: AbstractControl, input: AbstractControlBaseState): void;

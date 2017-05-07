@@ -31,8 +31,8 @@ export default class MidiOutProxy {
         }
     }
 
-    sendSysex({ port = 0, data, urgent = false }: {
-        port?: number, data: string, urgent?: boolean,
+    sendSysex({ name, port = 0, data, urgent = false }: {
+        name?: string, port?: number, data: string, urgent?: boolean,
     }) {
         // if urgent, fire sysex immediately, otherwise queue it up for next flush
         if (urgent) {

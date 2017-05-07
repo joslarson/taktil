@@ -25,7 +25,7 @@ export default abstract class AbstractRange<
         }, this.memory.input ? this.INPUT_DELAY : 0);
     }
 
-    getControlOutput(control: AbstractControl): object {
+    getControlOutput(control: AbstractControl): AbstractControlBaseState {
         return { value: this.state.value };
     }
 
