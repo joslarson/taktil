@@ -29,11 +29,11 @@ export default class Session {
             for (let port = 0; port < midiInPorts.length; port++) {
                 midiInPorts[port].setMidiCallback(
                     (status: number, data1: number, data2: number) => {
-                        this.onMidi(new MidiMessage({port, status, data1, data2}))
+                        this.onMidiInput(new MidiMessage({port, status, data1, data2}))
                     }
                 );
                 midiInPorts[port].setSysexCallback((data: string) => {
-                    this.onSysex(new SysexMessage({ port, data }));
+                    this.onMidiInput(new SysexMessage({ port, data }));
                 });
             }
             global.__is_init__ = false;
@@ -69,26 +69,13 @@ export default class Session {
         return midiInPorts;
     }
 
-    onMidi(midiMessage: MidiMessage) {
-        const control = this.findControl(midiMessage);
+    onMidiInput(message: MidiMessage | SysexMessage) {
+        const control = this.findControl(message);
+        const messageType = message instanceof MidiMessage ? 'MIDI ' : 'SYSEX'
 
-        if (control) {
-            console.log(`[MIDI]  IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}${control.name ? ` "${control.name}"` : ''}`);
-            control.onMidi(midiMessage);
-        } else {
-            console.log(`[MIDI]  IN  ${String(midiMessage.port)} ==> ${midiMessageToHex(midiMessage)}`);
-        }
-    }
-
-    onSysex(sysexMessage: SysexMessage) {
-        const control = this.findControl(sysexMessage);
-
-        if (control) {
-            console.log(`[SYSEX] IN  ${String(sysexMessage.port)} ==> ${sysexMessage.data}${control.name ? ` "${control.name}"` : ''}`);
-            control.onSysex(sysexMessage);
-        } else {
-            console.log(`[SYSEX] IN  ${String(sysexMessage.port)} ==> ${sysexMessage.data}`);
-        }
+        if (control) control.onMidiInput(message);
+        
+        console.log(`[${messageType}]  IN  ${String(message.port)} ==> ${message}${control && control.name ? ` "${control.name}"` : ''}`);
     }
 
     // Event Hooks

@@ -6,4 +6,8 @@ export default class SysexMessage {
         this.port = port;
         this.data = data;
     }
+
+    toString() {
+        return this.data.toUpperCase();
+    }
 }

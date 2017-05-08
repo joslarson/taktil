@@ -46,8 +46,7 @@ export default abstract class AbstractComponent<
     }
 
     setState(partialState: Partial<State>, render = true): void {
-        // if not set by initialState getter, store initialized state value
-        if (!this.initialState) this._initialState = JSON.parse(JSON.stringify(this.state));
+        this.initialState;  // make sure initialState has been initialized
 
         // update object state
         this.state = { ...this.state as object, ...partialState as object } as State; // TODO: should be able to remove type casting in typescript 2.4

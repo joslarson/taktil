@@ -44,6 +44,8 @@ export default abstract class AbstractControl<State extends AbstractControlBaseS
             .map(pattern => typeof pattern === 'string' ? new MessagePattern(pattern) : pattern);
     }
 
+    // state
+
     get initialState(): State {
         // if not set by setState, store initialized state value
         if (!this._initialState) this._initialState = JSON.parse(JSON.stringify(this.state));
@@ -51,8 +53,7 @@ export default abstract class AbstractControl<State extends AbstractControlBaseS
     }
 
     setState(partialState: Partial<State>, render = true): void {
-        // if not set by initialState getter, store initialized state value
-        if (!this.initialState) this._initialState = JSON.parse(JSON.stringify(this.state));
+        this.initialState;  // make sure initialState has been initialized
 
         if (partialState.value) {
             // validate input
@@ -68,6 +69,8 @@ export default abstract class AbstractControl<State extends AbstractControlBaseS
         if (render) this.render();
     }
 
+    // active component
+
     get activeComponent() {
         return this._activeComponent;
     }
@@ -81,14 +84,10 @@ export default abstract class AbstractControl<State extends AbstractControlBaseS
         this.setState(this.initialState, false);
 
         // render new control state
-        if (component) {
-            component.render();
-        } else {
-            this.render();
-        }
+        component ? component.render() : this.render();
     }
 
-    getOutput?(state: State): (MidiMessage | SysexMessage)[];
+    // midi i/o
 
     abstract getInput(message: MidiMessage | SysexMessage): State;
 
@@ -105,12 +104,12 @@ export default abstract class AbstractControl<State extends AbstractControlBaseS
         throw new Error(`MidiMessage "${midiMessage.hex}" does not match existing pattern on Control "${this.name}".`);
     }
 
-    onMidi(midiMessage: MidiMessage) {
+    onMidiInput(message: MidiMessage | SysexMessage) {
         // update cache with input
-        if (this.cacheOnMidiIn) this.cacheMidiMessage(midiMessage);
+        if (this.cacheOnMidiIn && message instanceof MidiMessage) this.cacheMidiMessage(message);
 
         if (this.activeComponent) {
-            this.activeComponent.onInput(this, this.getInput(midiMessage));
+            this.activeComponent.onInput(this, this.getInput(message));
         } else {
             // re-render based on current state (messages will only be sent if they are
             // different than what's in the cache)
@@ -119,26 +118,21 @@ export default abstract class AbstractControl<State extends AbstractControlBaseS
         }
     }
 
-    onSysex(sysexMessage: SysexMessage) {
-        if (this.activeComponent) {
-            this.activeComponent.onInput(this, this.getInput(sysexMessage));
-        } else {
-            this.render();
-            console.info(`Control "${this.name}" is not mapped in active view stack.`);
-        }
-    }
+    getMidiOutput?(state: State): (MidiMessage | SysexMessage)[];
+
+    // render
 
     preRender?(): void;
 
     render(): boolean {
         // no midi out? no render.
-        if (!this.enableMidiOut || !this.getOutput) return false;
+        if (!this.enableMidiOut || !this.getMidiOutput) return false;
 
         // pre render hook
         if (this.preRender) this.preRender();
 
         // send messages
-        for (let message of this.getOutput(this.state)) {
+        for (let message of this.getMidiOutput(this.state)) {
             if (message instanceof MidiMessage) {
                 // send message to cache, send to midi out if new
                 if (this.cacheMidiMessage(message)){

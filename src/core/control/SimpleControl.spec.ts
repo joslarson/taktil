@@ -21,7 +21,7 @@ describe('SimpleControl', () => {
     it('should generate correct output', () => {
         const { status, data1 } = control;
         const data2 = Math.round(control.state.value * 127);
-        expect(control.getOutput(control.state)).to.deep.equal([
+        expect(control.getMidiOutput(control.state)).to.deep.equal([
             new MidiMessage({ status, data1, data2 })
         ]);
     });

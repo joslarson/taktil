@@ -16,7 +16,7 @@ class TestControl extends AbstractControl<TestControlState> {
         return { ...this.state };
     }
 
-    getOutput(state: TestControlState) {
+    getMidiOutput(state: TestControlState) {
         return [
             new MidiMessage({
                 status: 0xB0, data1: 0x1F, data2: this.state.value || 127,
@@ -74,10 +74,10 @@ describe('AbstractControl', () => {
         expect(control.render()).to.equal(false);
         control.enableMidiOut = true;
 
-        const getOutput = TestControl.prototype.getOutput;
-        delete TestControl.prototype.getOutput;
+        const getOutput = TestControl.prototype.getMidiOutput;
+        delete TestControl.prototype.getMidiOutput;
         expect(control.render()).to.equal(false);
-        TestControl.prototype.getOutput = getOutput;
+        TestControl.prototype.getMidiOutput = getOutput;
 
         expect(control.render()).to.equal(true);
     });

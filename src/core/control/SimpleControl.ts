@@ -21,7 +21,7 @@ export default class SimpleControl<
         this.data1 = data1;
     }
 
-    getOutput(state: State): (MidiMessage | SysexMessage)[] {
+    getMidiOutput(state: State): (MidiMessage | SysexMessage)[] {
         const { outPort: port, status, data1 } = this;
         const data2 = Math.round(state.value * 127);
         return [
