@@ -1,4 +1,4 @@
-Taktil
+Taktil &nbsp;![build status](https://travis-ci.org/taktiljs/taktil.svg?branch=master "build status")
 ==========================
 
 Taktil is a lightweight control surface scripting framework for Bitwig Studio that encourages rapid development and community code reuse. At its core, it is designed around the idea of building reusable, extendable components and provides a simple but powerful view abstraction that makes contextually mapping hardware controls to different components a breeze.
