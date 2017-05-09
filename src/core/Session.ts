@@ -71,11 +71,11 @@ export default class Session {
 
     onMidiInput(message: MidiMessage | SysexMessage) {
         const control = this.findControl(message);
-        const messageType = message instanceof MidiMessage ? 'MIDI ' : 'SYSEX'
+        const messageType = message instanceof MidiMessage ? '[MIDI] ' : '[SYSEX]'
 
         if (control) control.onMidiInput(message);
-        
-        console.log(`[${messageType}]  IN  ${String(message.port)} ==> ${message}${control && control.name ? ` "${control.name}"` : ''}`);
+
+        console.log(`${messageType} IN  ${String(message.port)} ==> ${message}${control && control.name ? ` "${control.name}"` : ''}`);
     }
 
     // Event Hooks
