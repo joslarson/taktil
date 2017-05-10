@@ -1,7 +1,6 @@
 import { MidiOutProxy, MidiMessage, SysexMessage } from '../core/midi';
 import { AbstractControl } from 'core/control';
 import { AbstractView } from '../core/view';
-import { midiMessageToHex } from '../utils';
 
 
 /**
@@ -151,7 +150,7 @@ export default class Session {
         // connect each control to the corresponding component in view (if any)
         for (let controlName in this.controls) {
             const control = this.controls[controlName];
-            this.activeView.associateControl(control);
+            this.activeView.connectControl(control);
         }
     }
 

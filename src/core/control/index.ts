@@ -1,3 +1,3 @@
-export { default as AbstractControl } from './AbstractControl';
-export { default as SimpleControl } from './SimpleControl';
-export { default as SysexControl } from './SysexControl';
+export { default as AbstractControl, AbstractControlBaseState } from './AbstractControl';
+export { default as SimpleControl, SimpleControlBaseState } from './SimpleControl';
+export { default as SysexControl, SysexControlBaseState } from './SysexControl';

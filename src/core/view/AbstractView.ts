@@ -38,7 +38,7 @@ abstract class AbstractView {
         return this._componentMap[mode].components[componentMapIndex];
     }
 
-    static associateControl(control: AbstractControl) {
+    static connectControl(control: AbstractControl) {
         const instance = this.instance;
         // check view modes in order for component/control registration
         for (let activeMode of session.activeModes) {
@@ -52,7 +52,7 @@ abstract class AbstractView {
         }
         // component not found in view? send to parent
         if (this.parent) {
-            this.parent.associateControl(control);
+            this.parent.connectControl(control);
         } else {
             // no parent? no component to connect to
             control.activeComponent = null;

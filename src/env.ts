@@ -1,5 +1,6 @@
 // setup environment
-import logger from './logger';
+import Logger from './core/Logger';
+
 
 loadAPI(2); // load bitwig api v2
 
@@ -9,7 +10,7 @@ global.toast = (message: string) => {
 }
 
 // connect logger as global console
-global.console = logger;
+global.console = new Logger();
 
 // hookup dummy function to unsupported logger methods
 

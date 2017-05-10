@@ -1,3 +1,3 @@
-export { default as AbstractComponent } from './AbstractComponent';
-export { default as AbstractRange } from './AbstractRange';
-export { default as AbstractButton } from './AbstractButton';
+export { default as AbstractComponent, AbstractComponentBaseProps, AbstractComponentBaseState } from './AbstractComponent';
+export { default as AbstractRange, AbstractRangeBaseProps, AbstractRangeBaseState } from './AbstractRange';
+export { default as AbstractButton, AbstractButtonBaseProps, AbstractButtonBaseState } from './AbstractButton';

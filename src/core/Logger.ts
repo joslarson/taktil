@@ -6,7 +6,7 @@ export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
 /**
  * Simple logger implementation including integration with the Bitwig
  * API's preferences system for setting log level, log filtering via
- * regular expressions, and midi IO filtering.
+ * regular expressions, and Midi I/O filtering.
  */
 export default class Logger {
     private _levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
