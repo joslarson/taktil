@@ -11,7 +11,8 @@
         "lib": ["dom", "es6", "dom.iterable", "scripthost"],
         "importHelpers": true,
         "types": [
-            "typed-bitwig-api"
+            "typed-bitwig-api",
+            "@types/node"
         ],
         "strict": true
     },

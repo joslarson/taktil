@@ -2,6 +2,7 @@ import { MidiOutProxy, MidiMessage, SysexMessage } from '../core/midi';
 import { AbstractControl } from 'core/control';
 import { AbstractView } from '../core/view';
 
+declare const global: any;
 
 /**
  * A representation of the current scripting session / active Bitwig
