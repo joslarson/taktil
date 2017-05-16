@@ -3,7 +3,6 @@ import * as sinon from 'sinon';
 
 import AbstractButton from './AbstractButton';
 import { MidiMessage, SysexMessage } from '../midi/';
-import session from '../../session';
 import SimpleControl from '../control/SimpleControl';
 
 

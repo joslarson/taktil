@@ -109,7 +109,7 @@ export default class Session {
             // set control name on object
             control.name = controlName;
             for (let existingControl of controlsArray) {
-                // if no of the ports match up, then there's no conflict
+                // if none of the ports match up, then there's no conflict
                 if (control.outPort !== existingControl.outPort
                     && control.inPort !== existingControl.inPort) continue;
                 for (let pattern of control.patterns) {

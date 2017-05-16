@@ -1,9 +1,7 @@
 import { expect } from 'chai';
-import * as sinon from 'sinon';
 
 import SimpleControl from './SimpleControl';
-import { MidiMessage, SysexMessage } from '../midi/';
-import session from '../../session';
+import { MidiMessage } from '../midi/';
 
 
 const control = new SimpleControl({ status: 0xB0, data1: 21 });
