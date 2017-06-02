@@ -33,75 +33,75 @@ export default class MidiMessage implements SimpleMidiMessage {
     }
 
     get isNote() {
-        return ((this.status & 0xf0) == 0x80) || ((this.status & 0xf0) == 0x90);
+        return ((this.status & 0xf0) === 0x80) || ((this.status & 0xf0) === 0x90);
     }
 
     get isNoteOff() {
-        return ((this.status & 0xF0) == 0x80) || ((this.status & 0xF0) == 0x90 && this.data2 == 0);
+        return ((this.status & 0xF0) === 0x80) || ((this.status & 0xF0) === 0x90 && this.data2 === 0);
     }
 
     get isNoteOn() {
-        return (this.status & 0xF0) == 0x90;
+        return (this.status & 0xF0) === 0x90;
     }
 
     get isKeyPressure() {
-        return (this.status & 0xF0) == 0xA0;
+        return (this.status & 0xF0) === 0xA0;
     }
 
     get isChannelController() {
-        return (this.status & 0xF0) == 0xB0;
+        return (this.status & 0xF0) === 0xB0;
     }
 
     get isProgramChange() {
-        return (this.status & 0xF0) == 0xC0;
+        return (this.status & 0xF0) === 0xC0;
     }
 
     get isChannelPressure() {
-        return (this.status & 0xF0) == 0xD0;
+        return (this.status & 0xF0) === 0xD0;
     }
 
     get isPitchBend() {
-        return (this.status & 0xF0) == 0xE0;
+        return (this.status & 0xF0) === 0xE0;
     }
 
     get isMTCQuarterFrame() {
-        return this.status == 0xF1;
+        return this.status === 0xF1;
     }
 
     get isSongPositionPointer() {
-        return this.status == 0xF2;
+        return this.status === 0xF2;
     }
 
     get isSongSelect() {
-        return this.status == 0xF3;
+        return this.status === 0xF3;
     }
 
     get isTuneRequest() {
-        return this.status == 0xF6;
+        return this.status === 0xF6;
     }
 
     get isTimingClock() {
-        return this.status == 0xF8;
+        return this.status === 0xF8;
     }
 
     get isMIDIStart() {
-        return this.status == 0xFA;
+        return this.status === 0xFA;
     }
 
     get isMIDIContinue() {
-        return this.status == 0xFB;
+        return this.status === 0xFB;
     }
 
     get isMidiStop() {
-        return this.status == 0xFC;
+        return this.status === 0xFC;
     }
 
     get isActiveSensing() {
-        return this.status == 0xFE;
+        return this.status === 0xFE;
     }
 
     get isSystemReset() {
-        return this.status == 0xFF;
+        return this.status === 0xFF;
     }
 
     toString() {

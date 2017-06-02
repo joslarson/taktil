@@ -1,7 +1,7 @@
-import { AbstractButton } from '../../core/component';
+import { Button } from '../../core/component';
 
 
-export class PlayToggle extends AbstractButton<{ transport: API.Transport }> {
+export class PlayToggle extends Button<{ transport: API.Transport }> {
     onInit() {
         this.props.transport.isPlaying().addValueObserver(isPlaying => (
             this.setState({ on: isPlaying })
@@ -14,7 +14,7 @@ export class PlayToggle extends AbstractButton<{ transport: API.Transport }> {
 }
 
 
-export class MetronomeToggle extends AbstractButton<{ transport: API.Transport }> {
+export class MetronomeToggle extends Button<{ transport: API.Transport }> {
     onInit() {
         this.props.transport.isMetronomeEnabled().addValueObserver((isOn) => {
             this.setState({ on: isOn });
@@ -27,7 +27,7 @@ export class MetronomeToggle extends AbstractButton<{ transport: API.Transport }
 }
 
 
-export class PreRollToggle extends AbstractButton<{ transport: API.Transport }> {
+export class PreRollToggle extends Button<{ transport: API.Transport }> {
     onInit() {
         this.props.transport.preRoll().addValueObserver((preRollState) => {
             this.setState({ on: preRollState !== 'none' });
@@ -40,7 +40,7 @@ export class PreRollToggle extends AbstractButton<{ transport: API.Transport }> 
 }
 
 
-export class RestartButton extends AbstractButton<{ transport: API.Transport }, { on: boolean, isPlaying: boolean }> {
+export class RestartButton extends Button<{ transport: API.Transport }, { on: boolean, isPlaying: boolean }> {
     onInit() {
         this.props.transport.isPlaying().addValueObserver(isPlaying => (
             this.setState({ isPlaying: isPlaying })
@@ -58,7 +58,7 @@ export class RestartButton extends AbstractButton<{ transport: API.Transport }, 
 }
 
 
-export class OverwriteToggle extends AbstractButton<{ transport: API.Transport }> {
+export class OverwriteToggle extends Button<{ transport: API.Transport }> {
     onInit() {
         this.props.transport.isClipLauncherOverdubEnabled().addValueObserver(
             isActive => this.setState({ on: isActive })
@@ -71,7 +71,7 @@ export class OverwriteToggle extends AbstractButton<{ transport: API.Transport }
 }
 
 
-export class LoopToggle extends AbstractButton<{ transport: API.Transport }> {
+export class LoopToggle extends Button<{ transport: API.Transport }> {
     onInit() {
         this.props.transport.isArrangerLoopEnabled().addValueObserver(
             isActive => this.setState({ on: isActive })

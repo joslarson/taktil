@@ -1,11 +1,10 @@
-import { AbstractButton } from '../../core/component';
-import { AbstractView } from '../../core/view';
-import session from '../../session';
+import { Button } from '../../core/component';
+import { View } from '../../core/view';
 
 
-export class ViewToggle extends AbstractButton<{ view: typeof AbstractView }> {
+export class ViewToggle extends Button<{ view: typeof View }> {
     onInit() {
-        session.on('activateView', (view: typeof AbstractView) => {
+        session.on('activateView', (view: typeof View) => {
             this.setState({ on: view === this.props.view });
         });
     }
@@ -19,7 +18,7 @@ export class ViewToggle extends AbstractButton<{ view: typeof AbstractView }> {
     }
 }
 
-export class ModeGate extends AbstractButton<{ mode: string }> {
+export class ModeGate extends Button<{ mode: string }> {
     onPress() {
         this.setState({ on: true });
         session.activateMode(this.props.mode);

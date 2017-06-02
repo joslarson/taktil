@@ -1,11 +1,11 @@
-import AbstractComponent from './AbstractComponent';
-import { AbstractComponentBaseState, AbstractComponentBaseProps } from './AbstractComponent';
-import { AbstractControl } from '../control';
-import { AbstractControlBaseState } from '../control/AbstractControl';
+import Component from './Component';
+import { ComponentBaseState, ComponentBaseProps } from './Component';
+import { Control } from '../control';
+import { ControlBaseState } from '../control/Control';
 
 
-export type AbstractButtonBaseProps = AbstractComponentBaseProps;
-export interface AbstractButtonBaseState extends AbstractComponentBaseState {
+export type ButtonBaseProps = ComponentBaseProps;
+export interface ButtonBaseState extends ComponentBaseState {
     on: boolean;
     color?: { r: number, g: number, b: number };
 };
@@ -14,10 +14,10 @@ export interface AbstractButtonBaseState extends AbstractComponentBaseState {
  * A button component providing method hooks for press, long press,
  * double press, release, and double release events.
  */
-export default abstract class AbstractButton<
-    Props extends AbstractButtonBaseProps = AbstractButtonBaseProps,
-    State extends AbstractButtonBaseState = AbstractButtonBaseState
-> extends AbstractComponent<Props, State> {
+export default abstract class Button<
+    Props extends ButtonBaseProps = ButtonBaseProps,
+    State extends ButtonBaseState = ButtonBaseState
+> extends Component<Props, State> {
     state: State = { on: false } as State;
     memory: { [key: string]: any } = {};
 
@@ -30,7 +30,7 @@ export default abstract class AbstractButton<
     onRelease?(): void;
     onDoubleRelease?(): void;
 
-    onInput(control: AbstractControl, input: AbstractControlBaseState) {
+    onInput(control: Control, input: ControlBaseState) {
         if (this.onPress) this.handlePress(input.value);
         if (this.onLongPress) this.handleLongPress(input.value);
         if (this.onDoublePress) this.handleDoublePress(input.value);
@@ -38,7 +38,7 @@ export default abstract class AbstractButton<
         if (this.onDoubleRelease) this.handleDoubleRelease(input.value);
     }
 
-    getOutput(control: AbstractControl): AbstractControlBaseState {
+    getOutput(control: Control): ControlBaseState {
         const { on, color } = this.state;
         return {
             value: on ? 1 : 0,

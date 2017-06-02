@@ -1,12 +1,12 @@
-import { default as AbstractControl, AbstractControlBaseState } from './AbstractControl';
+import { default as Control, ControlBaseState } from './Control';
 import { MidiMessage, SysexMessage, MessagePattern } from '../midi';
 
 
-export type SimpleControlBaseState = AbstractControlBaseState;
+export type SimpleControlBaseState = ControlBaseState;
 
 export default class SimpleControl<
     State extends SimpleControlBaseState = SimpleControlBaseState
-> extends AbstractControl<State> {
+> extends Control<State> {
     state = { value: 0 } as State;
     status: number;
     data1: number;

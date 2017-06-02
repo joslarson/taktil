@@ -1,1 +1,1 @@
-export { default as AbstractView } from './AbstractView';
+export { default as View } from './View';

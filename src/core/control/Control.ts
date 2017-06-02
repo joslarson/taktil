@@ -1,10 +1,9 @@
 import { MidiMessage, SysexMessage, MessagePattern } from '../midi/';
-import { AbstractComponent } from '../component'
+import { Component } from '../component'
 import { Color } from '../helpers';
-import session from '../../session';
 
 
-export interface AbstractControlBaseState {
+export interface ControlBaseState {
     value: number;
     color?: Color;
     [key: string]: any;
@@ -14,7 +13,7 @@ export interface AbstractControlBaseState {
  * Abstract class defining the the base functionality from which all
  * other controls must extend.
  */
-export default abstract class AbstractControl<State extends AbstractControlBaseState = AbstractControlBaseState> {
+export default abstract class Control<State extends ControlBaseState = ControlBaseState> {
     name: string;
     mode: 'ABSOLUTE' | 'RELATIVE' = 'ABSOLUTE';
 
@@ -29,7 +28,7 @@ export default abstract class AbstractControl<State extends AbstractControlBaseS
     abstract state: State;
 
     private _initialState: State;
-    private _activeComponent: AbstractComponent | null = null;
+    private _activeComponent: Component | null = null;
 
     constructor({ port, inPort, outPort, patterns }: {
         port?: number, inPort?: number, outPort?: number,
@@ -75,7 +74,7 @@ export default abstract class AbstractControl<State extends AbstractControlBaseS
         return this._activeComponent;
     }
 
-    set activeComponent(component: AbstractComponent | null) {
+    set activeComponent(component: Component | null) {
         // component not changing? do nothing
         if (component === this._activeComponent) return;
         this._activeComponent = component;

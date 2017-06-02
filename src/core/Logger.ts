@@ -1,6 +1,3 @@
-import session from '../session';
-
-
 export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
 
 /**

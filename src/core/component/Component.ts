@@ -1,35 +1,35 @@
-import AbstractView from '../view/AbstractView';
-import { AbstractControl } from '../control';
-import { AbstractControlBaseState } from '../control/AbstractControl';
+import View from '../view/View';
+import { Control } from '../control';
+import { ControlBaseState } from '../control/Control';
 import ObjectLiteral from '../helpers/ObjectLiteral';
 
 
-export type AbstractComponentBaseState = ObjectLiteral;
-export type AbstractComponentBaseProps = ObjectLiteral;
+export type ComponentBaseState = ObjectLiteral;
+export type ComponentBaseProps = ObjectLiteral;
 
 /**
  * Abstract class defining the the base functionality from which all
  * other components must extend.
  */
-export default abstract class AbstractComponent<
-    Props extends AbstractComponentBaseProps = AbstractComponentBaseProps,
-    State extends AbstractComponentBaseState = AbstractComponentBaseState
+export default abstract class Component<
+    Props extends ComponentBaseProps = ComponentBaseProps,
+    State extends ComponentBaseState = ComponentBaseState
 > {
     name: string;
-    view: typeof AbstractView;
+    view: typeof View;
     mode: string;
-    controls: AbstractControl[];
+    controls: Control[];
 
     state: State = {} as State;
     props: Props = {} as Props;
 
     private _initialState: State;
 
-    constructor(controls: AbstractControl[], mode: string, props?: Props);
-    constructor(control: AbstractControl, mode: string, props?: Props);
-    constructor(controls: AbstractControl[], props?: Props);
-    constructor(control: AbstractControl, props?: Props);
-    constructor(controls: AbstractControl[] | AbstractControl, ...rest: any[]) {
+    constructor(controls: Control[], mode: string, props?: Props);
+    constructor(control: Control, mode: string, props?: Props);
+    constructor(controls: Control[], props?: Props);
+    constructor(control: Control, props?: Props);
+    constructor(controls: Control[] | Control, ...rest: any[]) {
         this.controls = Array.isArray(controls) ? controls : [controls];
         this.mode = typeof rest[0] === 'string' ? rest[0] : '__BASE__';
         this.props = typeof rest[rest.length - 1] === 'object' ? rest[rest.length - 1] : {};
@@ -62,8 +62,8 @@ export default abstract class AbstractComponent<
     }
 
     // renders component state to hardware control
-    abstract getOutput(control: AbstractControl): AbstractControlBaseState;
+    abstract getOutput(control: Control): ControlBaseState;
 
     // handles midi messages routed to control
-    abstract onInput(control: AbstractControl, input: AbstractControlBaseState): void;
+    abstract onInput(control: Control, input: ControlBaseState): void;
 }

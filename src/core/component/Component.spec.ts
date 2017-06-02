@@ -1,35 +1,35 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import AbstractComponent from './AbstractComponent';
-import AbstractControl from '../control/AbstractControl';
-import { AbstractControlBaseState } from '../control/AbstractControl';
+import Component from './Component';
+import Control from '../control/Control';
+import { ControlBaseState } from '../control/Control';
 import SimpleControl from '../control/SimpleControl';
-import { AbstractComponentBaseState, AbstractComponentBaseProps } from './AbstractComponent';
+import { ComponentBaseState, ComponentBaseProps } from './Component';
 
 
-type Props = AbstractComponentBaseProps;
-interface State extends AbstractComponentBaseState {
+type Props = ComponentBaseProps;
+interface State extends ComponentBaseState {
     value: number;
     foo: { bar: number };
 }
 
-class Component extends AbstractComponent<Props, State> {
+class TestComponent extends Component<Props, State> {
     state: State = { value: 0, foo: { bar: 0 } };
 
-    getOutput(control: AbstractControl): AbstractControlBaseState {
+    getOutput(control: Control): ControlBaseState {
         return { value: this.state.value };
     }
 
-    onInput(control: AbstractControl, input: AbstractControlBaseState) {
+    onInput(control: Control, input: ControlBaseState) {
         this.setState({ value: input.value });
     }
 }
 
-const component = new Component(
+const component = new TestComponent(
     new SimpleControl({ status: 0xB0, data1: 21 }), {});
 
-describe('AbstractComponent', () => {
+describe('Component', () => {
     it('should initialize state correctly', () => {
         expect(component.state).to.deep.equal({ value: 0, foo: { bar: 0 } });
     });

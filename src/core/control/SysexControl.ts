@@ -1,12 +1,12 @@
-import { default as AbstractControl, AbstractControlBaseState } from './AbstractControl';
+import { default as Control, ControlBaseState } from './Control';
 import { SysexMessage } from '../midi';
 
 
-export type SysexControlBaseState = AbstractControlBaseState;
+export type SysexControlBaseState = ControlBaseState;
 
 export default class SysexControl<
     State extends SysexControlBaseState = SysexControlBaseState
-> extends AbstractControl<State> {
+> extends Control<State> {
     state = { value: 0 } as State;
 
     getInput(message: SysexMessage): State {

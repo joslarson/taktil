@@ -1,12 +1,12 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import AbstractButton from './AbstractButton';
+import Button from './Button';
 import { MidiMessage, SysexMessage } from '../midi/';
 import SimpleControl from '../control/SimpleControl';
 
 
-class Button extends AbstractButton {
+class TestButton extends Button {
     onPress() {
         // ...
     }
@@ -28,9 +28,9 @@ class Button extends AbstractButton {
     }
 }
 
-describe('AbstractButton', () => {
+describe('Button', () => {
     const control = new SimpleControl({ status: 0xB0, data1: 21 });
-    const button = new Button(control);
+    const button = new TestButton(control);
 
     const clock = sinon.useFakeTimers();
     const onPress = sinon.spy(button, 'onPress');

@@ -1,24 +1,23 @@
-import { AbstractComponent } from '../component';
-import { AbstractControl } from '../control';
-import session from '../../session';
+import { Component } from '../component';
+import { Control } from '../control';
 
 
-interface AbstractView {
+interface View {
     [key: string]: (
-        AbstractComponent | AbstractComponent[] | (() => AbstractComponent | AbstractComponent[])
+        Component | Component[] | (() => Component | Component[])
     );
 }
 
-abstract class AbstractView {
-    static parent: typeof AbstractView;
-    private static _instance: AbstractView;
+abstract class View {
+    static parent: typeof View;
+    private static _instance: View;
     private static _componentMap: { [mode: string]: {
-        controls: AbstractControl[], components: AbstractComponent[],
+        controls: Control[], components: Component[],
     } };
 
     static get instance() {
         // inheritance safe singleton pattern (each child class will have its own singleton)
-        const View = this as any as { new (): AbstractView, _instance: AbstractView };
+        const View = this as any as { new (): View, _instance: View };
         let instance = View._instance;
 
         if (instance instanceof View) return instance;
@@ -31,14 +30,14 @@ abstract class AbstractView {
         return instance;
     }
 
-    static getComponent(control: AbstractControl, mode: string): AbstractComponent | null {
+    static getComponent(control: Control, mode: string): Component | null {
         if (this._componentMap[mode] === undefined) return null;
         const componentMapIndex = this._componentMap[mode].controls.indexOf(control);
         if (componentMapIndex === -1) return null;
         return this._componentMap[mode].components[componentMapIndex];
     }
 
-    static connectControl(control: AbstractControl) {
+    static connectControl(control: Control) {
         const instance = this.instance;
         // check view modes in order for component/control registration
         for (let activeMode of session.activeModes) {
@@ -69,13 +68,13 @@ abstract class AbstractView {
                 const component = components[i];
                 const isSingleComponent = components.length === 1;
                 // skip non-component properties
-                if (component instanceof AbstractComponent === false) continue;
+                if (component instanceof Component === false) continue;
                 // set component name and view
                 component.name = isSingleComponent ? key : `${key}[${i}]`;
                 component.view = this;
                 // register components and controls in view
                 const { controls, mode } = component;
-                for (let control of controls as AbstractControl[]) {
+                for (let control of controls as Control[]) {
                     // register control with view/mode
                     if (!this._componentMap[mode]) this._componentMap[mode] = {
                         controls: [], components: [],
@@ -98,4 +97,4 @@ abstract class AbstractView {
     protected constructor() {}
 }
 
-export default AbstractView;
+export default View;

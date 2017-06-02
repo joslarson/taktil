@@ -1,15 +1,15 @@
+import '../../env';  // adds session instance to global scope
 import { expect } from 'chai';
-import * as sinon from 'sinon';
+import * as sinon from 'sinon';``
 
-import AbstractControl from './AbstractControl';
+import Control from './Control';
 import { MidiMessage, SysexMessage } from '../midi/';
-import AbstractButton from '../component/AbstractButton';
-import session from '../../session';
+import Button from '../component/Button';
 
 
 type TestControlState = { value: number, nested: { value: number } };
 
-class TestControl extends AbstractControl<TestControlState> {
+class TestControl extends Control<TestControlState> {
     state = { value: 1, nested: { value: 0 } };
 
     getInput(message: MidiMessage | SysexMessage) {
@@ -25,14 +25,14 @@ class TestControl extends AbstractControl<TestControlState> {
     }
 }
 
-class TestComponent extends AbstractButton {
+class TestComponent extends Button {
     state = { on: false };
 }
 
-const control = new TestControl({ patterns: ["B01F??"] });
-const component = new TestComponent(control, {});
+describe('Control', () => {
+    const control = new TestControl({ patterns: ["B01F??"] });
+    const component = new TestComponent(control, {});
 
-describe('AbstractControl', () => {
     it('should initialize state correctly', () => {
         expect(control.state).to.deep.equal({ value: 1, nested: { value: 0 } });
     });

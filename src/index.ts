@@ -1,4 +1,3 @@
-export { default as session } from './session';
 export * from './core/component';
 export * from './core/control';
 export * from './core/helpers';

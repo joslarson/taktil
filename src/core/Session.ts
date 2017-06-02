@@ -1,6 +1,7 @@
 import { MidiOutProxy, MidiMessage, SysexMessage } from '../core/midi';
-import { AbstractControl } from 'core/control';
-import { AbstractView } from '../core/view';
+import { Control } from 'core/control';
+import { View } from '../core/view';
+
 
 declare const global: any;
 
@@ -12,9 +13,9 @@ declare const global: any;
  * subscriptions between Taktil and the control surface script.
  */
 export default class Session {
-    private _controls: { [key: string]: AbstractControl } = {};
-    private _views: typeof AbstractView[] = [];
-    private _activeView: typeof AbstractView;
+    private _controls: { [key: string]: Control } = {};
+    private _views: typeof View[] = [];
+    private _activeView: typeof View;
     private _activeModes: string[] = [];
     private _eventHandlers: { [key: string]: Function[] } = {};
     midiOut: MidiOutProxy = new MidiOutProxy(this);
@@ -102,8 +103,8 @@ export default class Session {
     // Controls
     //////////////////////////////
 
-    set controls(controls: { [name: string]: AbstractControl }) {
-        const controlsArray: AbstractControl[] = [];
+    set controls(controls: { [name: string]: Control }) {
+        const controlsArray: Control[] = [];
         for (let controlName in controls) {
             const control = controls[controlName];
             // set control name on object
@@ -128,7 +129,7 @@ export default class Session {
         return { ...this._controls };
     }
 
-    findControl(message: MidiMessage | SysexMessage): AbstractControl | null {
+    findControl(message: MidiMessage | SysexMessage): Control | null {
         // look for a matching registered control
         for (let controlName in this.controls) {
             const control = this.controls[controlName];
@@ -158,9 +159,9 @@ export default class Session {
     // Views
     //////////////////////////////
 
-    set views(views: typeof AbstractView[]) {
+    set views(views: typeof View[]) {
         if (!global.__is_init__) throw new Error('Untimely view registration: views can only be registered from within the init callback.');
-        let validatedViews: (typeof AbstractView)[] = [];
+        let validatedViews: (typeof View)[] = [];
         for (let view of views) {
             // validate view registration order
             if (view.parent && validatedViews.indexOf(view.parent) === -1) throw `Invalid view registration order: Parent view "${parent.name}" must be registered before child view "${view.name}".`;
@@ -177,14 +178,14 @@ export default class Session {
         return [...this._views];
     }
 
-    set activeView(view: typeof AbstractView) {
+    set activeView(view: typeof View) {
         if (this.views.indexOf(view) === -1) throw new Error(`${view.name} must first be registered before being set as the active view.`);
         this._activeView = view;
         this._callEventCallbacks('activateView', view);
         this.associateControlsInView();  // re-associate controls in view
     }
 
-    get activeView(): typeof AbstractView {
+    get activeView(): typeof View {
         return this._activeView;
     }
 

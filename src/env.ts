@@ -1,19 +1,23 @@
 // setup environment
 import Logger from './core/Logger';
+import Session from './core/Session';
 
 
 (() => {
     const global = Function('return this')() || (42, eval)('this');
 
+    // add global reference to global namespace
+    global.global = global;
+
+    // create global session object
+    global.session = new Session();
+
+    // allows us to provide better error messages and to catch errors early
+    // when code that is only allowed to run inside init is place outside.
+    global.__is_init__ = false;
+
     if (global.loadAPI) {
         loadAPI(2); // load bitwig api v2
-
-        // allows us to provide better error messages and to catch errors early
-        // when code that is only allowed to run inside init is place outside.
-        global.__is_init__ = false;
-
-        // add global reference to global namespace
-        global.global = global;
 
         // connect logger as global console
         global.console = new Logger();
