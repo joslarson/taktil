@@ -2,6 +2,11 @@
 import Logger from './core/Logger';
 import Session from './core/Session';
 
+// define global variables
+declare global {
+    const session: Session;
+}
+
 (() => {
     const global = Function('return this')() || (42, eval)('this');
 
@@ -10,10 +15,6 @@ import Session from './core/Session';
 
     // create global session object
     global.session = new Session();
-
-    // allows us to provide better error messages and to catch errors early
-    // when code that is only allowed to run inside init is place outside.
-    global.__is_init__ = false;
 
     if (global.loadAPI) {
         loadAPI(2); // load bitwig api v2

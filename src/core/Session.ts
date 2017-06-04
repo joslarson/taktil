@@ -12,6 +12,7 @@ declare const global: any;
  * subscriptions between Taktil and the control surface script.
  */
 export default class Session {
+    private _isInit: boolean = false;
     private _controls: { [key: string]: Control } = {};
     private _views: typeof View[] = [];
     private _activeView: typeof View;
@@ -22,7 +23,7 @@ export default class Session {
 
     constructor() {
         global.init = () => {
-            global.__is_init__ = true;
+            this._isInit = true;
             // call the session init callbacks
             this._callEventCallbacks('init');
             // setup midi/sysex callbacks per port
@@ -37,7 +38,7 @@ export default class Session {
                     this.onMidiInput(new SysexMessage({ port, data }));
                 });
             }
-            global.__is_init__ = false;
+            this._isInit = false;
         };
 
         global.flush = () => {
@@ -53,6 +54,10 @@ export default class Session {
             // call registered exit callbacks
             this._callEventCallbacks('exit');
         };
+    }
+
+    get isInit(): boolean {
+        return this._isInit;
     }
 
     // Midi
@@ -170,7 +175,7 @@ export default class Session {
     //////////////////////////////
 
     set views(views: typeof View[]) {
-        if (!global.__is_init__)
+        if (!this.isInit)
             throw new Error(
                 'Untimely view registration: views can only be registered from within the init callback.',
             );
