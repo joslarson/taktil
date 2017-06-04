@@ -32,7 +32,7 @@
     "typescript": "^2.3.4"
   },
   "scripts": {
-    "test": "mocha -r ts-node/register src/**/*.spec.ts",
+    "test": "mocha -r ts-node/register src/env.ts src/**/*.spec.ts",
     "lint": "./node_modules/tslint/bin/tslint -c tslint.json 'src/**/*.ts' || true",
     "format": "./node_modules/prettier/bin/prettier.js --parser typescript --print-width 100 --tab-width 4 --single-quote --trailing-comma=all --write './src/**/*.ts'"
   },
