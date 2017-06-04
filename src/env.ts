@@ -2,7 +2,6 @@
 import Logger from './core/Logger';
 import Session from './core/Session';
 
-
 (() => {
     const global = Function('return this')() || (42, eval)('this');
 
@@ -27,19 +26,41 @@ import Session from './core/Session';
         // Console-polyfill. MIT license.
         // https://github.com/paulmillr/console-polyfill
         // Make it safe to do console.log() always.
-        var con = global.console;
-        var prop, method;
-        var dummy = function() {};
-        var properties = ['memory'];
-        var methods = [
-            'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error', 'exception', 'group',
-            'groupCollapsed', 'groupEnd', 'info', 'log', 'markTimeline', 'profile', 'profiles',
-            'profileEnd', 'show', 'table', 'time', 'timeEnd', 'timeline', 'timelineEnd', 'timeStamp',
-            'trace', 'warn',
+        const con = global.console;
+        let prop;
+        let method;
+        const dummy = function() {};
+        const properties = ['memory'];
+        const methods = [
+            'assert',
+            'clear',
+            'count',
+            'debug',
+            'dir',
+            'dirxml',
+            'error',
+            'exception',
+            'group',
+            'groupCollapsed',
+            'groupEnd',
+            'info',
+            'log',
+            'markTimeline',
+            'profile',
+            'profiles',
+            'profileEnd',
+            'show',
+            'table',
+            'time',
+            'timeEnd',
+            'timeline',
+            'timelineEnd',
+            'timeStamp',
+            'trace',
+            'warn',
         ];
-        while (prop = properties.pop()) if (!con[prop]) con[prop] = {};
-        while (method = methods.pop()) if (typeof con[method] !== 'function') con[method] = dummy;
-
+        while ((prop = properties.pop())) if (!con[prop]) con[prop] = {};
+        while ((method = methods.pop())) if (typeof con[method] !== 'function') con[method] = dummy;
 
         class DelayedTask {
             callback: Function;
@@ -47,7 +68,7 @@ import Session from './core/Session';
             repeat: boolean;
             cancelled = false;
 
-            constructor (callback: (...args: any[]) => any, delay = 0, repeat = false) {
+            constructor(callback: (...args: any[]) => any, delay = 0, repeat = false) {
                 this.callback = callback;
                 this.delay = delay;
                 this.repeat = repeat;
@@ -69,20 +90,28 @@ import Session from './core/Session';
             }
         }
 
-        global.setTimeout = function setTimeout(callback: (...args: any[]) => any, delay = 0, ...params: any[]) {
+        global.setTimeout = function setTimeout(
+            callback: (...args: any[]) => any,
+            delay = 0,
+            ...params: any[]
+        ) {
             return new DelayedTask(callback, delay).start(...params);
-        }
+        };
 
         global.clearTimeout = function clearTimeout(timeout: DelayedTask) {
             timeout.cancel();
-        }
+        };
 
-        global.setInterval = function setInterval(callback: (...args: any[]) => any, delay = 0, ...params: any[]) {
+        global.setInterval = function setInterval(
+            callback: (...args: any[]) => any,
+            delay = 0,
+            ...params: any[]
+        ) {
             return new DelayedTask(callback, delay, true).start(...params);
-        }
+        };
 
         global.clearInterval = function clearInterval(interval: DelayedTask) {
             interval.cancel();
-        }
+        };
     }
 })();

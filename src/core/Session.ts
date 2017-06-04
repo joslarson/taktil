@@ -2,7 +2,6 @@ import { MidiOutProxy, MidiMessage, SysexMessage } from '../core/midi';
 import { Control } from 'core/control';
 import { View } from '../core/view';
 
-
 declare const global: any;
 
 /**
@@ -18,6 +17,7 @@ export default class Session {
     private _activeView: typeof View;
     private _activeModes: string[] = [];
     private _eventHandlers: { [key: string]: Function[] } = {};
+
     midiOut: MidiOutProxy = new MidiOutProxy(this);
 
     constructor() {
@@ -27,12 +27,12 @@ export default class Session {
             this._callEventCallbacks('init');
             // setup midi/sysex callbacks per port
             const midiInPorts = this.midiInPorts;
-            for (let port = 0; port < midiInPorts.length; port++) {
-                midiInPorts[port].setMidiCallback(
-                    (status: number, data1: number, data2: number) => {
-                        this.onMidiInput(new MidiMessage({port, status, data1, data2}))
-                    }
-                );
+            for (let port = 0; port < midiInPorts.length; port += 1) {
+                midiInPorts[
+                    port
+                ].setMidiCallback((status: number, data1: number, data2: number) => {
+                    this.onMidiInput(new MidiMessage({ port, status, data1, data2 }));
+                });
                 midiInPorts[port].setSysexCallback((data: string) => {
                     this.onMidiInput(new SysexMessage({ port, data }));
                 });
@@ -46,7 +46,7 @@ export default class Session {
 
         global.exit = () => {
             // reset all controls to default state
-            for (let controlName in this.controls) {
+            for (const controlName in this.controls) {
                 const control = this.controls[controlName];
                 control.setState(control.initialState);
             }
@@ -60,7 +60,7 @@ export default class Session {
 
     get midiInPorts(): API.MidiIn[] {
         const midiInPorts = [];
-        for (let i = 0; true; i++) {
+        for (let i = 0; true; i += 1) {
             try {
                 midiInPorts[i] = host.getMidiInPort(i);
             } catch (error) {
@@ -72,11 +72,15 @@ export default class Session {
 
     onMidiInput(message: MidiMessage | SysexMessage) {
         const control = this.findControl(message);
-        const messageType = message instanceof MidiMessage ? '[MIDI] ' : '[SYSEX]'
+        const messageType = message instanceof MidiMessage ? '[MIDI] ' : '[SYSEX]';
 
         if (control) control.onMidiInput(message);
 
-        console.log(`${messageType} IN  ${String(message.port)} ==> ${message}${control && control.name ? ` "${control.name}"` : ''}`);
+        console.log(
+            `${messageType} IN  ${String(message.port)} ==> ${message}${control && control.name
+                ? ` "${control.name}"`
+                : ''}`,
+        );
     }
 
     // Event Hooks
@@ -84,7 +88,7 @@ export default class Session {
 
     on(
         eventName: 'init' | 'flush' | 'exit' | 'activateView' | 'activateMode' | 'deactivateMode',
-        callback: (...args: any[]) => any
+        callback: (...args: any[]) => any,
     ) {
         if (!this._eventHandlers[eventName]) this._eventHandlers[eventName] = [];
         this._eventHandlers[eventName].push(callback);
@@ -94,8 +98,8 @@ export default class Session {
     private _callEventCallbacks(eventName: string, ...args: any[]) {
         if (this._eventHandlers[eventName] === undefined) return;
 
-        let callbackList = this._eventHandlers[eventName];
-        for (let callback of callbackList) {
+        const callbackList = this._eventHandlers[eventName];
+        for (const callback of callbackList) {
             callback.apply(this, args);
         }
     }
@@ -105,17 +109,23 @@ export default class Session {
 
     set controls(controls: { [name: string]: Control }) {
         const controlsArray: Control[] = [];
-        for (let controlName in controls) {
+        for (const controlName in controls) {
             const control = controls[controlName];
             // set control name on object
             control.name = controlName;
-            for (let existingControl of controlsArray) {
+            for (const existingControl of controlsArray) {
                 // if none of the ports match up, then there's no conflict
-                if (control.outPort !== existingControl.outPort
-                    && control.inPort !== existingControl.inPort) continue;
-                for (let pattern of control.patterns) {
-                    for (let existingPattern of existingControl.patterns) {
-                        if (pattern.conflictsWith(existingPattern)) throw new Error(`Control "${control.name}" conflicts with existing Control "${existingControl.name}".`);
+                if (
+                    control.outPort !== existingControl.outPort &&
+                    control.inPort !== existingControl.inPort
+                )
+                    continue;
+                for (const pattern of control.patterns) {
+                    for (const existingPattern of existingControl.patterns) {
+                        if (pattern.conflictsWith(existingPattern))
+                            throw new Error(
+                                `Control "${control.name}" conflicts with existing Control "${existingControl.name}".`,
+                            );
                     }
                 }
             }
@@ -131,13 +141,13 @@ export default class Session {
 
     findControl(message: MidiMessage | SysexMessage): Control | null {
         // look for a matching registered control
-        for (let controlName in this.controls) {
+        for (const controlName in this.controls) {
             const control = this.controls[controlName];
 
             // skip controls with an inPort that does not match the midiMessage port
             if (control.inPort !== message.port) continue;
 
-            for (let pattern of control.patterns) {
+            for (const pattern of control.patterns) {
                 // if pattern matches midiMessage, return control
                 if (pattern.test(message)) return control;
             }
@@ -150,7 +160,7 @@ export default class Session {
         // no view, no components to associate controls with
         if (!this.activeView) return;
         // connect each control to the corresponding component in view (if any)
-        for (let controlName in this.controls) {
+        for (const controlName in this.controls) {
             const control = this.controls[controlName];
             this.activeView.connectControl(control);
         }
@@ -160,11 +170,15 @@ export default class Session {
     //////////////////////////////
 
     set views(views: typeof View[]) {
-        if (!global.__is_init__) throw new Error('Untimely view registration: views can only be registered from within the init callback.');
+        if (!global.__is_init__)
+            throw new Error(
+                'Untimely view registration: views can only be registered from within the init callback.',
+            );
         let validatedViews: (typeof View)[] = [];
-        for (let view of views) {
+        for (const view of views) {
             // validate view registration order
-            if (view.parent && validatedViews.indexOf(view.parent) === -1) throw `Invalid view registration order: Parent view "${parent.name}" must be registered before child view "${view.name}".`;
+            if (view.parent && validatedViews.indexOf(view.parent) === -1)
+                throw `Invalid view registration order: Parent view "${parent.name}" must be registered before child view "${view.name}".`;
             // add to validate views list
             if (validatedViews.indexOf(view) === -1) validatedViews = [...validatedViews, view];
             // initialize view
@@ -179,10 +193,13 @@ export default class Session {
     }
 
     set activeView(view: typeof View) {
-        if (this.views.indexOf(view) === -1) throw new Error(`${view.name} must first be registered before being set as the active view.`);
+        if (this.views.indexOf(view) === -1)
+            throw new Error(
+                `${view.name} must first be registered before being set as the active view.`,
+            );
         this._activeView = view;
         this._callEventCallbacks('activateView', view);
-        this.associateControlsInView();  // re-associate controls in view
+        this.associateControlsInView(); // re-associate controls in view
     }
 
     get activeView(): typeof View {
@@ -193,16 +210,16 @@ export default class Session {
     //////////////////////////////
 
     get activeModes() {
-        return [...this._activeModes, '__BASE__']
+        return [...this._activeModes, '__BASE__'];
     }
 
     activateMode(mode: string) {
         if (mode === '__BASE__') throw new Error('Mode name "__BASE__" is reserved.');
         const modeIndex = this._activeModes.indexOf(mode);
         if (modeIndex > -1) this._activeModes.splice(modeIndex, 1);
-        this._activeModes.unshift(mode);  // prepend to modes
+        this._activeModes.unshift(mode); // prepend to modes
         this._callEventCallbacks('activateMode', mode);
-        this.associateControlsInView();  // re-associate controls in view
+        this.associateControlsInView(); // re-associate controls in view
     }
 
     deactivateMode(mode: string) {
@@ -210,7 +227,7 @@ export default class Session {
         if (modeIndex > -1) {
             this._activeModes.splice(modeIndex, 1);
             this._callEventCallbacks('deactivateMode', mode);
-            this.associateControlsInView();  // re-associate controls in view
+            this.associateControlsInView(); // re-associate controls in view
         }
     }
 

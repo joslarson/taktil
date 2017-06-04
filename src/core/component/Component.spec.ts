@@ -1,12 +1,9 @@
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import Component from './Component';
-import Control from '../control/Control';
-import { ControlBaseState } from '../control/Control';
+import { default as Control, ControlBaseState } from '../control/Control';
 import SimpleControl from '../control/SimpleControl';
-import { ComponentBaseState, ComponentBaseProps } from './Component';
-
+import { default as Component, ComponentBaseState, ComponentBaseProps } from './Component';
 
 type Props = ComponentBaseProps;
 interface State extends ComponentBaseState {
@@ -26,8 +23,7 @@ class TestComponent extends Component<Props, State> {
     }
 }
 
-const component = new TestComponent(
-    new SimpleControl({ status: 0xB0, data1: 21 }), {});
+const component = new TestComponent(new SimpleControl({ status: 0xb0, data1: 21 }), {});
 
 describe('Component', () => {
     it('should initialize state correctly', () => {
@@ -35,7 +31,7 @@ describe('Component', () => {
     });
 
     it('should modify state correctly', () => {
-        component.setState({ value: 1 });  // receives partial state
+        component.setState({ value: 1 }); // receives partial state
         expect(component.state).to.deep.equal({ value: 1, foo: { bar: 0 } });
     });
 

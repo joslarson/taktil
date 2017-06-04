@@ -16,27 +16,31 @@ export default class Logger {
 
     constructor() {
         session.on('init', () => {
-            host.getPreferences().getEnumSetting(
-                'Log Midi',
-                'Development',
-                ['None', 'Input', 'Output', 'Both'],
-                'None'
-            ).addValueObserver(midiLevel => this._midiLevel = midiLevel);
+            host
+                .getPreferences()
+                .getEnumSetting(
+                    'Log Midi',
+                    'Development',
+                    ['None', 'Input', 'Output', 'Both'],
+                    'None',
+                )
+                .addValueObserver(midiLevel => (this._midiLevel = midiLevel));
 
-            this._levelSetting = host.getPreferences().getEnumSetting(
-                'Log Level', 'Development', this._levels, this._level
-            );
-            
-            this._levelSetting.addValueObserver(level => this._level = level);
+            this._levelSetting = host
+                .getPreferences()
+                .getEnumSetting('Log Level', 'Development', this._levels, this._level);
 
-            this._filterSetting = host.getPreferences()
+            this._levelSetting.addValueObserver(level => (this._level = level));
+
+            this._filterSetting = host
+                .getPreferences()
                 .getStringSetting('Log filter (Regex)', 'Development', 1000, this._filter);
             this._filterSetting.addValueObserver(value => {
                 this._filter = value;
                 if (value) {
                     const message = ` Log filter regex set to \\${value}\\gi `;
                     this.log(`╭───┬${'─'.repeat(message.length)}╮`);
-                    this.log(`│ i │${message}` +               '│');
+                    this.log(`│ i │${message}` + '│');
                     this.log(`╰───┴${'─'.repeat(message.length)}╯`);
                 }
             });
@@ -106,8 +110,8 @@ export default class Logger {
             if (!re.test(message)) return;
         }
 
-        const isMidiInput =   new RegExp('^\\[(MIDI|SYSEX)\\] ? IN', 'gi').test(message);
-        const isMidiOutput =  new RegExp('^\\[(MIDI|SYSEX)\\] ? OUT', 'gi').test(message);
+        const isMidiInput = new RegExp('^\\[(MIDI|SYSEX)\\] ? IN', 'gi').test(message);
+        const isMidiOutput = new RegExp('^\\[(MIDI|SYSEX)\\] ? OUT', 'gi').test(message);
 
         if (this._midiLevel === 'None' && (isMidiInput || isMidiOutput)) return;
         if (this._midiLevel === 'Input' && isMidiOutput) return;

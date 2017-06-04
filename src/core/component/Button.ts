@@ -1,14 +1,12 @@
-import Component from './Component';
-import { ComponentBaseState, ComponentBaseProps } from './Component';
+import Component, { ComponentBaseState, ComponentBaseProps } from './Component';
 import { Control } from '../control';
 import { ControlBaseState } from '../control/Control';
-
 
 export type ButtonBaseProps = ComponentBaseProps;
 export interface ButtonBaseState extends ComponentBaseState {
     on: boolean;
-    color?: { r: number, g: number, b: number };
-};
+    color?: { r: number; g: number; b: number };
+}
 
 /**
  * A button component providing method hooks for press, long press,
@@ -42,7 +40,7 @@ export default abstract class Button<
         const { on, color } = this.state;
         return {
             value: on ? 1 : 0,
-            ...(color && { color }),
+            ...color && { color },
         };
     }
 
@@ -94,12 +92,13 @@ export default abstract class Button<
             this.memory['longPress'] = setTimeout(() => {
                 if (this.onLongPress) this.onLongPress();
             }, this.LONG_PRESS_DELAY);
-        } else { // otherwise cancel existing scheduled callback
+        } else {
+            // otherwise cancel existing scheduled callback
             // cancel longPress task if button released too early
             if (this.memory['longPress']) {
                 clearTimeout(this.memory['longPress']);
                 delete this.memory['longPress'];
-            };
+            }
         }
     }
 

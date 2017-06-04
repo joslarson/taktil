@@ -1,7 +1,6 @@
 import { Button } from '../../core/component';
 import { View } from '../../core/view';
 
-
 export class ViewToggle extends Button<{ view: typeof View }> {
     onInit() {
         session.on('activateView', (view: typeof View) => {

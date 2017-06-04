@@ -1,23 +1,23 @@
 import { Component } from '../component';
 import { Control } from '../control';
 
-
 interface View {
-    [key: string]: (
-        Component | Component[] | (() => Component | Component[])
-    );
+    [key: string]: (Component | Component[] | (() => Component | Component[]));
 }
 
 abstract class View {
     static parent: typeof View;
     private static _instance: View;
-    private static _componentMap: { [mode: string]: {
-        controls: Control[], components: Component[],
-    } };
+    private static _componentMap: {
+        [mode: string]: {
+            controls: Control[];
+            components: Component[];
+        };
+    };
 
     static get instance() {
         // inheritance safe singleton pattern (each child class will have its own singleton)
-        const View = this as any as { new (): View, _instance: View };
+        const View = (this as any) as { new (): View; _instance: View };
         let instance = View._instance;
 
         if (instance instanceof View) return instance;
@@ -40,8 +40,8 @@ abstract class View {
     static connectControl(control: Control) {
         const instance = this.instance;
         // check view modes in order for component/control registration
-        for (let activeMode of session.activeModes) {
-            if (!this._componentMap[activeMode]) continue;  // mode not used in view
+        for (const activeMode of session.activeModes) {
+            if (!this._componentMap[activeMode]) continue; // mode not used in view
             const component = this.getComponent(control, activeMode);
             if (component) {
                 // only set the component when it has changed
@@ -74,14 +74,17 @@ abstract class View {
                 component.view = this;
                 // register components and controls in view
                 const { controls, mode } = component;
-                for (let control of controls as Control[]) {
+                for (const control of controls as Control[]) {
                     // register control with view/mode
-                    if (!this._componentMap[mode]) this._componentMap[mode] = {
-                        controls: [], components: [],
-                    };
+                    if (!this._componentMap[mode])
+                        this._componentMap[mode] = {
+                            controls: [],
+                            components: [],
+                        };
 
                     // if control already registered in view mode, throw error
-                    if (this._componentMap[mode].controls.indexOf(control) > -1) throw Error('Duplicate Control registration in view mode.');
+                    if (this._componentMap[mode].controls.indexOf(control) > -1)
+                        throw Error('Duplicate Control registration in view mode.');
 
                     // add control and component pair to component map
                     this._componentMap[mode].controls.push(control);

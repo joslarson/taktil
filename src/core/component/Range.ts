@@ -1,13 +1,11 @@
-import Component from './Component';
 import { Control } from '../control';
 import { ControlBaseState } from '../control/Control';
-import { ComponentBaseState, ComponentBaseProps } from './Component';
-
+import Component, { ComponentBaseState, ComponentBaseProps } from './Component';
 
 export type RangeBaseProps = ComponentBaseProps;
 export interface RangeBaseState extends ComponentBaseState {
     value: number;
-};
+}
 
 export default abstract class Range<
     Props extends RangeBaseProps = RangeBaseProps,

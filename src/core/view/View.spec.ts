@@ -2,10 +2,7 @@ import { expect } from 'chai';
 
 import View from './View';
 
-
-class TestView extends View {
-    
-}
+class TestView extends View {}
 
 describe('View', () => {
     it('should have a name', () => {

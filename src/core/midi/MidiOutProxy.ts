@@ -1,11 +1,10 @@
-import { default as MidiMessage, SimpleMidiMessage } from './MidiMessage';
+import MidiMessage, { SimpleMidiMessage } from './MidiMessage';
 import SysexMessage from './SysexMessage';
 import Session from '../Session';
 
-
 export interface NaiveMidiMessage extends SimpleMidiMessage {
-    name?: string,
-    port: number,
+    name?: string;
+    port: number;
 }
 
 export default class MidiOutProxy {
@@ -16,22 +15,43 @@ export default class MidiOutProxy {
         session.on('flush', () => this._flushQueues());
     }
 
-    sendMidi({ name, port = 0, status, data1, data2, urgent = false }: {
-        name?: string,
-        port?: number, status: number, data1: number, data2: number,
-        urgent?: boolean,
+    sendMidi({
+        name,
+        port = 0,
+        status,
+        data1,
+        data2,
+        urgent = false,
+    }: {
+        name?: string;
+        port?: number;
+        status: number;
+        data1: number;
+        data2: number;
+        urgent?: boolean;
     }) {
         // if urgent, fire midi message immediately, otherwise queue it up for next flush
         if (urgent) {
-            console.log(`[MIDI]  OUT ${String(port)} <== ${new MidiMessage({ status, data1, data2 }).hex}${name ? ` "${name}"` : ''}`);
+            console.log(
+                `[MIDI]  OUT ${String(port)} <== ${new MidiMessage({ status, data1, data2 })
+                    .hex}${name ? ` "${name}"` : ''}`,
+            );
             host.getMidiOutPort(port).sendMidi(status, data1, data2);
         } else {
             this._midiQueue.push({ name, port, status, data1, data2 });
         }
     }
 
-    sendSysex({ name, port = 0, data, urgent = false }: {
-        name?: string, port?: number, data: string, urgent?: boolean,
+    sendSysex({
+        name,
+        port = 0,
+        data,
+        urgent = false,
+    }: {
+        name?: string;
+        port?: number;
+        data: string;
+        urgent?: boolean;
     }) {
         // if urgent, fire sysex immediately, otherwise queue it up for next flush
         if (urgent) {
@@ -42,47 +62,115 @@ export default class MidiOutProxy {
         }
     }
 
-    sendNoteOn({ port = 0, channel, key, velocity, urgent = false }: {
-        port?: number, channel: number, key: number, velocity: number, urgent?: boolean,
+    sendNoteOn({
+        port = 0,
+        channel,
+        key,
+        velocity,
+        urgent = false,
+    }: {
+        port?: number;
+        channel: number;
+        key: number;
+        velocity: number;
+        urgent?: boolean;
     }) {
         this.sendMidi({ port, status: 0x90 | channel, data1: key, data2: velocity, urgent });
     }
 
-    sendNoteOff({ port = 0, channel, key, velocity, urgent = false }: {
-        port?: number, channel: number, key: number, velocity: number, urgent?: boolean,
+    sendNoteOff({
+        port = 0,
+        channel,
+        key,
+        velocity,
+        urgent = false,
+    }: {
+        port?: number;
+        channel: number;
+        key: number;
+        velocity: number;
+        urgent?: boolean;
     }) {
         this.sendMidi({ port, status: 0x80 | channel, data1: key, data2: velocity, urgent });
     }
 
-    sendKeyPressure({ port = 0, channel, key, pressure, urgent = false }: {
-        port?: number, channel: number, key: number, pressure: number, urgent?: boolean,
+    sendKeyPressure({
+        port = 0,
+        channel,
+        key,
+        pressure,
+        urgent = false,
+    }: {
+        port?: number;
+        channel: number;
+        key: number;
+        pressure: number;
+        urgent?: boolean;
     }) {
-        this.sendMidi({ port, status: 0xA0 | channel, data1: key, data2: pressure, urgent });
+        this.sendMidi({ port, status: 0xa0 | channel, data1: key, data2: pressure, urgent });
     }
 
-    sendChannelController({ port = 0, channel, controller, value, urgent = false }: {
-        port?: number, channel: number, controller: number, value: number, urgent?: boolean,
+    sendChannelController({
+        port = 0,
+        channel,
+        controller,
+        value,
+        urgent = false,
+    }: {
+        port?: number;
+        channel: number;
+        controller: number;
+        value: number;
+        urgent?: boolean;
     }) {
-        this.sendMidi({ port, status: 0xB0 | channel, data1: controller, data2: value, urgent });
+        this.sendMidi({ port, status: 0xb0 | channel, data1: controller, data2: value, urgent });
     }
 
-    sendProgramChange({ port = 0, channel, program, urgent = false }: {
-        port?: number, channel: number, program: number, urgent?: boolean,
+    sendProgramChange({
+        port = 0,
+        channel,
+        program,
+        urgent = false,
+    }: {
+        port?: number;
+        channel: number;
+        program: number;
+        urgent?: boolean;
     }) {
-        this.sendMidi({ port, status: 0xC0 | channel, data1: program, data2: 0, urgent });
+        this.sendMidi({ port, status: 0xc0 | channel, data1: program, data2: 0, urgent });
     }
 
-    sendChannelPressure({ port = 0, channel, pressure, urgent = false }: {
-        port?: number, channel: number, pressure: number, urgent?: boolean,
+    sendChannelPressure({
+        port = 0,
+        channel,
+        pressure,
+        urgent = false,
+    }: {
+        port?: number;
+        channel: number;
+        pressure: number;
+        urgent?: boolean;
     }) {
-        this.sendMidi({ port, status: 0xD0 | channel, data1: pressure, data2: 0, urgent });
+        this.sendMidi({ port, status: 0xd0 | channel, data1: pressure, data2: 0, urgent });
     }
 
-    sendPitchBend({ port = 0, channel, value, urgent = false }: {
-        port?: number, channel: number, value: number, urgent?: boolean,
+    sendPitchBend({
+        port = 0,
+        channel,
+        value,
+        urgent = false,
+    }: {
+        port?: number;
+        channel: number;
+        value: number;
+        urgent?: boolean;
     }) {
         this.sendMidi({
-            port, status: 0xE0 | channel, data1: value & 0x7F, data2: (value >> 7) & 0x7F, urgent,
+            port,
+            status: 0xe0 | channel,
+            data1: value & 0x7f,
+            data2: (value >> 7) & 0x7f,
+            urgent,
         });
     }
 
@@ -93,9 +181,16 @@ export default class MidiOutProxy {
         setTimeout(() => {
             while (this._midiQueue.length > 0) {
                 const {
-                    name, port, status, data1, data2,
+                    name,
+                    port,
+                    status,
+                    data1,
+                    data2,
                 } = this._midiQueue.shift() as NaiveMidiMessage;
-                console.log(`[MIDI]  OUT ${String(port)} <== ${new MidiMessage({ status, data1, data2 }).hex}${name ? ` "${name}"` : ''}`);
+                console.log(
+                    `[MIDI]  OUT ${String(port)} <== ${new MidiMessage({ status, data1, data2 })
+                        .hex}${name ? ` "${name}"` : ''}`,
+                );
                 host.getMidiOutPort(port).sendMidi(status, data1, data2);
             }
         });
@@ -103,7 +198,7 @@ export default class MidiOutProxy {
         setTimeout(() => {
             while (this._sysexQueue.length > 0) {
                 const { port, data } = this._sysexQueue.shift() as SysexMessage;
-                host.getMidiOutPort(port).sendSysex(data)
+                host.getMidiOutPort(port).sendSysex(data);
             }
         });
     }

@@ -5,7 +5,6 @@ import Button from './Button';
 import { MidiMessage, SysexMessage } from '../midi/';
 import SimpleControl from '../control/SimpleControl';
 
-
 class TestButton extends Button {
     onPress() {
         // ...
@@ -29,7 +28,7 @@ class TestButton extends Button {
 }
 
 describe('Button', () => {
-    const control = new SimpleControl({ status: 0xB0, data1: 21 });
+    const control = new SimpleControl({ status: 0xb0, data1: 21 });
     const button = new TestButton(control);
 
     const clock = sinon.useFakeTimers();
@@ -40,7 +39,7 @@ describe('Button', () => {
     const onLongPress = sinon.spy(button, 'onLongPress');
 
     it('should handle single and double press/release events', () => {
-        clock.tick(350);  // memory reset
+        clock.tick(350); // memory reset
 
         onPress.reset();
         onDoublePress.reset();
@@ -64,7 +63,7 @@ describe('Button', () => {
     });
 
     it('should handle long press event', () => {
-        clock.tick(350);  // memory reset
+        clock.tick(350); // memory reset
 
         onPress.reset();
         onLongPress.reset();

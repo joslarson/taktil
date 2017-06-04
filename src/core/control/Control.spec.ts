@@ -1,13 +1,12 @@
-import '../../env';  // adds session instance to global scope
+import '../../env'; // adds session instance to global scope
 import { expect } from 'chai';
-import * as sinon from 'sinon';``
+import * as sinon from 'sinon';
 
 import Control from './Control';
 import { MidiMessage, SysexMessage } from '../midi/';
 import Button from '../component/Button';
 
-
-type TestControlState = { value: number, nested: { value: number } };
+type TestControlState = { value: number; nested: { value: number } };
 
 class TestControl extends Control<TestControlState> {
     state = { value: 1, nested: { value: 0 } };
@@ -19,9 +18,11 @@ class TestControl extends Control<TestControlState> {
     getMidiOutput(state: TestControlState) {
         return [
             new MidiMessage({
-                status: 0xB0, data1: 0x1F, data2: this.state.value || 127,
-            })
-        ]
+                status: 0xb0,
+                data1: 0x1f,
+                data2: this.state.value || 127,
+            }),
+        ];
     }
 }
 
@@ -30,7 +31,7 @@ class TestComponent extends Button {
 }
 
 describe('Control', () => {
-    const control = new TestControl({ patterns: ["B01F??"] });
+    const control = new TestControl({ patterns: ['B01F??'] });
     const component = new TestComponent(control, {});
 
     it('should initialize state correctly', () => {
@@ -38,12 +39,15 @@ describe('Control', () => {
     });
 
     it('should modify state correctly', () => {
-        control.setState({ nested: { value: 1 } });  // receives partial state
+        control.setState({ nested: { value: 1 } }); // receives partial state
         expect(control.state).to.deep.equal({ value: 1, nested: { value: 1 } });
     });
 
     it('should maintain its initial state', () => {
-        expect(control.initialState).to.deep.equal({ value: 1, nested: { value: 0 } });
+        expect(control.initialState).to.deep.equal({
+            value: 1,
+            nested: { value: 0 },
+        });
     });
 
     it('should set active component correctly', () => {

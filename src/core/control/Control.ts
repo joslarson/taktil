@@ -1,7 +1,6 @@
 import { MidiMessage, SysexMessage, MessagePattern } from '../midi/';
-import { Component } from '../component'
+import { Component } from '../component';
 import { Color } from '../helpers';
-
 
 export interface ControlBaseState {
     value: number;
@@ -30,17 +29,28 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
     private _initialState: State;
     private _activeComponent: Component | null = null;
 
-    constructor({ port, inPort, outPort, patterns }: {
-        port?: number, inPort?: number, outPort?: number,
-        patterns: (string | MessagePattern)[],  // patterns for all inPort and outPort MidiMessages
-    }) {
-        if (!patterns || patterns.length === 0) throw new Error(`Error, Control must specify at least one pattern.`);
+    constructor(
+        {
+            port,
+            inPort,
+            outPort,
+            patterns,
+        }: {
+            port?: number;
+            inPort?: number;
+            outPort?: number;
+            patterns: (string | MessagePattern)[];
+        }, // patterns for all inPort and outPort MidiMessages
+    ) {
+        if (!patterns || patterns.length === 0)
+            throw new Error(`Error, Control must specify at least one pattern.`);
 
         // set object properties
-        this.inPort = port !== undefined ? port : (inPort !== undefined ? inPort : this.inPort);
-        this.outPort = port !== undefined ? port : (outPort !== undefined ? outPort : this.outPort);
-        this.patterns = patterns
-            .map(pattern => typeof pattern === 'string' ? new MessagePattern(pattern) : pattern);
+        this.inPort = port !== undefined ? port : inPort !== undefined ? inPort : this.inPort;
+        this.outPort = port !== undefined ? port : outPort !== undefined ? outPort : this.outPort;
+        this.patterns = patterns.map(
+            pattern => (typeof pattern === 'string' ? new MessagePattern(pattern) : pattern),
+        );
     }
 
     // state
@@ -52,18 +62,25 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
     }
 
     setState(partialState: Partial<State>, render = true): void {
-        this.initialState;  // make sure initialState has been initialized
+        this.initialState; // make sure initialState has been initialized
 
         if (partialState.value) {
             // validate input
-            const invalidAbsoluteValue = this.mode === 'ABSOLUTE'
-                && (partialState.value > 1 || partialState.value < 0);
-            const invalidRelativeValue = this.mode === 'RELATIVE'
-                && (partialState.value > 1 || partialState.value < -1);
-            if (invalidAbsoluteValue || invalidRelativeValue) throw new Error(`Invalid value "${partialState.value}" for Control "${this.name}" with value range ${this.mode === 'ABSOLUTE' ? 0 : -1} to 1.`);
+            const invalidAbsoluteValue =
+                this.mode === 'ABSOLUTE' && (partialState.value > 1 || partialState.value < 0);
+            const invalidRelativeValue =
+                this.mode === 'RELATIVE' && (partialState.value > 1 || partialState.value < -1);
+            if (invalidAbsoluteValue || invalidRelativeValue)
+                throw new Error(
+                    `Invalid value "${partialState.value}" for Control "${this
+                        .name}" with value range ${this.mode === 'ABSOLUTE' ? 0 : -1} to 1.`,
+                );
         }
         // update state
-        this.state = { ...this.state as object, ...partialState as object } as State;  // TODO: should be able to remove type casting in typescript 2.4
+        this.state = {
+            ...this.state as object,
+            ...partialState as object,
+        } as State; // TODO: should be able to remove type casting in typescript 2.4
         // re-render with new state
         if (render) this.render();
     }
@@ -92,7 +109,7 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
 
     cacheMidiMessage(midiMessage: MidiMessage): boolean {
         if (this.cache.indexOf(midiMessage.hex) !== -1) return false;
-        for (let i = 0; i < this.patterns.length; i++) {
+        for (let i = 0; i < this.patterns.length; i += 1) {
             const pattern = this.patterns[i];
             if (pattern.test(midiMessage)) {
                 this.cache[i] = midiMessage.hex;
@@ -100,7 +117,10 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
             }
         }
         // no match
-        throw new Error(`MidiMessage "${midiMessage.hex}" does not match existing pattern on Control "${this.name}".`);
+        throw new Error(
+            `MidiMessage "${midiMessage.hex}" does not match existing pattern on Control "${this
+                .name}".`,
+        );
     }
 
     onMidiInput(message: MidiMessage | SysexMessage) {
@@ -131,16 +151,22 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
         if (this.preRender) this.preRender();
 
         // send messages
-        for (let message of this.getMidiOutput(this.state)) {
+        for (const message of this.getMidiOutput(this.state)) {
             if (message instanceof MidiMessage) {
                 // send message to cache, send to midi out if new
-                if (this.cacheMidiMessage(message)){
+                if (this.cacheMidiMessage(message)) {
                     const { port, status, data1, data2 } = message;
-                    session.midiOut.sendMidi({ name: this.name, port, status, data1, data2 });
+                    session.midiOut.sendMidi({
+                        name: this.name,
+                        port,
+                        status,
+                        data1,
+                        data2,
+                    });
                 }
             } else if (message instanceof SysexMessage) {
                 const { port, data } = message;
-                session.midiOut.sendSysex({ port, data })
+                session.midiOut.sendSysex({ port, data });
             } else {
                 throw new Error('Unrecognized message type.');
             }

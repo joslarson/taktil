@@ -3,7 +3,6 @@ import { Control } from '../control';
 import { ControlBaseState } from '../control/Control';
 import ObjectLiteral from '../helpers/ObjectLiteral';
 
-
 export type ComponentBaseState = ObjectLiteral;
 export type ComponentBaseProps = ObjectLiteral;
 
@@ -46,10 +45,13 @@ export default abstract class Component<
     }
 
     setState(partialState: Partial<State>, render = true): void {
-        this.initialState;  // make sure initialState has been initialized
+        this.initialState; // make sure initialState has been initialized
 
         // update object state
-        this.state = { ...this.state as object, ...partialState as object } as State; // TODO: should be able to remove type casting in typescript 2.4
+        this.state = {
+            ...this.state as object,
+            ...partialState as object,
+        } as State; // TODO: should be able to remove type casting in typescript 2.4
         // re-render associated controls
         if (render) this.render();
     }

@@ -4,5 +4,4 @@ interface Color {
     b: number;
 }
 
-
 export default Color;
