@@ -6,7 +6,12 @@
         "baseUrl": "./src",
         "moduleResolution": "node",
         "outDir": "./dist",
-        "lib": ["dom", "es6", "dom.iterable", "scripthost"],
+        "lib": [
+            "dom",
+            "es6",
+            "dom.iterable",
+            "scripthost"
+        ],
         "importHelpers": true,
         "types": [
             "typed-bitwig-api",

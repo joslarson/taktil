@@ -1,4 +1,4 @@
-import { default as MidiMessage, SimpleMidiMessage } from './MidiMessage';
+import MidiMessage, { SimpleMidiMessage } from './MidiMessage';
 import SysexMessage from './SysexMessage';
 
 export default class MessagePattern {

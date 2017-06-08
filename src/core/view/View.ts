@@ -5,7 +5,7 @@ interface View {
     [key: string]: (Component | Component[] | (() => Component | Component[]));
 }
 
-abstract class View {
+class View {
     static parent: typeof View;
     private static _instance: View;
     private static _componentMap: {
@@ -17,8 +17,7 @@ abstract class View {
 
     static get instance() {
         // inheritance safe singleton pattern (each child class will have its own singleton)
-        const View = (this as any) as { new (): View; _instance: View };
-        let instance = View._instance;
+        let instance = this._instance;
 
         if (instance instanceof View) return instance;
         // force every child class to create/use its own static _componentMap
