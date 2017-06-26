@@ -11,7 +11,7 @@ declare global {
 (() => {
     const global = Function('return this')() || (42, eval)('this');
 
-    // add global reference to global namespace 
+    // add global reference to global namespace
     global.global = global;
 
     // create global session object

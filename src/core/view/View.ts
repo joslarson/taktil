@@ -6,8 +6,6 @@ interface View {
 }
 
 class View {
-    static parent: typeof View;
-    private static _instance: View;
     private static _componentMap: {
         [mode: string]: {
             controls: Control[];
@@ -15,19 +13,7 @@ class View {
         };
     };
 
-    static get instance() {
-        // inheritance safe singleton pattern (each child class will have its own singleton)
-        let instance = this._instance;
-
-        if (instance instanceof View) return instance;
-        // force every child class to create/use its own static _componentMap
-        // object, instead of sharing one.
-        this._componentMap = {};
-        instance = new View();
-        View._instance = instance;
-
-        return instance;
-    }
+    static parent: typeof View;
 
     static getComponent(control: Control, mode: string): Component | null {
         if (this._componentMap[mode] === undefined) return null;
@@ -37,7 +23,6 @@ class View {
     }
 
     static connectControl(control: Control) {
-        const instance = this.instance;
         // check view modes in order for component/control registration
         for (const activeMode of session.activeModes) {
             if (!this._componentMap[activeMode]) continue; // mode not used in view
@@ -58,7 +43,10 @@ class View {
     }
 
     static init() {
-        const instance = this.instance;
+        const instance = new this();
+        // give each subclass its own componentMap
+        this._componentMap = {};
+
         Object.getOwnPropertyNames(instance).map(key => {
             let value = instance[key];
             value = typeof value === 'function' ? value() : value;
@@ -83,7 +71,9 @@ class View {
 
                     // if control already registered in view mode, throw error
                     if (this._componentMap[mode].controls.indexOf(control) > -1)
-                        throw Error('Duplicate Control registration in view mode.');
+                        throw Error(
+                            `Duplicate Control "${control.name}" registration in view mode.`,
+                        );
 
                     // add control and component pair to component map
                     this._componentMap[mode].controls.push(control);
