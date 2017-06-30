@@ -1,6 +1,7 @@
 // setup environment
-import Logger from './core/Logger';
-import Session from './core/Session';
+import Logger from './Logger';
+import Session from './Session';
+import DelayedTask from './DelayedTask';
 
 // define global variables
 declare global {
@@ -21,7 +22,32 @@ declare global {
     if (global.loadAPI) {
         loadAPI(2); // load bitwig api v2
 
-        // connect logger as global console
+        // shim Timeout and Interval methods using DelayedTask class
+        global.setTimeout = function setTimeout(
+            callback: (...args: any[]) => any,
+            delay = 0,
+            ...params: any[]
+        ) {
+            return new DelayedTask(callback, delay).start(...params);
+        };
+
+        global.clearTimeout = function clearTimeout(timeout: DelayedTask) {
+            timeout.cancel();
+        };
+
+        global.setInterval = function setInterval(
+            callback: (...args: any[]) => any,
+            delay = 0,
+            ...params: any[]
+        ) {
+            return new DelayedTask(callback, delay, true).start(...params);
+        };
+
+        global.clearInterval = function clearInterval(interval: DelayedTask) {
+            interval.cancel();
+        };
+
+        // shim console with custom logger
         global.console = new Logger();
 
         // hookup dummy function to unsupported logger methods
@@ -64,57 +90,5 @@ declare global {
         ];
         while ((prop = properties.pop())) if (!con[prop]) con[prop] = {};
         while ((method = methods.pop())) if (typeof con[method] !== 'function') con[method] = dummy;
-
-        class DelayedTask {
-            callback: Function;
-            delay: number;
-            repeat: boolean;
-            cancelled = false;
-
-            constructor(callback: (...args: any[]) => any, delay = 0, repeat = false) {
-                this.callback = callback;
-                this.delay = delay;
-                this.repeat = repeat;
-            }
-
-            start(...args: any[]) {
-                host.scheduleTask(() => {
-                    if (!this.cancelled) {
-                        this.callback.call(args);
-                        if (this.repeat) this.start(...args);
-                    }
-                }, this.delay);
-                return this;
-            }
-
-            cancel() {
-                this.cancelled = true;
-                return this;
-            }
-        }
-
-        global.setTimeout = function setTimeout(
-            callback: (...args: any[]) => any,
-            delay = 0,
-            ...params: any[]
-        ) {
-            return new DelayedTask(callback, delay).start(...params);
-        };
-
-        global.clearTimeout = function clearTimeout(timeout: DelayedTask) {
-            timeout.cancel();
-        };
-
-        global.setInterval = function setInterval(
-            callback: (...args: any[]) => any,
-            delay = 0,
-            ...params: any[]
-        ) {
-            return new DelayedTask(callback, delay, true).start(...params);
-        };
-
-        global.clearInterval = function clearInterval(interval: DelayedTask) {
-            interval.cancel();
-        };
     }
 })();

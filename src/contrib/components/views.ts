@@ -10,9 +10,9 @@ export class ViewToggle extends Button<{ view: typeof View }> {
 
     onPress() {
         if (session.activeView === this.props.view && this.props.view.parent) {
-            session.activeView = this.props.view.parent;
+            session.activateView(this.props.view.parent);
         } else {
-            session.activeView = this.props.view;
+            session.activateView(this.props.view);
         }
     }
 }

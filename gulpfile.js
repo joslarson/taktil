@@ -25,9 +25,9 @@ gulp.task('test', () => {
 });
 
 // copy
-gulp.task('copy', () =>
-    gulp.src(['README.md', 'LICENSE', 'package.json', 'src/globals.d.ts']).pipe(gulp.dest('dist')),
-);
+gulp.task('copy', () => {
+    gulp.src(['README.md', 'LICENSE', 'package.json', 'src/globals.d.ts']).pipe(gulp.dest('dist'));
+});
 
 // gulp watch
 gulp.task('watch', ['clean', 'ts', 'copy'], () => {

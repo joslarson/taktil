@@ -1,6 +1,5 @@
 import MidiMessage, { SimpleMidiMessage } from './MidiMessage';
 import SysexMessage from './SysexMessage';
-import Session from '../Session';
 
 export interface NaiveMidiMessage extends SimpleMidiMessage {
     name?: string;
@@ -11,7 +10,7 @@ export default class MidiOutProxy {
     private _midiQueue: NaiveMidiMessage[] = [];
     private _sysexQueue: SysexMessage[] = [];
 
-    constructor(session: Session) {
+    constructor() {
         session.on('flush', () => this._flushQueues());
     }
 
@@ -75,7 +74,7 @@ export default class MidiOutProxy {
         velocity: number;
         urgent?: boolean;
     }) {
-        this.sendMidi({ port, status: 0x90 | channel, data1: key, data2: velocity, urgent });
+        this.sendMidi({ urgent, port, status: 0x90 | channel, data1: key, data2: velocity });
     }
 
     sendNoteOff({
@@ -91,7 +90,7 @@ export default class MidiOutProxy {
         velocity: number;
         urgent?: boolean;
     }) {
-        this.sendMidi({ port, status: 0x80 | channel, data1: key, data2: velocity, urgent });
+        this.sendMidi({ urgent, port, status: 0x80 | channel, data1: key, data2: velocity });
     }
 
     sendKeyPressure({
@@ -107,7 +106,7 @@ export default class MidiOutProxy {
         pressure: number;
         urgent?: boolean;
     }) {
-        this.sendMidi({ port, status: 0xa0 | channel, data1: key, data2: pressure, urgent });
+        this.sendMidi({ urgent, port, status: 0xa0 | channel, data1: key, data2: pressure });
     }
 
     sendChannelController({
@@ -123,7 +122,7 @@ export default class MidiOutProxy {
         value: number;
         urgent?: boolean;
     }) {
-        this.sendMidi({ port, status: 0xb0 | channel, data1: controller, data2: value, urgent });
+        this.sendMidi({ urgent, port, status: 0xb0 | channel, data1: controller, data2: value });
     }
 
     sendProgramChange({
@@ -137,7 +136,7 @@ export default class MidiOutProxy {
         program: number;
         urgent?: boolean;
     }) {
-        this.sendMidi({ port, status: 0xc0 | channel, data1: program, data2: 0, urgent });
+        this.sendMidi({ urgent, port, status: 0xc0 | channel, data1: program, data2: 0 });
     }
 
     sendChannelPressure({
@@ -151,7 +150,7 @@ export default class MidiOutProxy {
         pressure: number;
         urgent?: boolean;
     }) {
-        this.sendMidi({ port, status: 0xd0 | channel, data1: pressure, data2: 0, urgent });
+        this.sendMidi({ urgent, port, status: 0xd0 | channel, data1: pressure, data2: 0 });
     }
 
     sendPitchBend({
@@ -166,11 +165,11 @@ export default class MidiOutProxy {
         urgent?: boolean;
     }) {
         this.sendMidi({
+            urgent,
             port,
             status: 0xe0 | channel,
             data1: value & 0x7f,
             data2: (value >> 7) & 0x7f,
-            urgent,
         });
     }
 

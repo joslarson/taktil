@@ -1,5 +1,5 @@
 import { MidiOutProxy, MidiMessage, SysexMessage } from '../core/midi';
-import { Control } from 'core/control';
+import { Control } from '../core/control';
 import { View } from '../core/view';
 
 declare const global: any;
@@ -19,7 +19,7 @@ export default class Session {
     private _activeModes: string[] = [];
     private _eventHandlers: { [key: string]: Function[] } = {};
 
-    midiOut: MidiOutProxy = new MidiOutProxy(this);
+    midiOut: MidiOutProxy = new MidiOutProxy();
 
     constructor() {
         global.init = () => {
@@ -112,7 +112,7 @@ export default class Session {
     // Controls
     //////////////////////////////
 
-    set controls(controls: { [name: string]: Control }) {
+    registerControls(controls: { [name: string]: Control }) {
         const controlsArray: Control[] = [];
         for (const controlName in controls) {
             const control = controls[controlName];
@@ -140,7 +140,7 @@ export default class Session {
         this._controls = controls;
     }
 
-    get controls() {
+    get controls(): { [name: string]: Control } {
         return { ...this._controls };
     }
 
@@ -174,7 +174,7 @@ export default class Session {
     // Views
     //////////////////////////////
 
-    set views(views: typeof View[]) {
+    registerViews(...views: typeof View[]) {
         if (!this.isInit)
             throw new Error(
                 'Untimely view registration: views can only be registered from within the init callback.',
@@ -197,7 +197,7 @@ export default class Session {
         return [...this._views];
     }
 
-    set activeView(view: typeof View) {
+    activateView(view: typeof View) {
         if (this.views.indexOf(view) === -1)
             throw new Error(
                 `${view.name} must first be registered before being set as the active view.`,
@@ -214,7 +214,7 @@ export default class Session {
     // Modes
     //////////////////////////////
 
-    get activeModes() {
+    getActiveModes() {
         return [...this._activeModes, '__BASE__'];
     }
 
@@ -237,6 +237,6 @@ export default class Session {
     }
 
     modeIsActive(mode: string) {
-        return this.activeModes.indexOf(mode) > -1;
+        return this.getActiveModes().indexOf(mode) > -1;
     }
 }
