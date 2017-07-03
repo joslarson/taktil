@@ -143,7 +143,7 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
 
     preRender?(): void;
 
-    render(): boolean {
+    render(force = false): boolean {
         // no midi out? no render.
         if (!this.enableMidiOut || !this.getMidiOutput) return false;
 
@@ -154,14 +154,14 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
         for (const message of this.getMidiOutput(this.state)) {
             if (message instanceof MidiMessage) {
                 // send message to cache, send to midi out if new
-                if (this.cacheMidiMessage(message)) {
+                if (this.cacheMidiMessage(message) || force) {
                     const { port, status, data1, data2 } = message;
                     session.midiOut.sendMidi({
-                        name: this.name,
                         port,
                         status,
                         data1,
                         data2,
+                        name: this.name,
                     });
                 }
             } else if (message instanceof SysexMessage) {

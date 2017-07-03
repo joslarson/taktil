@@ -1,5 +1,6 @@
 import MidiMessage, { SimpleMidiMessage } from './MidiMessage';
 import SysexMessage from './SysexMessage';
+import Session from '../../env/Session';
 
 export interface NaiveMidiMessage extends SimpleMidiMessage {
     name?: string;
@@ -10,7 +11,7 @@ export default class MidiOutProxy {
     private _midiQueue: NaiveMidiMessage[] = [];
     private _sysexQueue: SysexMessage[] = [];
 
-    constructor() {
+    constructor(session: Session) {
         session.on('flush', () => this._flushQueues());
     }
 

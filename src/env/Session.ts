@@ -19,7 +19,7 @@ export default class Session {
     private _activeModes: string[] = [];
     private _eventHandlers: { [key: string]: Function[] } = {};
 
-    midiOut: MidiOutProxy = new MidiOutProxy();
+    midiOut: MidiOutProxy = new MidiOutProxy(this);
 
     constructor() {
         global.init = () => {
@@ -112,19 +112,18 @@ export default class Session {
     // Controls
     //////////////////////////////
 
-    registerControls(controls: { [name: string]: Control }) {
+    set controls(controls: { [name: string]: Control }) {
         const controlsArray: Control[] = [];
         for (const controlName in controls) {
             const control = controls[controlName];
-            // set control name on object
-            control.name = controlName;
             for (const existingControl of controlsArray) {
                 // if none of the ports match up, then there's no conflict
                 if (
                     control.outPort !== existingControl.outPort &&
                     control.inPort !== existingControl.inPort
-                )
+                ) {
                     continue;
+                }
                 for (const pattern of control.patterns) {
                     for (const existingPattern of existingControl.patterns) {
                         if (pattern.conflictsWith(existingPattern))
@@ -171,14 +170,17 @@ export default class Session {
         }
     }
 
+    rerender() {
+        for (const controlName in this.controls) {
+            const control = this.controls[controlName];
+            control.render(true);
+        }
+    }
+
     // Views
     //////////////////////////////
 
-    registerViews(...views: typeof View[]) {
-        if (!this.isInit)
-            throw new Error(
-                'Untimely view registration: views can only be registered from within the init callback.',
-            );
+    set views(views: typeof View[]) {
         let validatedViews: (typeof View)[] = [];
         for (const view of views) {
             // validate view registration order
