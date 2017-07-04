@@ -13,7 +13,7 @@ declare const global: any;
  */
 export default class Session {
     private _isInit: boolean = false;
-    private _controls: { [key: string]: Control } = {};
+    private _controls: { [name: string]: Control } = {};
     private _views: typeof View[] = [];
     private _activeView: typeof View;
     private _activeModes: string[] = [];
@@ -24,8 +24,10 @@ export default class Session {
     constructor() {
         global.init = () => {
             this._isInit = true;
+
             // call the session init callbacks
             this._callEventCallbacks('init');
+
             // setup midi/sysex callbacks per port
             const midiInPorts = this.midiInPorts;
             for (let port = 0; port < midiInPorts.length; port += 1) {
@@ -38,6 +40,7 @@ export default class Session {
                     this.onMidiInput(new SysexMessage({ port, data }));
                 });
             }
+
             this._isInit = false;
         };
 
@@ -116,6 +119,7 @@ export default class Session {
         const controlsArray: Control[] = [];
         for (const controlName in controls) {
             const control = controls[controlName];
+            control.name = controlName;
             for (const existingControl of controlsArray) {
                 // if none of the ports match up, then there's no conflict
                 if (
@@ -180,7 +184,12 @@ export default class Session {
     // Views
     //////////////////////////////
 
-    set views(views: typeof View[]) {
+    registerViews(...views: typeof View[]) {
+        if (!this.isInit) {
+            throw new Error(
+                'Untimely view registration: views can only be registered from within the init callback.',
+            );
+        }
         let validatedViews: (typeof View)[] = [];
         for (const view of views) {
             // validate view registration order
