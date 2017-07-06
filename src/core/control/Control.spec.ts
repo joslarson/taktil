@@ -1,4 +1,3 @@
-import '../../env'; // adds session instance to global scope
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 

@@ -1,18 +1,27 @@
 import { Button } from '../../core/component';
 import { View } from '../../core/view';
 
-export class ViewToggle extends Button<{ view: typeof View }> {
+export class ViewToggle extends Button<{ view: typeof View | string }> {
+    getView() {
+        let view = this.props.view;
+        if (typeof view === 'string') view = session.getView(view);
+        return view;
+    }
+
     onInit() {
         session.on('activateView', (view: typeof View) => {
-            this.setState({ on: view === this.props.view });
+            this.setState({ on: view === this.getView() });
         });
     }
 
     onPress() {
-        if (session.activeView === this.props.view && this.props.view.parent) {
-            session.activateView(this.props.view.parent);
+        let view = this.props.view;
+        if (typeof view === 'string') view = session.getView(view);
+        const parent = view.getParent();
+        if (session.activeView === view && parent) {
+            session.activateView(parent);
         } else {
-            session.activateView(this.props.view);
+            session.activateView(view);
         }
     }
 }

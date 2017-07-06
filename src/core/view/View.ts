@@ -13,7 +13,12 @@ class View {
         };
     };
 
-    static parent: typeof View;
+    static parent: typeof View | string | undefined;
+
+    static getParent(): typeof View | undefined {
+        if (typeof this.parent === 'string') return session.getView(this.parent);
+        return this.parent;
+    }
 
     static getComponent(control: Control, mode: string): Component | null {
         if (this._componentMap[mode] === undefined) return null;
@@ -34,8 +39,9 @@ class View {
             }
         }
         // component not found in view? send to parent
-        if (this.parent) {
-            this.parent.connectControl(control);
+        const parent = this.getParent();
+        if (parent) {
+            parent.connectControl(control);
         } else {
             // no parent? no component to connect to
             control.activeComponent = null;

@@ -193,7 +193,8 @@ export default class Session {
         let validatedViews: (typeof View)[] = [];
         for (const view of views) {
             // validate view registration order
-            if (view.parent && validatedViews.indexOf(view.parent) === -1)
+            const parent = view.getParent();
+            if (parent && validatedViews.indexOf(parent) === -1)
                 throw `Invalid view registration order: Parent view "${parent.name}" must be registered before child view "${view.name}".`;
             // add to validate views list
             if (validatedViews.indexOf(view) === -1) validatedViews = [...validatedViews, view];
@@ -208,13 +209,18 @@ export default class Session {
         return [...this._views];
     }
 
-    activateView(view: typeof View) {
-        if (this.views.indexOf(view) === -1)
+    getView(viewName: string) {
+        return session.views.filter(view => view.name === viewName)[0];
+    }
+
+    activateView(view: typeof View | string) {
+        const newView = typeof view === 'string' ? this.getView(view) : view;
+        if (this.views.indexOf(newView) === -1)
             throw new Error(
-                `${view.name} must first be registered before being set as the active view.`,
+                `${newView.name} must first be registered before being set as the active view.`,
             );
-        this._activeView = view;
-        this._callEventCallbacks('activateView', view);
+        this._activeView = newView;
+        this._callEventCallbacks('activateView', newView);
         this.associateControlsInView(); // re-associate controls in view
     }
 

@@ -27,13 +27,13 @@
     "mocha": "^3.3.0",
     "prettier": "^1.4.2",
     "sinon": "^2.2.0",
-    "ts-node": "^3.0.2",
+    "ts-node": "^3.1.0",
     "tslint-config-airbnb": "^5.0.1",
     "typed-bitwig-api": "^2.0.0",
     "typescript": "^2.4.1"
   },
   "scripts": {
-    "test": "mocha -r ts-node/register src/env/index.ts src/**/*.spec.ts",
+    "test": "./node_modules/mocha/bin/mocha -r ts-node/register -r ./src/env ./src/**/*.spec.ts",
     "lint": "./node_modules/tslint/bin/tslint -c tslint.json 'src/**/*.ts' || true",
     "format": "./node_modules/prettier/bin/prettier.js --parser typescript --print-width 100 --tab-width 4 --single-quote --trailing-comma=all --write './src/**/*.ts'"
   },
