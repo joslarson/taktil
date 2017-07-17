@@ -1,3 +1,4 @@
+import EventEmitter from './EventEmitter';
 import { MidiOutProxy, MidiMessage, SysexMessage } from '../core/midi';
 import { Control } from '../core/control';
 import { View } from '../core/view';
@@ -11,7 +12,7 @@ declare const global: any;
  * Assists in managing shared state and session level event
  * subscriptions between Taktil and the control surface script.
  */
-export default class Session {
+class Session extends EventEmitter {
     private _isInit: boolean = false;
     private _controls: { [name: string]: Control } = {};
     private _views: typeof View[] = [];
@@ -22,11 +23,12 @@ export default class Session {
     midiOut: MidiOutProxy = new MidiOutProxy(this);
 
     constructor() {
+        super();
         global.init = () => {
             this._isInit = true;
 
             // call the session init callbacks
-            this._callEventCallbacks('init');
+            this.emit('init');
 
             // setup midi/sysex callbacks per port
             const midiInPorts = this.midiInPorts;
@@ -45,7 +47,7 @@ export default class Session {
         };
 
         global.flush = () => {
-            this._callEventCallbacks('flush');
+            this.emit('flush');
         };
 
         global.exit = () => {
@@ -55,7 +57,7 @@ export default class Session {
                 control.setState(control.initialState);
             }
             // call registered exit callbacks
-            this._callEventCallbacks('exit');
+            this.emit('exit');
         };
     }
 
@@ -87,29 +89,8 @@ export default class Session {
         console.log(
             `${messageType} IN  ${String(message.port)} ==> ${message}${control && control.name
                 ? ` "${control.name}"`
-                : ''}`,
+                : ''}`
         );
-    }
-
-    // Event Hooks
-    //////////////////////////////
-
-    on(
-        eventName: 'init' | 'flush' | 'exit' | 'activateView' | 'activateMode' | 'deactivateMode',
-        callback: (...args: any[]) => any,
-    ) {
-        if (!this._eventHandlers[eventName]) this._eventHandlers[eventName] = [];
-        this._eventHandlers[eventName].push(callback);
-        return this;
-    }
-
-    private _callEventCallbacks(eventName: string, ...args: any[]) {
-        if (this._eventHandlers[eventName] === undefined) return;
-
-        const callbackList = this._eventHandlers[eventName];
-        for (const callback of callbackList) {
-            callback.apply(this, args);
-        }
     }
 
     // Controls
@@ -132,7 +113,7 @@ export default class Session {
                     for (const existingPattern of existingControl.patterns) {
                         if (pattern.conflictsWith(existingPattern))
                             throw new Error(
-                                `Control "${control.name}" conflicts with existing Control "${existingControl.name}".`,
+                                `Control "${control.name}" conflicts with existing Control "${existingControl.name}".`
                             );
                     }
                 }
@@ -185,24 +166,25 @@ export default class Session {
     //////////////////////////////
 
     registerViews(...views: typeof View[]) {
-        if (!this.isInit) {
-            throw new Error(
-                'Untimely view registration: views can only be registered from within the init callback.',
-            );
-        }
-        let validatedViews: (typeof View)[] = [];
-        for (const view of views) {
-            // validate view registration order
-            const parent = view.getParent();
-            if (parent && validatedViews.indexOf(parent) === -1)
-                throw `Invalid view registration order: Parent view "${parent.name}" must be registered before child view "${view.name}".`;
-            // add to validate views list
-            if (validatedViews.indexOf(view) === -1) validatedViews = [...validatedViews, view];
-            // initialize view
-            view.init();
-        }
-        // set session views
-        this._views = validatedViews;
+        const register = () => {
+            let validatedViews: (typeof View)[] = [];
+            for (const view of views) {
+                // validate view registration order
+                const parent = view.getParent();
+                if (parent && validatedViews.indexOf(parent) === -1)
+                    throw `Invalid view registration order: Parent view "${parent.name}" must be registered before child view "${view.name}".`;
+                // add to validate views list
+                if (validatedViews.indexOf(view) === -1) validatedViews = [...validatedViews, view];
+                // initialize view
+                view.init();
+            }
+            // set session views
+            this._views = validatedViews;
+        };
+        // if called during init register immediately
+        if (this.isInit) return register();
+        // otherwise defer until init
+        this.on('init', register);
     }
 
     get views() {
@@ -217,10 +199,10 @@ export default class Session {
         const newView = typeof view === 'string' ? this.getView(view) : view;
         if (this.views.indexOf(newView) === -1)
             throw new Error(
-                `${newView.name} must first be registered before being set as the active view.`,
+                `${newView.name} must first be registered before being set as the active view.`
             );
         this._activeView = newView;
-        this._callEventCallbacks('activateView', newView);
+        this.emit('activateView', newView);
         this.associateControlsInView(); // re-associate controls in view
     }
 
@@ -240,7 +222,7 @@ export default class Session {
         const modeIndex = this._activeModes.indexOf(mode);
         if (modeIndex > -1) this._activeModes.splice(modeIndex, 1);
         this._activeModes.unshift(mode); // prepend to modes
-        this._callEventCallbacks('activateMode', mode);
+        this.emit('activateMode', mode);
         this.associateControlsInView(); // re-associate controls in view
     }
 
@@ -248,7 +230,7 @@ export default class Session {
         const modeIndex = this._activeModes.indexOf(mode);
         if (modeIndex > -1) {
             this._activeModes.splice(modeIndex, 1);
-            this._callEventCallbacks('deactivateMode', mode);
+            this.emit('deactivateMode', mode);
             this.associateControlsInView(); // re-associate controls in view
         }
     }
@@ -257,3 +239,22 @@ export default class Session {
         return this.getActiveModes().indexOf(mode) > -1;
     }
 }
+
+interface Session extends EventEmitter {
+    on(label: 'activateMode' | 'deactivateMode', callback: (mode: string) => void): void;
+    on(label: 'activateView', callback: (view: typeof View) => void): void;
+    on(label: 'init' | 'flush' | 'exit', callback: () => void): void;
+
+    addListener(label: 'activateMode' | 'deactivateMode', callback: (mode: string) => void): void;
+    addListener(label: 'activateView', callback: (view: typeof View) => void): void;
+    addListener(label: 'init' | 'flush' | 'exit', callback: () => void): void;
+
+    removeListener(
+        label: 'activateMode' | 'deactivateMode',
+        callback: (mode: string) => void
+    ): boolean;
+    removeListener(label: 'activateView', callback: (view: typeof View) => void): boolean;
+    removeListener(label: 'init' | 'flush' | 'exit', callback: () => void): boolean;
+}
+
+export default Session;

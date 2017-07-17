@@ -34,7 +34,7 @@ export default class MidiOutProxy {
         if (urgent) {
             console.log(
                 `[MIDI]  OUT ${String(port)} <== ${new MidiMessage({ status, data1, data2 })
-                    .hex}${name ? ` "${name}"` : ''}`,
+                    .hex}${name ? ` "${name}"` : ''}`
             );
             host.getMidiOutPort(port).sendMidi(status, data1, data2);
         } else {
@@ -189,7 +189,7 @@ export default class MidiOutProxy {
                 } = this._midiQueue.shift() as NaiveMidiMessage;
                 console.log(
                     `[MIDI]  OUT ${String(port)} <== ${new MidiMessage({ status, data1, data2 })
-                        .hex}${name ? ` "${name}"` : ''}`,
+                        .hex}${name ? ` "${name}"` : ''}`
                 );
                 host.getMidiOutPort(port).sendMidi(status, data1, data2);
             }

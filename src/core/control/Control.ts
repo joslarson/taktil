@@ -40,7 +40,7 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
             inPort?: number;
             outPort?: number;
             patterns: (string | MessagePattern)[];
-        }, // patterns for all inPort and outPort MidiMessages
+        } // patterns for all inPort and outPort MidiMessages
     ) {
         if (!patterns || patterns.length === 0)
             throw new Error(`Error, Control must specify at least one pattern.`);
@@ -49,7 +49,7 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
         this.inPort = port !== undefined ? port : inPort !== undefined ? inPort : this.inPort;
         this.outPort = port !== undefined ? port : outPort !== undefined ? outPort : this.outPort;
         this.patterns = patterns.map(
-            pattern => (typeof pattern === 'string' ? new MessagePattern(pattern) : pattern),
+            pattern => (typeof pattern === 'string' ? new MessagePattern(pattern) : pattern)
         );
     }
 
@@ -73,7 +73,7 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
             if (invalidAbsoluteValue || invalidRelativeValue)
                 throw new Error(
                     `Invalid value "${partialState.value}" for Control "${this
-                        .name}" with value range ${this.mode === 'ABSOLUTE' ? 0 : -1} to 1.`,
+                        .name}" with value range ${this.mode === 'ABSOLUTE' ? 0 : -1} to 1.`
                 );
         }
         // update state
@@ -119,7 +119,7 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
         // no match
         throw new Error(
             `MidiMessage "${midiMessage.hex}" does not match existing pattern on Control "${this
-                .name}".`,
+                .name}".`
         );
     }
 

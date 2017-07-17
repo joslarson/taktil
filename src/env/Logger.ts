@@ -22,7 +22,7 @@ export default class Logger {
                     'Log Midi',
                     'Development',
                     ['None', 'Input', 'Output', 'Both'],
-                    'None',
+                    'None'
                 )
                 .addValueObserver(midiLevel => (this._midiLevel = midiLevel));
 

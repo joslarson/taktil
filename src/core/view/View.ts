@@ -2,7 +2,7 @@ import { Component } from '../component';
 import { Control } from '../control';
 
 interface View {
-    [key: string]: (Component | Component[] | (() => Component | Component[]));
+    [key: string]: Component | Component[] | (() => Component | Component[]);
 }
 
 class View {
@@ -13,7 +13,7 @@ class View {
         };
     };
 
-    static parent: typeof View | string | undefined;
+    static parent: typeof View | string;
 
     static getParent(): typeof View | undefined {
         if (typeof this.parent === 'string') return session.getView(this.parent);
@@ -78,7 +78,7 @@ class View {
                     // if control already registered in view mode, throw error
                     if (this._componentMap[mode].controls.indexOf(control) > -1)
                         throw Error(
-                            `Duplicate Control "${control.name}" registration in view mode.`,
+                            `Duplicate Control "${control.name}" registration in view mode.`
                         );
 
                     // add control and component pair to component map

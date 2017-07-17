@@ -40,9 +40,10 @@ export default class MessagePattern {
     }
 
     test(message: MidiMessage | SysexMessage) {
-        const testString: string = message instanceof SysexMessage
-            ? message.data.toUpperCase()
-            : MessagePattern.getPatternStringFromMidiMessage(message);
+        const testString: string =
+            message instanceof SysexMessage
+                ? message.data.toUpperCase()
+                : MessagePattern.getPatternStringFromMidiMessage(message);
         return this.regex.test(testString);
     }
 }
