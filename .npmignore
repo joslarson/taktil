@@ -1,0 +1,14 @@
+node_modules
+.DS_Store
+/notes
+/.vscode
+/gulpfile.js
+/.travis.yml
+/tsconfig.*
+/tslint.json
+
+# ignore the .ts files
+*.ts
+
+# include the .d.ts files
+!*.d.ts

@@ -3,9 +3,9 @@
         "target": "es5",
         "sourceMap": false,
         "declaration": true,
-        "baseUrl": "./src",
+        "baseUrl": "./",
         "moduleResolution": "node",
-        "outDir": "./dist",
+        "outDir": "./",
         "lib": [
             "dom",
             "es6",
@@ -23,6 +23,9 @@
     },
     "compileOnSave": false,
     "include": [
-        "src/**/*.ts"
+        "**/*.ts"
+    ],
+    "exclude": [
+        "node_modules/**/*"
     ]
 }

@@ -4,6 +4,7 @@ const gts = require('gulp-typescript');
 const merge = require('merge2');
 const spawn = require('child_process').spawnSync;
 const del = require('del');
+const glob = require('glob');
 
 const test = process.argv.indexOf('--test') > -1;
 const tsProject = gts.createProject('tsconfig.build.json', { typescript });
@@ -12,8 +13,8 @@ const tsProject = gts.createProject('tsconfig.build.json', { typescript });
 gulp.task('ts', () => {
     const tsResult = tsProject.src().pipe(tsProject());
     return merge([
-        tsResult.dts.pipe(gulp.dest('dist')),
-        tsResult.js.pipe(gulp.dest('dist')),
+        tsResult.dts.pipe(gulp.dest('.')),
+        tsResult.js.pipe(gulp.dest('.')),
     ]).on('finish', () => {
         if (test) gulp.start('test');
     });
@@ -24,22 +25,16 @@ gulp.task('test', () => {
     spawn('npm', ['test'], { stdio: 'inherit' });
 });
 
-// copy
-gulp.task('copy', () => {
-    gulp.src(['README.md', 'LICENSE', 'package.json', 'src/globals.d.ts']).pipe(gulp.dest('dist'));
-});
-
 // gulp watch
 gulp.task('watch', ['clean', 'ts', 'copy'], () => {
     gulp.watch(['src/**/*.ts'], ['ts']);
-    gulp.watch(['README.md', 'LICENSE', 'package.json', 'src/globals.d.ts'], ['copy']);
 });
 
 // clean
 gulp.task('clean', function() {
-    del.sync(['dist/**/*', '!dist/node_modules', '!dist/node_modules/**/*']);
+    del.sync(glob.sync('**/*.@(js|d.ts)', { ignore: ['gulpfile.js', 'node_modules/**/*'] }));
 });
 
 // default task
 gulp.task('default', ['clean', 'ts', 'copy']);
-gulp.task('build', ['clean', 'ts', 'copy']);
+gulp.task('build', ['ts']);

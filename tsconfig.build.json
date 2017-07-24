@@ -4,11 +4,16 @@
         "module": "es2015",
         "sourceMap": false,
         "declaration": true,
-        "rootDir": "src",
-        "baseUrl": "./src",
+        "rootDir": ".",
+        "baseUrl": "./",
         "moduleResolution": "node",
-        "outDir": "./dist",
-        "lib": ["dom", "es6", "dom.iterable", "scripthost"],
+        "outDir": "./",
+        "lib": [
+            "dom",
+            "es6",
+            "dom.iterable",
+            "scripthost"
+        ],
         "importHelpers": true,
         "types": [
             "typed-bitwig-api",
@@ -18,9 +23,10 @@
     },
     "compileOnSave": false,
     "include": [
-        "src/**/*.ts"
+        "**/*.ts"
     ],
     "exclude": [
-        "src/**/*.spec.ts"
+        "node_modules/**/*",
+        "**/*.spec.ts"
     ]
 }
