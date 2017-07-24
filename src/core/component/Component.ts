@@ -24,14 +24,14 @@ export default abstract class Component<
 
     private _initialState: State;
 
-    constructor(controls: Control[], mode: string, props?: Props);
-    constructor(control: Control, mode: string, props?: Props);
-    constructor(controls: Control[], props?: Props);
-    constructor(control: Control, props?: Props);
+    constructor(controls: Control[], props: Props, mode?: string);
+    constructor(control: Control, props: Props, mode?: string);
+    constructor(controls: Control[], mode?: string);
+    constructor(control: Control, mode?: string);
     constructor(controls: Control[] | Control, ...rest: any[]) {
         this.controls = Array.isArray(controls) ? controls : [controls];
-        this.mode = typeof rest[0] === 'string' ? rest[0] : '__BASE__';
-        this.props = typeof rest[rest.length - 1] === 'object' ? rest[rest.length - 1] : {};
+        this.props = typeof rest[0] === 'object' ? rest[0] : {};
+        this.mode = typeof rest[rest.length - 1] === 'string' ? rest[rest.length - 1] : '__BASE__';
     }
 
     // called when component is registered to a view for the first time
