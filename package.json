@@ -1,7 +1,7 @@
 {
   "name": "taktil",
   "description": "Taktil is a lightweight control surface scripting framework for Bitwig Studio that encourages rapid development and community code reuse.",
-  "version": "0.6.0-0",
+  "version": "0.5.1",
   "repository": "taktiljs/taktil",
   "author": "Joseph Larson",
   "tags": [
@@ -36,9 +36,16 @@
     "typescript": "^2.4.1"
   },
   "scripts": {
-    "test": "mocha -r ts-node/register -r ./src/env ./src/**/*.spec.ts",
-    "lint": "tslint -c tslint.json 'src/**/*.ts' || true",
-    "format": "prettier --parser typescript --print-width 100 --tab-width 4 --single-quote --trailing-comma=es5 --write './src/**/*.ts'"
+    "start": "gulp watch",
+    "build": "gulp build",
+    "clean": "gulp clean",
+    "test": "mocha -r ts-node/register -r ./env $(find . ! -path './.git*' ! -path './node_modules*' -path '*.spec.ts')",
+    "lint": "tslint -c tslint.json $(find . ! -path './.git*' ! -path './node_modules*' -path '*.ts') || true",
+    "format": "prettier --parser typescript --print-width 100 --tab-width 4 --single-quote --trailing-comma=es5 --write $(find . ! -path './.git*' ! -path './node_modules*' -path '*.ts')",
+    "preversion": "npm test && gulp build",
+    "postversion": "gulp clean",
+    "prepack": "npm test && gulp build",
+    "postpack": "gulp clean"
   },
   "engines": {
     "node": ">= 6.9.0"
