@@ -2,3 +2,8 @@ node_modules
 .DS_Store
 /notes
 .vscode
+
+# ignore build files, but not gulpfile
+**/*.js
+**/*.d.ts
+!gulpfile.js
