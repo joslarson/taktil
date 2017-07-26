@@ -1,4 +1,5 @@
 export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
+export type MidiLevel = 'Input' | 'Output' | 'Both' | 'None';
 
 /**
  * Simple logger implementation including integration with the Bitwig
@@ -8,7 +9,7 @@ export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
 export default class Logger {
     private _levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
     private _level: Level = 'DEBUG';
-    private _midiLevel: 'Input' | 'Output' | 'Both' | 'None';
+    private _midiLevel: MidiLevel;
     private _levelSetting: API.SettableEnumValue;
     private _filter = '';
     private _filterSetting: API.SettableEnumValue;
@@ -24,7 +25,9 @@ export default class Logger {
                     ['None', 'Input', 'Output', 'Both'],
                     'None'
                 )
-                .addValueObserver(midiLevel => (this._midiLevel = midiLevel));
+                .addValueObserver((midiLevel: MidiLevel) => {
+                    this._midiLevel = midiLevel;
+                });
 
             this._levelSetting = host
                 .getPreferences()
@@ -40,7 +43,7 @@ export default class Logger {
                 if (value) {
                     const message = ` Log filter regex set to \\${value}\\gi `;
                     this.log(`╭───┬${'─'.repeat(message.length)}╮`);
-                    this.log(`│ i │${message}` + '│');
+                    this.log(`│ i │${message}` +               '│'); // prettier-ignore
                     this.log(`╰───┴${'─'.repeat(message.length)}╯`);
                 }
             });
