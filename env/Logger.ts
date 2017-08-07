@@ -33,7 +33,7 @@ export default class Logger {
                 .getPreferences()
                 .getEnumSetting('Log Level', 'Development', this._levels, this._level);
 
-            this._levelSetting.addValueObserver(level => (this._level = level));
+            this._levelSetting.addValueObserver((level: Level) => (this._level = level));
 
             this._filterSetting = host
                 .getPreferences()
