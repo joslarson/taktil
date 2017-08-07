@@ -19,8 +19,6 @@ declare global {
 
     // specific env setup for bitwig environment
     if (global.loadAPI) {
-        loadAPI(2); // load bitwig api v2
-
         // shim Timeout and Interval methods using DelayedTask class
         global.setTimeout = function setTimeout(
             callback: (...args: any[]) => any,
