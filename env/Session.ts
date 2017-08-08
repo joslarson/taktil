@@ -155,7 +155,7 @@ class Session extends EventEmitter {
         }
     }
 
-    rerender() {
+    resetControls() {
         for (const controlName in this.controls) {
             const control = this.controls[controlName];
             control.render(true);
