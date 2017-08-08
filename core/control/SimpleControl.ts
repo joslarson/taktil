@@ -45,9 +45,9 @@ export default class SimpleControl<
             message.status === this.status &&
             message.data1 === this.data1
         ) {
-            return { ...this.state as object, value: message.data2 / 127 } as State; // TODO: should be able to remove type casting in typescript 2.4
+            return { ...this.state as object, value: message.data2 / 127 } as State; // TODO: should be able to remove type casting in future typescript release
         } else {
-            return { ...this.state as object } as State; // TODO: should be able to remove type casting in typescript 2.4
+            return { ...this.state as object } as State; // TODO: should be able to remove type casting in future typescript release
         }
     }
 }

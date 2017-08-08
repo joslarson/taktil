@@ -64,7 +64,6 @@ class View {
                 if (component instanceof Component === false) continue;
                 // set component name and view
                 component.name = isSingleComponent ? key : `${key}[${i}]`;
-                component.view = this;
                 // register components and controls in view
                 const { controls, mode } = component;
                 for (const control of controls as Control[]) {

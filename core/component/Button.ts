@@ -75,7 +75,7 @@ export default abstract class Button<
         if (this.isDoublePress(value)) {
             if (this.onDoublePress) this.onDoublePress();
         } else {
-            // setup interval task to remove self after DOUBLE_PRESS_DURATION
+            // setup interval task to remove self after this.DOUBLE_PRESS_DELAY
             this.memory['doublePress'] = setTimeout(() => {
                 delete this.memory['doublePress'];
             }, this.DOUBLE_PRESS_DELAY);

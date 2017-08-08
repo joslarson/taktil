@@ -40,6 +40,7 @@
     "build": "gulp build",
     "clean": "gulp clean",
     "test": "mocha -r ts-node/register -r ./env $(find . ! -path './.git*' ! -path './node_modules*' -path '*.spec.ts')",
+    "check": "tsc --noEmit",
     "lint": "tslint -c tslint.json $(find . ! -path './.git*' ! -path './node_modules*' -path '*.ts') || true",
     "format": "prettier --parser typescript --print-width 100 --tab-width 4 --single-quote --trailing-comma=es5 --write $(find . ! -path './.git*' ! -path './node_modules*' -path '*.ts')",
     "preversion": "npm test && gulp build",

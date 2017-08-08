@@ -9,6 +9,6 @@ export default class SysexControl<
     state = { value: 0 } as State;
 
     getInput(message: SysexMessage): State {
-        return { ...this.state as object, value: 1 } as State; // TODO: should be able to remove type casting in typescript 2.4
+        return { ...this.state as object, value: 1 } as State; // TODO: should be able to remove type casting in future typescript release
     }
 }

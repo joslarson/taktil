@@ -26,7 +26,7 @@ gulp.task('test', () => {
 });
 
 // gulp watch
-gulp.task('watch', ['clean', 'ts', 'copy'], () => {
+gulp.task('watch', ['clean', 'ts'], () => {
     gulp.watch(['src/**/*.ts'], ['ts']);
 });
 
@@ -36,5 +36,5 @@ gulp.task('clean', function() {
 });
 
 // default task
-gulp.task('default', ['clean', 'ts', 'copy']);
-gulp.task('build', ['ts']);
+gulp.task('default', ['clean', 'ts']);
+gulp.task('build', ['clean', 'ts']);

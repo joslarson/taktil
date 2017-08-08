@@ -34,8 +34,4 @@ describe('Component', () => {
         component.setState({ value: 1 }); // receives partial state
         expect(component.state).to.deep.equal({ value: 1, foo: { bar: 0 } });
     });
-
-    it('should maintain its initial state', () => {
-        expect(component.initialState).to.deep.equal({ value: 0, foo: { bar: 0 } });
-    });
 });

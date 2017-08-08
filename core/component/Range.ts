@@ -11,10 +11,10 @@ export default abstract class Range<
     Props extends RangeBaseProps = RangeBaseProps,
     State extends RangeBaseState = RangeBaseState
 > extends Component<Props, State> {
+    INPUT_DELAY = 350;
+
     state: State = { value: 0 } as State;
     memory: { [key: string]: any } = {};
-
-    INPUT_DELAY = 350;
 
     render() {
         if (this.memory.update) clearInterval(this.memory.update);

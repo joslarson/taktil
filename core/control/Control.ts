@@ -13,16 +13,16 @@ export interface ControlBaseState {
  * other controls must extend.
  */
 export default abstract class Control<State extends ControlBaseState = ControlBaseState> {
+    type: 'ABSOLUTE' | 'RELATIVE' = 'ABSOLUTE';
     name: string;
-    mode: 'ABSOLUTE' | 'RELATIVE' = 'ABSOLUTE';
+    cache: string[] = [];
 
     inPort: number = 0;
     outPort: number = 0;
     patterns: MessagePattern[];
 
-    cache: string[] = [];
-    cacheOnMidiIn: boolean = true;
     enableMidiOut: boolean = true;
+    cacheOnMidiIn: boolean = true;
 
     abstract state: State;
 
@@ -67,20 +67,20 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
         if (partialState.value) {
             // validate input
             const invalidAbsoluteValue =
-                this.mode === 'ABSOLUTE' && (partialState.value > 1 || partialState.value < 0);
+                this.type === 'ABSOLUTE' && (partialState.value > 1 || partialState.value < 0);
             const invalidRelativeValue =
-                this.mode === 'RELATIVE' && (partialState.value > 1 || partialState.value < -1);
+                this.type === 'RELATIVE' && (partialState.value > 1 || partialState.value < -1);
             if (invalidAbsoluteValue || invalidRelativeValue)
                 throw new Error(
                     `Invalid value "${partialState.value}" for Control "${this
-                        .name}" with value range ${this.mode === 'ABSOLUTE' ? 0 : -1} to 1.`
+                        .name}" with value range ${this.type === 'ABSOLUTE' ? 0 : -1} to 1.`
                 );
         }
         // update state
         this.state = {
             ...this.state as object,
             ...partialState as object,
-        } as State; // TODO: should be able to remove type casting in typescript 2.4
+        } as State; // TODO: should be able to remove type casting in future typescript release
         // re-render with new state
         if (render) this.render();
     }
@@ -156,13 +156,7 @@ export default abstract class Control<State extends ControlBaseState = ControlBa
                 // send message to cache, send to midi out if new
                 if (this.cacheMidiMessage(message) || force) {
                     const { port, status, data1, data2 } = message;
-                    session.midiOut.sendMidi({
-                        port,
-                        status,
-                        data1,
-                        data2,
-                        name: this.name,
-                    });
+                    session.midiOut.sendMidi({ port, status, data1, data2, name: this.name });
                 }
             } else if (message instanceof SysexMessage) {
                 const { port, data } = message;
