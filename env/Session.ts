@@ -151,9 +151,7 @@ class Session extends EventEmitter {
         // connect each control to the corresponding component in view (if any)
         for (const controlName in this.controls) {
             const control = this.controls[controlName];
-            for (const mode of this.getActiveModes()) {
-                this.activeView.connectControl(control, mode);
-            }
+            this.activeView.connectControl(control);
         }
     }
 
