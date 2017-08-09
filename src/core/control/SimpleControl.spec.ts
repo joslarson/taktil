@@ -1,3 +1,4 @@
+import '../../env';
 import { expect } from 'chai';
 
 import SimpleControl from './SimpleControl';

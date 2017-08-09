@@ -1,3 +1,4 @@
+import '../../env';
 import { expect } from 'chai';
 
 import View from './View';

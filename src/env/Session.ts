@@ -192,7 +192,7 @@ class Session extends EventEmitter {
     }
 
     getView(viewName: string) {
-        return session.views.filter(view => view.name === viewName)[0];
+        return this.views.filter(view => view.name === viewName)[0];
     }
 
     activateView(view: typeof View | string) {
