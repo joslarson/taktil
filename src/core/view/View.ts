@@ -40,11 +40,11 @@ class View {
     static connectControl(control: Control) {
         // check view modes in order for component/control registration
         for (const activeMode of session.getActiveModes()) {
-            if (!this._componentMap[activeMode]) continue; // mode not used in view
             const component = this.getComponent(control, activeMode);
-
             // only set the component when it has changed
             if (control.activeComponent !== component) control.activeComponent = component;
+            // if component is not null, we're done looking
+            if (component) return;
         }
     }
 

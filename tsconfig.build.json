@@ -4,8 +4,8 @@
         "module": "es2015",
         "sourceMap": false,
         "declaration": true,
-        "rootDir": ".",
-        "baseUrl": "./",
+        "rootDir": "./src",
+        "baseUrl": "./src",
         "moduleResolution": "node",
         "outDir": "./",
         "lib": [
@@ -23,10 +23,10 @@
     },
     "compileOnSave": false,
     "include": [
-        "**/*.ts"
+        "src/**/*.ts"
     ],
     "exclude": [
         "node_modules/**/*",
-        "**/*.spec.ts"
+        "src/**/*.spec.ts"
     ]
 }

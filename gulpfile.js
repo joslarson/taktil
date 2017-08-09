@@ -4,6 +4,7 @@ const gts = require('gulp-typescript');
 const merge = require('merge2');
 const spawn = require('child_process').spawnSync;
 const del = require('del');
+const deleteEmpty = require('delete-empty');
 const glob = require('glob');
 
 const test = process.argv.indexOf('--test') > -1;
@@ -33,6 +34,9 @@ gulp.task('watch', ['clean', 'ts'], () => {
 // clean
 gulp.task('clean', function() {
     del.sync(glob.sync('**/*.@(js|d.ts)', { ignore: ['gulpfile.js', 'node_modules/**/*'] }));
+    ['contrib', 'core', 'env'].forEach(dir => {
+        deleteEmpty.sync(dir);
+    });
 });
 
 // default task

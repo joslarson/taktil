@@ -3,7 +3,7 @@
         "target": "es5",
         "sourceMap": false,
         "declaration": true,
-        "baseUrl": "./",
+        "baseUrl": "./src",
         "moduleResolution": "node",
         "outDir": "./",
         "lib": [
@@ -23,7 +23,7 @@
     },
     "compileOnSave": false,
     "include": [
-        "**/*.ts"
+        "src/**/*.ts"
     ],
     "exclude": [
         "node_modules/**/*"

@@ -6,6 +6,7 @@ node_modules
 /.travis.yml
 /tsconfig.*
 /tslint.json
+/src
 
 # ignore the .ts files
 *.ts
