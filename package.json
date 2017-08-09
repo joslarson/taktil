@@ -14,26 +14,26 @@
     "tslib": "^1.7.1"
   },
   "devDependencies": {
-    "@types/chai": "^3.5.2",
+    "@types/chai": "^4.0.2",
     "@types/mocha": "^2.2.41",
-    "@types/node": "^7.0.16",
-    "@types/sinon": "^2.2.1",
-    "chai": "^3.5.0",
-    "del": "^2.2.2",
+    "@types/node": "^8.0.20",
+    "@types/sinon": "^2.3.3",
+    "chai": "^4.1.1",
+    "del": "^3.0.0",
     "glob": "^7.1.2",
     "gulp": "^3.9.1",
-    "gulp-typescript": "^3.1.6",
-    "merge2": "^1.0.3",
-    "mocha": "^3.3.0",
-    "prettier": "^1.4.2",
-    "sinon": "^2.2.0",
-    "ts-node": "^3.1.0",
-    "tslint": "^5.5.0",
+    "gulp-typescript": "^3.2.1",
+    "merge2": "^1.1.0",
+    "mocha": "^3.5.0",
+    "prettier": "^1.5.3",
+    "sinon": "^3.1.0",
+    "ts-node": "^3.3.0",
+    "tslint": "^5.6.0",
     "tslint-config-airbnb": "^5.2.1",
-    "tslint-config-prettier": "^1.1.0",
-    "tsutils": "^1.6.0",
+    "tslint-config-prettier": "^1.3.0",
+    "tsutils": "^2.8.0",
     "typed-bitwig-api": "^2.1.2",
-    "typescript": "^2.4.1"
+    "typescript": "^2.4.2"
   },
   "scripts": {
     "start": "gulp watch",
@@ -43,10 +43,9 @@
     "check": "tsc --noEmit",
     "lint": "tslint -c tslint.json $(find . ! -path './.git*' ! -path './node_modules*' -path '*.ts') || true",
     "format": "prettier --parser typescript --print-width 100 --tab-width 4 --single-quote --trailing-comma=es5 --write $(find . ! -path './.git*' ! -path './node_modules*' -path '*.ts')",
-    "preversion": "npm test && gulp build",
-    "postversion": "gulp clean",
-    "prepack": "npm test && gulp build",
-    "postpack": "gulp clean"
+    "preversion": "npm test",
+    "version": "npm run build",
+    "postversion": "gulp clean"
   },
   "engines": {
     "node": ">= 6.9.0"
