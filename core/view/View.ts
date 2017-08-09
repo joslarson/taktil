@@ -27,7 +27,7 @@ class View {
         return this._componentMap[mode].components[componentMapIndex];
     }
 
-    static connectControl(control: Control) {
+    static connectControl(control: Control, isRoot = true) {
         // check view modes in order for component/control registration
         for (const activeMode of session.getActiveModes()) {
             if (!this._componentMap[activeMode]) continue; // mode not used in view
@@ -35,17 +35,16 @@ class View {
             if (component) {
                 // only set the component when it has changed
                 if (control.activeComponent !== component) control.activeComponent = component;
-                return;
+                return true;
             }
+            // component not found in view? send to parent
+            const parent = this.getParent();
+            if (parent && parent.connectControl(control, false)) return true;
         }
-        // component not found in view? send to parent
-        const parent = this.getParent();
-        if (parent) {
-            parent.connectControl(control);
-        } else {
-            // no parent? no component to connect to
-            control.activeComponent = null;
-        }
+
+        // no parent? no component to connect to
+        if (isRoot) control.activeComponent = null;
+        return false;
     }
 
     static init() {
