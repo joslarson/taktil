@@ -21,30 +21,31 @@ class View {
     }
 
     static getComponent(control: Control, mode: string): Component | null {
-        if (this._componentMap[mode] === undefined) return null;
-        const componentMapIndex = this._componentMap[mode].controls.indexOf(control);
-        if (componentMapIndex === -1) return null;
-        return this._componentMap[mode].components[componentMapIndex];
+        // check in current view
+        if (this._componentMap[mode] !== undefined) {
+            const componentMapIndex = this._componentMap[mode].controls.indexOf(control);
+            if (componentMapIndex !== -1) {
+                return this._componentMap[mode].components[componentMapIndex];
+            }
+        }
+
+        // component not found in view? check in parent
+        const parent = this.getParent();
+        if (parent) return parent.getComponent(control, mode);
+
+        // not in current view, no parent to check? return null
+        return null;
     }
 
-    static connectControl(control: Control, isRoot = true) {
+    static connectControl(control: Control) {
         // check view modes in order for component/control registration
         for (const activeMode of session.getActiveModes()) {
             if (!this._componentMap[activeMode]) continue; // mode not used in view
             const component = this.getComponent(control, activeMode);
-            if (component) {
-                // only set the component when it has changed
-                if (control.activeComponent !== component) control.activeComponent = component;
-                return true;
-            }
-            // component not found in view? send to parent
-            const parent = this.getParent();
-            if (parent && parent.connectControl(control, false)) return true;
-        }
 
-        // no parent? no component to connect to
-        if (isRoot) control.activeComponent = null;
-        return false;
+            // only set the component when it has changed
+            if (control.activeComponent !== component) control.activeComponent = component;
+        }
     }
 
     static init() {
