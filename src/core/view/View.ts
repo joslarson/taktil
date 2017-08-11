@@ -28,24 +28,23 @@ class View {
                 return this._componentMap[mode].components[componentMapIndex];
             }
         }
-
         // component not found in view? check in parent
         const parent = this.getParent();
         if (parent) return parent.getComponent(control, mode);
-
         // not in current view, no parent to check? return null
         return null;
     }
 
     static connectControl(control: Control) {
         // check view modes in order for component/control registration
+        let component = null;
         for (const activeMode of session.getActiveModes()) {
-            const component = this.getComponent(control, activeMode);
-            // only set the component when it has changed
-            if (control.activeComponent !== component) control.activeComponent = component;
+            component = this.getComponent(control, activeMode);
             // if component is not null, we're done looking
-            if (component) return;
+            if (component) break;
         }
+        // only set the component when it has changed
+        if (control.activeComponent !== component) control.activeComponent = component;
     }
 
     static init() {
