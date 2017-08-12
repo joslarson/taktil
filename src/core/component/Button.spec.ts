@@ -3,7 +3,6 @@ import { expect } from 'chai';
 import * as sinon from 'sinon';
 
 import Button from './Button';
-import { MidiMessage, SysexMessage } from '../midi/';
 import SimpleControl from '../control/SimpleControl';
 
 class TestButton extends Button {
