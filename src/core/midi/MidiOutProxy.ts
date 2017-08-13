@@ -1,13 +1,13 @@
-import MidiMessage, { SimpleMidiMessage } from './MidiMessage';
-import SysexMessage from './SysexMessage';
-import Session from '../../env/Session';
+import { MidiMessage, SimpleMidiMessage } from './MidiMessage';
+import { SysexMessage } from './SysexMessage';
+import { Session } from '../../env/Session';
 
 export interface NaiveMidiMessage extends SimpleMidiMessage {
     name?: string;
     port: number;
 }
 
-export default class MidiOutProxy {
+export class MidiOutProxy {
     private _midiQueue: NaiveMidiMessage[] = [];
     private _sysexQueue: SysexMessage[] = [];
 

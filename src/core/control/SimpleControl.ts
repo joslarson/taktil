@@ -1,11 +1,11 @@
-import Control, { ControlBaseState } from './Control';
+import { Control, ControlState } from './Control';
 import { MidiMessage, SysexMessage, MessagePattern } from '../midi';
 
-export type SimpleControlBaseState = ControlBaseState;
+export type SimpleControlState = ControlState;
 
-export default class SimpleControl<
-    State extends SimpleControlBaseState = SimpleControlBaseState
-> extends Control<State> {
+export class SimpleControl<State extends SimpleControlState = SimpleControlState> extends Control<
+    State
+> {
     state = { value: 0 } as State;
     status: number;
     data1: number;

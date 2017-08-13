@@ -1,18 +1,18 @@
-import View from '../view/View';
+import { View } from '../view/View';
 import { Control } from '../control';
-import { ControlBaseState } from '../control/Control';
-import ObjectLiteral from '../helpers/ObjectLiteral';
+import { ControlState } from '../control/Control';
+import { ObjectLiteral } from '../helpers/ObjectLiteral';
 
-export type ComponentBaseState = ObjectLiteral;
-export type ComponentBaseProps = ObjectLiteral;
+export type ComponentState = ObjectLiteral;
+export type ComponentProps = ObjectLiteral;
 
 /**
  * Abstract class defining the the base functionality from which all
  * other components must extend.
  */
-export default abstract class Component<
-    Props extends ComponentBaseProps = ComponentBaseProps,
-    State extends ComponentBaseState = ComponentBaseState
+export abstract class Component<
+    Props extends ComponentProps = ComponentProps,
+    State extends ComponentState = ComponentState
 > {
     name: string;
     mode: string;
@@ -23,12 +23,13 @@ export default abstract class Component<
 
     constructor(controls: Control[], props: Props, mode?: string);
     constructor(control: Control, props: Props, mode?: string);
-    constructor(controls: Control[], mode?: string);
-    constructor(control: Control, mode?: string);
-    constructor(controls: Control[] | Control, ...rest: any[]) {
+    constructor(controls: Control[] | Control, props: Props, mode?: string) {
         this.controls = Array.isArray(controls) ? controls : [controls];
-        this.props = typeof rest[0] === 'object' ? rest[0] : {};
-        this.mode = typeof rest[rest.length - 1] === 'string' ? rest[rest.length - 1] : '__BASE__';
+        this.props = {
+            ...this.props as object,
+            ...props as object,
+        } as Props;
+        this.mode = mode || '__BASE__';
     }
 
     // called when component is registered to a view for the first time
@@ -53,8 +54,8 @@ export default abstract class Component<
     }
 
     // defines conversion of component state to control state
-    abstract getOutput(control: Control): ControlBaseState;
+    abstract getOutput(control: Control): ControlState;
 
     // handles control input
-    abstract onInput(control: Control, input: ControlBaseState): void;
+    abstract onInput(control: Control, input: ControlState): void;
 }

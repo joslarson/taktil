@@ -1,9 +1,9 @@
-import Component, { ComponentBaseState, ComponentBaseProps } from './Component';
+import { Component, ComponentState, ComponentProps } from './Component';
 import { Control } from '../control';
-import { ControlBaseState } from '../control/Control';
+import { ControlState } from '../control/Control';
 
-export type ButtonBaseProps = ComponentBaseProps;
-export interface ButtonBaseState extends ComponentBaseState {
+export type ButtonProps = ComponentProps;
+export interface ButtonState extends ComponentState {
     on: boolean;
     color?: { r: number; g: number; b: number };
 }
@@ -12,9 +12,9 @@ export interface ButtonBaseState extends ComponentBaseState {
  * A button component providing method hooks for press, long press,
  * double press, release, and double release events.
  */
-export default abstract class Button<
-    Props extends ButtonBaseProps = ButtonBaseProps,
-    State extends ButtonBaseState = ButtonBaseState
+export abstract class Button<
+    Props extends ButtonProps = ButtonProps,
+    State extends ButtonState = ButtonState
 > extends Component<Props, State> {
     state: State = { on: false } as State;
     memory: { [key: string]: any } = {};
@@ -28,7 +28,7 @@ export default abstract class Button<
     onRelease?(): void;
     onDoubleRelease?(): void;
 
-    onInput(control: Control, input: ControlBaseState) {
+    onInput(control: Control, input: ControlState) {
         if (this.onPress) this.handlePress(input.value);
         if (this.onLongPress) this.handleLongPress(input.value);
         if (this.onDoublePress) this.handleDoublePress(input.value);
@@ -36,7 +36,7 @@ export default abstract class Button<
         if (this.onDoubleRelease) this.handleDoubleRelease(input.value);
     }
 
-    getOutput(control: Control): ControlBaseState {
+    getOutput(control: Control): ControlState {
         const { on, color } = this.state;
         return {
             value: on ? 1 : 0,

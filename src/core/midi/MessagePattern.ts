@@ -1,7 +1,7 @@
-import MidiMessage, { SimpleMidiMessage } from './MidiMessage';
-import SysexMessage from './SysexMessage';
+import { MidiMessage, SimpleMidiMessage } from './MidiMessage';
+import { SysexMessage } from './SysexMessage';
 
-export default class MessagePattern {
+export class MessagePattern {
     string: string;
     regex: RegExp;
 

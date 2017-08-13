@@ -1,7 +1,7 @@
 import '../../env';
 import { expect } from 'chai';
 
-import View from './View';
+import { View } from './View';
 
 class TestView extends View {}
 

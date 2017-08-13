@@ -1,7 +1,7 @@
 import '../../env';
 import { expect } from 'chai';
 
-import SimpleControl from './SimpleControl';
+import { SimpleControl } from './SimpleControl';
 import { MidiMessage } from '../midi/';
 
 const control = new SimpleControl({ status: 0xb0, data1: 21 });

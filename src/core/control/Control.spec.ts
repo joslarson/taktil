@@ -2,9 +2,9 @@ import '../../env';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import Control from './Control';
+import { Control } from './Control';
 import { MidiMessage, SysexMessage } from '../midi/';
-import Button from '../component/Button';
+import { Button } from '../component/Button';
 
 type TestControlState = { value: number; nested: { value: number } };
 

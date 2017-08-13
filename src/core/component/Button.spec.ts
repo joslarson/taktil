@@ -2,8 +2,8 @@ import '../../env';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import Button from './Button';
-import SimpleControl from '../control/SimpleControl';
+import { Button } from './Button';
+import { SimpleControl } from '../control/SimpleControl';
 
 class TestButton extends Button {
     onPress() {
@@ -29,7 +29,7 @@ class TestButton extends Button {
 
 describe('Button', () => {
     const control = new SimpleControl({ status: 0xb0, data1: 21 });
-    const button = new TestButton(control);
+    const button = new TestButton(control, {});
 
     const clock = sinon.useFakeTimers();
     const onPress = sinon.spy(button, 'onPress');

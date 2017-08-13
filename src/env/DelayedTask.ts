@@ -1,4 +1,4 @@
-export default class DelayedTask {
+export class DelayedTask {
     callback: Function;
     delay: number;
     repeat: boolean;

@@ -6,7 +6,7 @@ export type MidiLevel = 'Input' | 'Output' | 'Both' | 'None';
  * API's preferences system for setting log level, log filtering via
  * regular expressions, and Midi I/O filtering.
  */
-export default class Logger {
+export class Logger {
     private _levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
     private _level: Level = 'DEBUG';
     private _midiLevel: MidiLevel;

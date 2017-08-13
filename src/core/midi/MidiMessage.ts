@@ -4,7 +4,7 @@ export interface SimpleMidiMessage {
     data2: number;
 }
 
-export default class MidiMessage implements SimpleMidiMessage {
+export class MidiMessage implements SimpleMidiMessage {
     port: number;
     status: number;
     data1: number;

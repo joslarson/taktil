@@ -1,4 +1,4 @@
-export default class SysexMessage {
+export class SysexMessage {
     port: number;
     data: string;
 

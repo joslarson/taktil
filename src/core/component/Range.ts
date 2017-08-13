@@ -1,15 +1,15 @@
 import { Control } from '../control';
-import { ControlBaseState } from '../control/Control';
-import Component, { ComponentBaseState, ComponentBaseProps } from './Component';
+import { ControlState } from '../control/Control';
+import { Component, ComponentState, ComponentProps } from './Component';
 
-export type RangeBaseProps = ComponentBaseProps;
-export interface RangeBaseState extends ComponentBaseState {
+export type RangeProps = ComponentProps;
+export interface RangeState extends ComponentState {
     value: number;
 }
 
-export default abstract class Range<
-    Props extends RangeBaseProps = RangeBaseProps,
-    State extends RangeBaseState = RangeBaseState
+export abstract class Range<
+    Props extends RangeProps = RangeProps,
+    State extends RangeState = RangeState
 > extends Component<Props, State> {
     INPUT_DELAY = 350;
 
@@ -23,11 +23,11 @@ export default abstract class Range<
         }, this.memory.input ? this.INPUT_DELAY : 0);
     }
 
-    getOutput(control: Control): ControlBaseState {
+    getOutput(control: Control): ControlState {
         return { value: this.state.value };
     }
 
-    onInput(control: Control, { value }: ControlBaseState) {
+    onInput(control: Control, { value }: ControlState) {
         if (this.memory.input) clearTimeout(this.memory.input);
         this.memory.input = setTimeout(() => {
             delete this.memory.input;

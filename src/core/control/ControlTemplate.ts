@@ -1,8 +1,8 @@
-import Control from './Control';
+import { Control } from './Control';
 
 export type ControlMap = { [name: string]: Control };
 
-const ControlTemplate: {
+export const ControlTemplate: {
     new <C extends ControlMap>(controls: C): C;
     <C extends ControlMap>(controls: C): C;
 } = function ControlTemplate(this: ControlMap, controls: ControlMap) {
@@ -19,5 +19,3 @@ const ControlTemplate: {
         return controls;
     }
 } as any;
-
-export default ControlTemplate;

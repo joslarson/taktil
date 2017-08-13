@@ -1,4 +1,4 @@
-export default class EventEmitter {
+export class EventEmitter {
     listeners: { [key: string]: ((...args: any[]) => void)[] } = {};
 
     on<Callback extends ((...args: any[]) => void)>(label: string, callback: Callback) {

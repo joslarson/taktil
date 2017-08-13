@@ -1,6 +1,6 @@
-import Logger from './Logger';
-import Session from './Session';
-import DelayedTask from './DelayedTask';
+import { Logger } from './Logger';
+import { Session } from './Session';
+import { DelayedTask } from './DelayedTask';
 
 // define global variables
 declare global {

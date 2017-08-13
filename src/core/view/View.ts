@@ -1,11 +1,11 @@
 import { Component } from '../component';
 import { Control } from '../control';
 
-interface View {
+export interface View {
     [key: string]: Component | Component[] | (() => Component | Component[]);
 }
 
-class View {
+export class View {
     private static _componentMap: {
         [mode: string]: {
             controls: Control[];
@@ -92,5 +92,3 @@ class View {
     // view should be instantiated through `get instance` method, not `new`
     protected constructor() {}
 }
-
-export default View;

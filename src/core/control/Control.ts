@@ -2,7 +2,7 @@ import { MidiMessage, SysexMessage, MessagePattern } from '../midi/';
 import { Component } from '../component';
 import { Color } from '../helpers';
 
-export interface ControlBaseState {
+export interface ControlState {
     value: number;
     color?: Color;
     [key: string]: any;
@@ -12,7 +12,7 @@ export interface ControlBaseState {
  * Abstract class defining the the base functionality from which all
  * other controls must extend.
  */
-export default abstract class Control<State extends ControlBaseState = ControlBaseState> {
+export abstract class Control<State extends ControlState = ControlState> {
     type: 'ABSOLUTE' | 'RELATIVE' = 'ABSOLUTE';
     name: string;
     cache: string[] = [];

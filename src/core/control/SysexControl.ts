@@ -1,11 +1,11 @@
-import Control, { ControlBaseState } from './Control';
+import { Control, ControlState } from './Control';
 import { SysexMessage } from '../midi';
 
-export type SysexControlBaseState = ControlBaseState;
+export type SysexControlState = ControlState;
 
-export default class SysexControl<
-    State extends SysexControlBaseState = SysexControlBaseState
-> extends Control<State> {
+export class SysexControl<State extends SysexControlState = SysexControlState> extends Control<
+    State
+> {
     state = { value: 0 } as State;
 
     getInput(message: SysexMessage): State {

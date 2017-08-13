@@ -2,12 +2,12 @@ import '../../env';
 import { expect } from 'chai';
 import * as sinon from 'sinon';
 
-import { default as Control, ControlBaseState } from '../control/Control';
-import SimpleControl from '../control/SimpleControl';
-import { default as Component, ComponentBaseState, ComponentBaseProps } from './Component';
+import { Control, ControlState } from '../control/Control';
+import { SimpleControl } from '../control/SimpleControl';
+import { Component, ComponentState, ComponentProps } from './Component';
 
-type Props = ComponentBaseProps;
-interface State extends ComponentBaseState {
+type Props = ComponentProps;
+interface State extends ComponentState {
     value: number;
     foo: { bar: number };
 }
@@ -15,11 +15,11 @@ interface State extends ComponentBaseState {
 class TestComponent extends Component<Props, State> {
     state: State = { value: 0, foo: { bar: 0 } };
 
-    getOutput(control: Control): ControlBaseState {
+    getOutput(control: Control): ControlState {
         return { value: this.state.value };
     }
 
-    onInput(control: Control, input: ControlBaseState) {
+    onInput(control: Control, input: ControlState) {
         this.setState({ value: input.value });
     }
 }

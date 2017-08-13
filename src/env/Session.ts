@@ -1,4 +1,4 @@
-import EventEmitter from './EventEmitter';
+import { EventEmitter } from './EventEmitter';
 import { MidiOutProxy, MidiMessage, SysexMessage } from '../core/midi';
 import { Control } from '../core/control';
 import { View } from '../core/view';
@@ -12,7 +12,7 @@ declare const global: any;
  * Assists in managing shared state and session level event
  * subscriptions between Taktil and the control surface script.
  */
-class Session extends EventEmitter {
+export class Session extends EventEmitter {
     private _isInit: boolean = false;
     private _controls: { [name: string]: Control } = {};
     private _views: typeof View[] = [];
@@ -240,7 +240,7 @@ class Session extends EventEmitter {
     }
 }
 
-interface Session extends EventEmitter {
+export interface Session extends EventEmitter {
     on(label: 'activateMode' | 'deactivateMode', callback: (mode: string) => void): void;
     on(label: 'activateView', callback: (view: typeof View) => void): void;
     on(label: 'init' | 'flush' | 'exit', callback: () => void): void;
@@ -256,5 +256,3 @@ interface Session extends EventEmitter {
     removeListener(label: 'activateView', callback: (view: typeof View) => void): boolean;
     removeListener(label: 'init' | 'flush' | 'exit', callback: () => void): boolean;
 }
-
-export default Session;
