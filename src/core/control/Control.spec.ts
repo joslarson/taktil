@@ -9,18 +9,18 @@ import { Button } from '../component/Button';
 type TestControlState = { value: number; nested: { value: number } };
 
 class TestControl extends Control<TestControlState> {
-    state = { value: this.maxValue, nested: { value: 0 } };
+    state = { value: 127, nested: { value: 0 } };
 
     getInput(message: MidiMessage | SysexMessage) {
         return { ...this.state };
     }
 
-    getMidiOutput(state: TestControlState) {
+    getMidiOutput({ value }: TestControlState) {
         return [
             new MidiMessage({
                 status: 0xb0,
                 data1: 0x1f,
-                data2: this.state.value || this.maxValue,
+                data2: value,
             }),
         ];
     }
@@ -35,17 +35,17 @@ describe('Control', () => {
     const component = new TestComponent(control, {});
 
     it('should initialize state correctly', () => {
-        expect(control.state).to.deep.equal({ value: control.maxValue, nested: { value: 0 } });
+        expect(control.state).to.deep.equal({ value: 127, nested: { value: 0 } });
     });
 
     it('should modify state correctly', () => {
-        control.setState({ nested: { value: control.maxValue } }); // receives partial state
-        expect(control.state).to.deep.equal({ value: control.maxValue, nested: { value: 1 } });
+        control.setState({ nested: { value: 1 } }); // receives partial state
+        expect(control.state).to.deep.equal({ value: 127, nested: { value: 1 } });
     });
 
     it('should maintain its initial state', () => {
         expect(control.defaultState).to.deep.equal({
-            value: control.maxValue,
+            value: 127,
             nested: { value: 0 },
         });
     });
@@ -68,8 +68,8 @@ describe('Control', () => {
         control.setState({ value: 0 });
         const mock = sinon.mock(session.midiOut);
         mock.expects('sendMidi').once();
-        control.setState({ value: control.maxValue });
-        control.setState({ value: control.maxValue });
+        control.setState({ value: 127 });
+        control.setState({ value: 127 });
         mock.verify();
     });
 
