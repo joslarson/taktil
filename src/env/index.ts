@@ -55,6 +55,7 @@ declare global {
         const con = global.console;
         let prop;
         let method;
+
         const dummy = function() {};
         const properties = ['memory'];
         const methods = [

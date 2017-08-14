@@ -6,6 +6,8 @@ export type SimpleControlState = ControlState;
 export class SimpleControl<State extends SimpleControlState = SimpleControlState> extends Control<
     State
 > {
+    minValue = 0;
+    maxValue = 127;
     state = { value: 0 } as State;
     status: number;
     data1: number;
@@ -35,8 +37,7 @@ export class SimpleControl<State extends SimpleControlState = SimpleControlState
 
     getMidiOutput(state: State): (MidiMessage | SysexMessage)[] {
         const { outPort: port, status, data1 } = this;
-        const data2 = Math.round(state.value * 127);
-        return [new MidiMessage({ port, status, data1, data2 })];
+        return [new MidiMessage({ port, status, data1, data2: state.value })];
     }
 
     getInput(message: MidiMessage | SysexMessage): State {
@@ -45,7 +46,7 @@ export class SimpleControl<State extends SimpleControlState = SimpleControlState
             message.status === this.status &&
             message.data1 === this.data1
         ) {
-            return { ...this.state as object, value: message.data2 / 127 } as State; // TODO: should be able to remove type casting in future typescript release
+            return { ...this.state as object, value: message.data2 } as State; // TODO: should be able to remove type casting in future typescript release
         } else {
             return { ...this.state as object } as State; // TODO: should be able to remove type casting in future typescript release
         }

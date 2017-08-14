@@ -54,7 +54,7 @@ export class Session extends EventEmitter {
             // reset all controls to default state
             for (const controlName in this.controls) {
                 const control = this.controls[controlName];
-                control.setState(control.initialState);
+                control.setState(control.defaultState);
             }
             // call registered exit callbacks
             this.emit('exit');

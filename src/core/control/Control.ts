@@ -8,40 +8,37 @@ export interface ControlState {
     [key: string]: any;
 }
 
+export interface ControlOptions {
+    port?: number;
+    inPort?: number;
+    outPort?: number;
+    patterns: (string | MessagePattern)[]; // patterns for all inPort and outPort MidiMessages
+}
+
 /**
  * Abstract class defining the the base functionality from which all
  * other controls must extend.
  */
 export abstract class Control<State extends ControlState = ControlState> {
-    type: 'ABSOLUTE' | 'RELATIVE' = 'ABSOLUTE';
     name: string;
-    cache: string[] = [];
 
     inPort: number = 0;
     outPort: number = 0;
     patterns: MessagePattern[];
 
+    cache: string[] = [];
     enableMidiOut: boolean = true;
     cacheOnMidiIn: boolean = true;
 
+    abstract minValue: number;
+    abstract maxValue: number;
+
     abstract state: State;
 
-    private _initialState: State;
+    private _defaultState: State;
     private _activeComponent: Component | null = null;
 
-    constructor(
-        {
-            port,
-            inPort,
-            outPort,
-            patterns,
-        }: {
-            port?: number;
-            inPort?: number;
-            outPort?: number;
-            patterns: (string | MessagePattern)[];
-        } // patterns for all inPort and outPort MidiMessages
-    ) {
+    constructor({ port, inPort, outPort, patterns }: ControlOptions) {
         if (!patterns || patterns.length === 0)
             throw new Error(`Error, Control must specify at least one pattern.`);
 
@@ -55,26 +52,22 @@ export abstract class Control<State extends ControlState = ControlState> {
 
     // state
 
-    get initialState(): State {
+    get defaultState(): State {
         // if not set by setState, store initialized state value
-        if (!this._initialState) this._initialState = JSON.parse(JSON.stringify(this.state));
-        return this._initialState;
+        if (!this._defaultState) this._defaultState = JSON.parse(JSON.stringify(this.state));
+        return this._defaultState;
     }
 
     setState(partialState: Partial<State>, render = true): void {
-        this.initialState; // make sure initialState has been initialized
-
+        this.defaultState; // make sure defaultState has been initialized
         if (partialState.value) {
-            // validate input
-            const invalidAbsoluteValue =
-                this.type === 'ABSOLUTE' && (partialState.value > 1 || partialState.value < 0);
-            const invalidRelativeValue =
-                this.type === 'RELATIVE' && (partialState.value > 1 || partialState.value < -1);
-            if (invalidAbsoluteValue || invalidRelativeValue)
+            // validate value input
+            if (partialState.value > this.maxValue || partialState.value < this.minValue) {
                 throw new Error(
                     `Invalid value "${partialState.value}" for Control "${this
-                        .name}" with value range ${this.type === 'ABSOLUTE' ? 0 : -1} to 1.`
+                        .name}" with value range ${this.minValue} to ${this.maxValue}.`
                 );
+            }
         }
         // update state
         this.state = {
@@ -97,7 +90,7 @@ export abstract class Control<State extends ControlState = ControlState> {
         this._activeComponent = component;
 
         // on component change, reset state to default
-        this.setState(this.initialState, false);
+        this.setState(this.defaultState, false);
 
         // render new control state
         component ? component.render() : this.render();

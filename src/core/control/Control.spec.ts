@@ -9,6 +9,8 @@ import { Button } from '../component/Button';
 type TestControlState = { value: number; nested: { value: number } };
 
 class TestControl extends Control<TestControlState> {
+    minValue = 0;
+    maxValue = 127;
     state = { value: 1, nested: { value: 0 } };
 
     getInput(message: MidiMessage | SysexMessage) {
@@ -44,7 +46,7 @@ describe('Control', () => {
     });
 
     it('should maintain its initial state', () => {
-        expect(control.initialState).to.deep.equal({
+        expect(control.defaultState).to.deep.equal({
             value: 1,
             nested: { value: 0 },
         });
@@ -61,7 +63,7 @@ describe('Control', () => {
     });
 
     it('should throw on invalid setState of state.value', () => {
-        expect(() => control.setState({ value: 2 })).to.throw();
+        expect(() => control.setState({ value: 128 })).to.throw();
     });
 
     it('should cache controller hardware state', () => {
