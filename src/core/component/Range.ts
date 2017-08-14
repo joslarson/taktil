@@ -23,8 +23,8 @@ export abstract class Range<
         }, this.memory.input ? this.INPUT_DELAY : 0);
     }
 
-    getOutput(control: Control): ControlState {
-        return { value: this.state.value };
+    getOutput({ minValue, maxValue }: Control): ControlState {
+        return { value: Math.round(this.state.value * (maxValue - minValue) + minValue) };
     }
 
     onInput(control: Control, { value }: ControlState) {

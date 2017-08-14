@@ -29,11 +29,11 @@ export abstract class Button<
     onDoubleRelease?(): void;
 
     onInput(control: Control, input: ControlState) {
-        if (this.onPress) this.handlePress(input.value);
-        if (this.onLongPress) this.handleLongPress(input.value);
-        if (this.onDoublePress) this.handleDoublePress(input.value);
-        if (this.onRelease) this.handleRelease(input.value);
-        if (this.onDoubleRelease) this.handleDoubleRelease(input.value);
+        if (this.onPress) this.handlePress(control, input.value);
+        if (this.onLongPress) this.handleLongPress(control, input.value);
+        if (this.onDoublePress) this.handleDoublePress(control, input.value);
+        if (this.onRelease) this.handleRelease(control, input.value);
+        if (this.onDoubleRelease) this.handleDoubleRelease(control, input.value);
     }
 
     getOutput(control: Control): ControlState {
@@ -44,35 +44,35 @@ export abstract class Button<
         };
     }
 
-    isPress(value: number) {
-        return value > 0;
+    isPress(control: Control, value: number) {
+        return value > control.minValue;
     }
 
-    isRelease(value: number) {
-        return value === 0;
+    isRelease(control: Control, value: number) {
+        return value === control.minValue;
     }
 
-    isDoublePress(value: number) {
-        return this.memory['doublePress'] && this.isPress(value);
+    isDoublePress(control: Control, value: number) {
+        return this.memory['doublePress'] && this.isPress(control, value);
     }
 
-    isDoubleRelease(value: number) {
-        return this.memory['doubleRelease'] && this.isRelease(value);
+    isDoubleRelease(control: Control, value: number) {
+        return this.memory['doubleRelease'] && this.isRelease(control, value);
     }
 
-    handlePress(value: number) {
+    handlePress(control: Control, value: number) {
         // if it's not a press, not implemented or is a doublePress, ignore it
-        if (!this.isPress(value) || this.memory['doublePress']) return;
+        if (!this.isPress(control, value) || this.memory['doublePress']) return;
         // handle single press
         if (this.onPress) this.onPress();
     }
 
-    handleDoublePress(value: number) {
+    handleDoublePress(control: Control, value: number) {
         // if it's not a press or not implemented, ignore it
-        if (!this.isPress(value)) return;
+        if (!this.isPress(control, value)) return;
 
         // if is doublePress
-        if (this.isDoublePress(value)) {
+        if (this.isDoublePress(control, value)) {
             if (this.onDoublePress) this.onDoublePress();
         } else {
             // setup interval task to remove self after this.DOUBLE_PRESS_DELAY
@@ -82,12 +82,12 @@ export abstract class Button<
         }
     }
 
-    handleLongPress(value: number) {
+    handleLongPress(control: Control, value: number) {
         // if it's a doublePress or is not implemented, ignore it
-        if (this.isDoublePress(value)) return;
+        if (this.isDoublePress(control, value)) return;
 
         // if it's a press schedule the callback
-        if (this.isPress(value)) {
+        if (this.isPress(control, value)) {
             // schedule callback
             this.memory['longPress'] = setTimeout(() => {
                 if (this.onLongPress) this.onLongPress();
@@ -102,19 +102,19 @@ export abstract class Button<
         }
     }
 
-    handleRelease(value: number) {
+    handleRelease(control: Control, value: number) {
         // if it's not a release, not implemented or is a doubleRelease, ignore it
-        if (!this.isRelease(value) || this.memory['doubleRelease']) return;
+        if (!this.isRelease(control, value) || this.memory['doubleRelease']) return;
         // handle single release
         if (this.onRelease) this.onRelease();
     }
 
-    handleDoubleRelease(value: number) {
+    handleDoubleRelease(control: Control, value: number) {
         // if it's not a release or not implemented, ignore it
-        if (!this.isRelease(value)) return;
+        if (!this.isRelease(control, value)) return;
 
         // if is doubleRelease
-        if (this.isDoubleRelease(value) && this.onDoubleRelease) {
+        if (this.isDoubleRelease(control, value) && this.onDoubleRelease) {
             this.onDoubleRelease();
         } else {
             // setup timeout task to remove self after this.DOUBLE_PRESS_DELAY

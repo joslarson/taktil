@@ -6,8 +6,6 @@ export type SimpleControlState = ControlState;
 export class SimpleControl<State extends SimpleControlState = SimpleControlState> extends Control<
     State
 > {
-    minValue = 0;
-    maxValue = 127;
     state = { value: 0 } as State;
     status: number;
     data1: number;

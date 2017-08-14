@@ -30,8 +30,8 @@ export abstract class Control<State extends ControlState = ControlState> {
     enableMidiOut: boolean = true;
     cacheOnMidiIn: boolean = true;
 
-    abstract minValue: number;
-    abstract maxValue: number;
+    minValue = 0;
+    maxValue = 127;
 
     abstract state: State;
 

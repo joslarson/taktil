@@ -6,6 +6,8 @@ import { Control, ControlState } from '../control/Control';
 import { SimpleControl } from '../control/SimpleControl';
 import { Component, ComponentState, ComponentProps } from './Component';
 
+const control = new SimpleControl({ status: 0xb0, data1: 21 });
+
 type Props = ComponentProps;
 interface State extends ComponentState {
     value: number;
@@ -13,26 +15,26 @@ interface State extends ComponentState {
 }
 
 class TestComponent extends Component<Props, State> {
-    state: State = { value: 0, foo: { bar: 0 } };
+    state: State = { value: control.minValue, foo: { bar: 0 } };
 
     getOutput(control: Control): ControlState {
         return { value: this.state.value };
     }
 
-    onInput(control: Control, input: ControlState) {
-        this.setState({ value: input.value });
+    onInput(control: Control, { value }: ControlState) {
+        this.setState({ value });
     }
 }
 
-const component = new TestComponent(new SimpleControl({ status: 0xb0, data1: 21 }), {});
+const component = new TestComponent(control, {});
 
 describe('Component', () => {
     it('should initialize state correctly', () => {
-        expect(component.state).to.deep.equal({ value: 0, foo: { bar: 0 } });
+        expect(component.state).to.deep.equal({ value: control.minValue, foo: { bar: 0 } });
     });
 
     it('should modify state correctly', () => {
-        component.setState({ value: 1 }); // receives partial state
-        expect(component.state).to.deep.equal({ value: 1, foo: { bar: 0 } });
+        component.setState({ value: control.maxValue }); // receives partial state
+        expect(component.state).to.deep.equal({ value: control.maxValue, foo: { bar: 0 } });
     });
 });
