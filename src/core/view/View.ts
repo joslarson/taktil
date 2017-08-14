@@ -63,28 +63,25 @@ export class View {
                 if (component instanceof Component === false) continue;
                 // set component name and view
                 component.name = isSingleComponent ? key : `${key}[${i}]`;
+
                 // register components and controls in view
-                const { controls, mode } = component;
-                for (const control of controls as Control[]) {
-                    // register control with view/mode
-                    if (!this._componentMap[mode])
-                        this._componentMap[mode] = {
-                            controls: [],
-                            components: [],
-                        };
+                const { control, mode } = component;
+                // register control with view/mode
+                if (!this._componentMap[mode])
+                    this._componentMap[mode] = {
+                        controls: [],
+                        components: [],
+                    };
 
-                    // if control already registered in view mode, throw error
-                    if (this._componentMap[mode].controls.indexOf(control) > -1)
-                        throw Error(
-                            `Duplicate Control "${control.name}" registration in view mode.`
-                        );
+                // if control already registered in view mode, throw error
+                if (this._componentMap[mode].controls.indexOf(control) > -1)
+                    throw Error(`Duplicate Control "${control.name}" registration in view mode.`);
 
-                    // add control and component pair to component map
-                    this._componentMap[mode].controls.push(control);
-                    this._componentMap[mode].components.push(component);
-                    // initialize component
-                    if (component.onInit) component.onInit();
-                }
+                // add control and component pair to component map
+                this._componentMap[mode].controls.push(control);
+                this._componentMap[mode].components.push(component);
+                // initialize component
+                if (component.onInit) component.onInit();
             }
         });
     }

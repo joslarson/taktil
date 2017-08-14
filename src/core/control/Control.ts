@@ -121,7 +121,7 @@ export abstract class Control<State extends ControlState = ControlState> {
         if (this.cacheOnMidiIn && message instanceof MidiMessage) this.cacheMidiMessage(message);
 
         if (this.activeComponent) {
-            this.activeComponent.onInput(this, this.getInput(message));
+            this.activeComponent.onInput(this.getInput(message));
         } else {
             // re-render based on current state (messages will only be sent if they are
             // different than what's in the cache)

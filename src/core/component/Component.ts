@@ -4,32 +4,31 @@ import { ControlState } from '../control/Control';
 import { ObjectLiteral } from '../helpers/ObjectLiteral';
 
 export type ComponentState = ObjectLiteral;
-export type ComponentProps = ObjectLiteral;
+export type ComponentOptions = ObjectLiteral;
 
 /**
  * Abstract class defining the the base functionality from which all
  * other components must extend.
  */
 export abstract class Component<
-    Props extends ComponentProps = ComponentProps,
+    Options extends ComponentOptions = ComponentOptions,
     State extends ComponentState = ComponentState
 > {
     name: string;
+    control: Control;
     mode: string;
-    controls: Control[];
-
+    options: Options = {} as Options;
     state: State = {} as State;
-    props: Props = {} as Props;
 
-    constructor(controls: Control[], props: Props, mode?: string);
-    constructor(control: Control, props: Props, mode?: string);
-    constructor(controls: Control[] | Control, props: Props, mode?: string) {
-        this.controls = Array.isArray(controls) ? controls : [controls];
-        this.props = {
-            ...this.props as object,
-            ...props as object,
-        } as Props;
-        this.mode = mode || '__BASE__';
+    constructor(control: Control, mode: string, options: Options);
+    constructor(control: Control, options: Options);
+    constructor(control: Control, ...rest: (string | Options)[]) {
+        this.control = control;
+        this.mode = typeof rest[0] === 'string' ? rest[0] as string : '__BASE__';
+        this.options = {
+            ...this.options as object,
+            ...rest.slice(-1)[0] as object,
+        } as Options;
     }
 
     // called when component is registered to a view for the first time
@@ -38,24 +37,19 @@ export abstract class Component<
 
     setState(partialState: Partial<State>): void {
         // update object state
-        this.state = {
-            ...this.state as object,
-            ...partialState as object,
-        } as State; // TODO: should be able to remove type casting in future typescript release
+        this.state = { ...this.state as object, ...partialState as object } as State; // TODO: should be able to remove type casting in future typescript release
         // re-render associated controls
         this.render();
     }
 
     render(): void {
-        this.controls.map(control => {
-            // update hardware state if in view
-            if (control.activeComponent === this) control.setState(this.getOutput(control));
-        });
+        // update hardware state if in view
+        if (this.control.activeComponent === this) this.control.setState(this.getOutput());
     }
 
     // defines conversion of component state to control state
-    abstract getOutput(control: Control): ControlState;
+    abstract getOutput(): ControlState;
 
     // handles control input
-    abstract onInput(control: Control, input: ControlState): void;
+    abstract onInput(input: ControlState): void;
 }

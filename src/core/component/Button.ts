@@ -1,8 +1,8 @@
-import { Component, ComponentState, ComponentProps } from './Component';
+import { Component, ComponentState, ComponentOptions } from './Component';
 import { Control } from '../control';
 import { ControlState } from '../control/Control';
 
-export type ButtonProps = ComponentProps;
+export type ButtonOptions = ComponentOptions;
 export interface ButtonState extends ComponentState {
     on: boolean;
     color?: { r: number; g: number; b: number };
@@ -13,9 +13,9 @@ export interface ButtonState extends ComponentState {
  * double press, release, and double release events.
  */
 export abstract class Button<
-    Props extends ButtonProps = ButtonProps,
+    Options extends ButtonOptions = ButtonOptions,
     State extends ButtonState = ButtonState
-> extends Component<Props, State> {
+> extends Component<Options, State> {
     state: State = { on: false } as State;
     memory: { [key: string]: any } = {};
 
@@ -28,51 +28,51 @@ export abstract class Button<
     onRelease?(): void;
     onDoubleRelease?(): void;
 
-    onInput(control: Control, input: ControlState) {
-        if (this.onPress) this.handlePress(control, input.value);
-        if (this.onLongPress) this.handleLongPress(control, input.value);
-        if (this.onDoublePress) this.handleDoublePress(control, input.value);
-        if (this.onRelease) this.handleRelease(control, input.value);
-        if (this.onDoubleRelease) this.handleDoubleRelease(control, input.value);
+    onInput(input: ControlState) {
+        if (this.onPress) this.handlePress(input.value);
+        if (this.onLongPress) this.handleLongPress(input.value);
+        if (this.onDoublePress) this.handleDoublePress(input.value);
+        if (this.onRelease) this.handleRelease(input.value);
+        if (this.onDoubleRelease) this.handleDoubleRelease(input.value);
     }
 
-    getOutput(control: Control): ControlState {
+    getOutput(): ControlState {
         const { on, color } = this.state;
         return {
-            value: on ? control.maxValue : control.minValue,
+            value: on ? this.control.maxValue : this.control.minValue,
             ...color && { color },
         };
     }
 
-    isPress(control: Control, value: number) {
-        return value > control.minValue;
+    isPress(value: number) {
+        return value > this.control.minValue;
     }
 
-    isRelease(control: Control, value: number) {
-        return value === control.minValue;
+    isRelease(value: number) {
+        return value === this.control.minValue;
     }
 
-    isDoublePress(control: Control, value: number) {
-        return this.memory['doublePress'] && this.isPress(control, value);
+    isDoublePress(value: number) {
+        return this.memory['doublePress'] && this.isPress(value);
     }
 
-    isDoubleRelease(control: Control, value: number) {
-        return this.memory['doubleRelease'] && this.isRelease(control, value);
+    isDoubleRelease(value: number) {
+        return this.memory['doubleRelease'] && this.isRelease(value);
     }
 
-    handlePress(control: Control, value: number) {
+    handlePress(value: number) {
         // if it's not a press, not implemented or is a doublePress, ignore it
-        if (!this.isPress(control, value) || this.memory['doublePress']) return;
+        if (!this.isPress(value) || this.memory['doublePress']) return;
         // handle single press
         if (this.onPress) this.onPress();
     }
 
-    handleDoublePress(control: Control, value: number) {
+    handleDoublePress(value: number) {
         // if it's not a press or not implemented, ignore it
-        if (!this.isPress(control, value)) return;
+        if (!this.isPress(value)) return;
 
         // if is doublePress
-        if (this.isDoublePress(control, value)) {
+        if (this.isDoublePress(value)) {
             if (this.onDoublePress) this.onDoublePress();
         } else {
             // setup interval task to remove self after this.DOUBLE_PRESS_DELAY
@@ -82,12 +82,12 @@ export abstract class Button<
         }
     }
 
-    handleLongPress(control: Control, value: number) {
+    handleLongPress(value: number) {
         // if it's a doublePress or is not implemented, ignore it
-        if (this.isDoublePress(control, value)) return;
+        if (this.isDoublePress(value)) return;
 
         // if it's a press schedule the callback
-        if (this.isPress(control, value)) {
+        if (this.isPress(value)) {
             // schedule callback
             this.memory['longPress'] = setTimeout(() => {
                 if (this.onLongPress) this.onLongPress();
@@ -102,19 +102,19 @@ export abstract class Button<
         }
     }
 
-    handleRelease(control: Control, value: number) {
+    handleRelease(value: number) {
         // if it's not a release, not implemented or is a doubleRelease, ignore it
-        if (!this.isRelease(control, value) || this.memory['doubleRelease']) return;
+        if (!this.isRelease(value) || this.memory['doubleRelease']) return;
         // handle single release
         if (this.onRelease) this.onRelease();
     }
 
-    handleDoubleRelease(control: Control, value: number) {
+    handleDoubleRelease(value: number) {
         // if it's not a release or not implemented, ignore it
-        if (!this.isRelease(control, value)) return;
+        if (!this.isRelease(value)) return;
 
         // if is doubleRelease
-        if (this.isDoubleRelease(control, value) && this.onDoubleRelease) {
+        if (this.isDoubleRelease(value) && this.onDoubleRelease) {
             this.onDoubleRelease();
         } else {
             // setup timeout task to remove self after this.DOUBLE_PRESS_DELAY

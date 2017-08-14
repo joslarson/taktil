@@ -3,7 +3,7 @@ import { View } from '../../core/view';
 
 export class ViewToggle extends Button<{ view: typeof View | string }> {
     getView() {
-        let view = this.props.view;
+        let view = this.options.view;
         if (typeof view === 'string') view = session.getView(view);
         return view;
     }
@@ -15,7 +15,7 @@ export class ViewToggle extends Button<{ view: typeof View | string }> {
     }
 
     onPress() {
-        let view = this.props.view;
+        let view = this.options.view;
         if (typeof view === 'string') view = session.getView(view);
         const parent = view.getParent();
         if (session.activeView === view && parent) {
@@ -29,11 +29,11 @@ export class ViewToggle extends Button<{ view: typeof View | string }> {
 export class ModeGate extends Button<{ mode: string }> {
     onPress() {
         this.setState({ on: true });
-        session.activateMode(this.props.mode);
+        session.activateMode(this.options.mode);
     }
 
     onRelease() {
         this.setState({ on: false });
-        session.deactivateMode(this.props.mode);
+        session.deactivateMode(this.options.mode);
     }
 }

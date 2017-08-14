@@ -47,13 +47,13 @@ describe('Button', () => {
         onDoubleRelease.reset();
 
         // double press/release
-        button.onInput(control, { value: control.maxValue });
+        button.onInput({ value: control.maxValue });
         clock.tick(50);
-        button.onInput(control, { value: control.minValue });
+        button.onInput({ value: control.minValue });
         clock.tick(100);
-        button.onInput(control, { value: control.maxValue });
+        button.onInput({ value: control.maxValue });
         clock.tick(50);
-        button.onInput(control, { value: control.minValue });
+        button.onInput({ value: control.minValue });
         clock.tick(50);
 
         expect(onPress.calledOnce).to.be.true;
@@ -69,9 +69,9 @@ describe('Button', () => {
         onLongPress.reset();
 
         // long press
-        button.onInput(control, { value: control.maxValue });
+        button.onInput({ value: control.maxValue });
         clock.tick(350);
-        button.onInput(control, { value: control.minValue });
+        button.onInput({ value: control.minValue });
 
         expect(onPress.calledOnce).to.be.true;
         expect(onLongPress.calledOnce).to.be.true;
