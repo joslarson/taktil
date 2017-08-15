@@ -50,6 +50,10 @@ export abstract class Control<State extends ControlState = ControlState> {
         );
     }
 
+    get range() {
+        return this.maxValue - this.minValue;
+    }
+
     // state
 
     get defaultState(): State {
