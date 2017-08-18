@@ -24,14 +24,11 @@ export abstract class Range<
     }
 
     getOutput(): ControlState {
-        const { maxValue, minValue } = this.control;
-        return { value: Math.round(this.state.value * (maxValue - minValue) + minValue) };
+        return { value: this.state.value };
     }
 
     onInput({ value }: ControlState) {
         if (this.memory.input) clearTimeout(this.memory.input);
-        this.memory.input = setTimeout(() => {
-            delete this.memory.input;
-        }, this.INPUT_DELAY);
+        this.memory.input = setTimeout(() => delete this.memory.input, this.INPUT_DELAY);
     }
 }
