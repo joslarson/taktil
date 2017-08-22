@@ -17,7 +17,8 @@ export abstract class Range<
     memory: { [key: string]: any } = {};
 
     render() {
-        if (this.memory.update) clearInterval(this.memory.update);
+        // if there is active input, delay the render until after the input timer runs out
+        clearInterval(this.memory.update);
         this.memory.update = setInterval(() => {
             super.render();
         }, this.memory.input ? this.INPUT_DELAY : 0);
@@ -28,7 +29,8 @@ export abstract class Range<
     }
 
     onInput({ value }: ControlState) {
-        if (this.memory.input) clearTimeout(this.memory.input);
+        // on input, start/restart input countdown timer to create input buffer time
+        clearTimeout(this.memory.input);
         this.memory.input = setTimeout(() => delete this.memory.input, this.INPUT_DELAY);
     }
 }
