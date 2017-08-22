@@ -15,8 +15,7 @@
         "importHelpers": true,
         "types": [
             "typed-bitwig-api",
-            "@types/mocha",
-            "@types/chai",
+            "@types/jest",
             "@types/node"
         ],
         "strict": true

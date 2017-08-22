@@ -1,6 +1,4 @@
 import '../../env';
-import { expect } from 'chai';
-import * as sinon from 'sinon';
 
 import { Control, ControlState } from '../control/Control';
 import { SimpleControl } from '../control/SimpleControl';
@@ -30,19 +28,19 @@ describe('Component', () => {
     const component = new TestComponent(control, 'MY_MODE', {});
 
     it('should initialize state correctly', () => {
-        expect(component.state).to.deep.equal({ value: control.minValue, foo: { bar: 0 } });
+        expect(component.state).toEqual({ value: control.minValue, foo: { bar: 0 } });
     });
 
     it('should modify state correctly', () => {
         component.setState({ value: control.maxValue }); // receives partial state
-        expect(component.state).to.deep.equal({ value: control.maxValue, foo: { bar: 0 } });
+        expect(component.state).toEqual({ value: control.maxValue, foo: { bar: 0 } });
     });
 
     it('should set the control correctly', () => {
-        expect(component.control).to.equal(control);
+        expect(component.control).toBe(control);
     });
 
     it('should set the mode correctly', () => {
-        expect(component.mode).to.equal('MY_MODE');
+        expect(component.mode).toBe('MY_MODE');
     });
 });

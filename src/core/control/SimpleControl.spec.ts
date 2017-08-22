@@ -1,5 +1,4 @@
 import '../../env';
-import { expect } from 'chai';
 
 import { SimpleControl } from './SimpleControl';
 import { MidiMessage } from '../midi/';
@@ -11,14 +10,14 @@ describe('SimpleControl', () => {
         const { status, data1 } = control;
         expect(
             control.getInput(new MidiMessage({ status, data1, data2: control.maxValue }))
-        ).to.deep.equal({
+        ).toEqual({
             value: control.maxValue,
         });
     });
 
     it('should generate correct output', () => {
         const { status, data1, state: { value } } = control;
-        expect(control.getMidiOutput(control.state)).to.deep.equal([
+        expect(control.getMidiOutput(control.state)).toEqual([
             new MidiMessage({ status, data1, data2: value }),
         ]);
     });

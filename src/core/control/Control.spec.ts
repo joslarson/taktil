@@ -1,6 +1,4 @@
 import '../../env';
-import { expect } from 'chai';
-import * as sinon from 'sinon';
 
 import { Control } from './Control';
 import { MidiMessage, SysexMessage } from '../midi/';
@@ -35,16 +33,16 @@ describe('Control', () => {
     const component = new TestComponent(control, {});
 
     it('should initialize state correctly', () => {
-        expect(control.state).to.deep.equal({ value: 127, nested: { value: 0 } });
+        expect(control.state).toEqual({ value: 127, nested: { value: 0 } });
     });
 
     it('should modify state correctly', () => {
         control.setState({ nested: { value: 1 } }); // receives partial state
-        expect(control.state).to.deep.equal({ value: 127, nested: { value: 1 } });
+        expect(control.state).toEqual({ value: 127, nested: { value: 1 } });
     });
 
     it('should maintain its initial state', () => {
-        expect(control.defaultState).to.deep.equal({
+        expect(control.defaultState).toEqual({
             value: 127,
             nested: { value: 0 },
         });
@@ -52,37 +50,36 @@ describe('Control', () => {
 
     it('should set active component correctly', () => {
         // should be initialized as null
-        expect(control.activeComponent).to.be.null;
+        expect(control.activeComponent).toBe(null);
         control.activeComponent = component;
-        expect(control.activeComponent).to.equal(component);
+        expect(control.activeComponent).toBe(component);
         // state.value should have been changed to 0 because of initial
         // component state
-        expect(control.state.value).to.equal(0);
+        expect(control.state.value).toBe(0);
     });
 
     it('should throw on invalid setState of state.value', () => {
-        expect(() => control.setState({ value: 128 })).to.throw();
+        expect(() => control.setState({ value: 128 })).toThrow();
     });
 
     it('should cache controller hardware state', () => {
         control.setState({ value: 0 });
-        const mock = sinon.mock(session.midiOut);
-        mock.expects('sendMidi').once();
+        const spy = jest.spyOn(session.midiOut, 'sendMidi');
         control.setState({ value: 127 });
         control.setState({ value: 127 });
-        mock.verify();
+        expect(spy).toHaveBeenCalledTimes(1);
     });
 
     it('should skip render in certain situations', () => {
         control.enableMidiOut = false;
-        expect(control.render()).to.equal(false);
+        expect(control.render()).toBe(false);
         control.enableMidiOut = true;
 
         const getOutput = TestControl.prototype.getMidiOutput;
         delete TestControl.prototype.getMidiOutput;
-        expect(control.render()).to.equal(false);
+        expect(control.render()).toBe(false);
         TestControl.prototype.getMidiOutput = getOutput;
 
-        expect(control.render()).to.equal(true);
+        expect(control.render()).toBe(true);
     });
 });
