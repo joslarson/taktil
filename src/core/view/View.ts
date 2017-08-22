@@ -86,6 +86,6 @@ export class View {
         });
     }
 
-    // view should be instantiated through `get instance` method, not `new`
+    // view should not be instantiated by user
     protected constructor() {}
 }
