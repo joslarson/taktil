@@ -37,6 +37,11 @@ describe('Button', () => {
     const onDoubleRelease = jest.spyOn(button, 'onDoubleRelease');
     const onLongPress = jest.spyOn(button, 'onLongPress');
 
+    it('correctly identifies press and release input', () => {
+        expect(button.isPress(control.minValue)).toBe(false);
+        expect(button.isPress(control.minValue + 1)).toBe(true);
+    });
+
     it('should handle single and double press/release events', () => {
         jest.runTimersToTime(350); // memory reset
 
