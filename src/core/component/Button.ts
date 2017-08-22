@@ -61,7 +61,7 @@ export abstract class Button<
     }
 
     handlePress(value: number) {
-        // if it's not a press, not implemented or is a doublePress, ignore it
+        // if it's not a press or is a doublePress, ignore it
         if (!this.isPress(value) || this.memory['doublePress']) return;
         // handle single press
         if (this.onPress) this.onPress();
@@ -88,17 +88,14 @@ export abstract class Button<
 
         // if it's a press schedule the callback
         if (this.isPress(value)) {
-            // schedule callback
+            // schedule long press callback
             this.memory['longPress'] = setTimeout(() => {
                 if (this.onLongPress) this.onLongPress();
             }, this.LONG_PRESS_DELAY);
-        } else {
-            // otherwise cancel existing scheduled callback
-            // cancel longPress task if button released too early
-            if (this.memory['longPress']) {
-                clearTimeout(this.memory['longPress']);
-                delete this.memory['longPress'];
-            }
+        } else if (this.memory['longPress']) {
+            // cancel scheduled long press callback if button released too early
+            clearTimeout(this.memory['longPress']);
+            delete this.memory['longPress'];
         }
     }
 
