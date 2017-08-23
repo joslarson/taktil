@@ -29,7 +29,7 @@ declare global {
         };
 
         global.clearTimeout = function clearTimeout(timeout: DelayedTask) {
-            timeout.cancel();
+            if (timeout) timeout.cancel();
         };
 
         global.setInterval = function setInterval(
@@ -41,7 +41,7 @@ declare global {
         };
 
         global.clearInterval = function clearInterval(interval: DelayedTask) {
-            interval.cancel();
+            if (interval) interval.cancel();
         };
 
         // shim console with custom logger
