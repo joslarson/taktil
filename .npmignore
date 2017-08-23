@@ -7,6 +7,7 @@ node_modules
 /tsconfig.*
 /tslint.json
 /src
+/coverage
 
 # ignore the .ts files
 *.ts
