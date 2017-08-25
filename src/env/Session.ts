@@ -1,13 +1,39 @@
 import { EventEmitter } from './EventEmitter';
 import { MidiOutProxy, MidiMessage, SysexMessage } from '../core/midi';
-import { Control } from '../core/control';
+import { Control, ControlState } from '../core/control';
 import { View } from '../core/view';
 
 declare const global: any;
 
+export interface Session extends EventEmitter {
+    on(label: 'activateMode' | 'deactivateMode', callback: (mode: string) => void): void;
+    on(label: 'activateView', callback: (view: typeof View) => void): void;
+    on(
+        label: 'init' | 'registerControls' | 'registerViews' | 'flush' | 'exit',
+        callback: () => void
+    ): void;
+
+    addListener(label: 'activateMode' | 'deactivateMode', callback: (mode: string) => void): void;
+    addListener(label: 'activateView', callback: (view: typeof View) => void): void;
+    addListener(
+        label: 'init' | 'registerControls' | 'registerViews' | 'flush' | 'exit',
+        callback: () => void
+    ): void;
+
+    removeListener(
+        label: 'activateMode' | 'deactivateMode',
+        callback: (mode: string) => void
+    ): boolean;
+    removeListener(label: 'activateView', callback: (view: typeof View) => void): boolean;
+    removeListener(
+        label: 'init' | 'registerControls' | 'registerViews' | 'flush' | 'exit',
+        callback: () => void
+    ): boolean;
+}
+
 /**
- * A representation of the current scripting session / active Bitwig
- * Studio tab.
+ * A representation of the current project (or active Bitwig
+ * Studio tab).
  * 
  * Assists in managing shared state and session level event
  * subscriptions between Taktil and the control surface script.
@@ -15,7 +41,7 @@ declare const global: any;
 export class Session extends EventEmitter {
     private _isInit: boolean = false;
     private _controls: { [name: string]: Control } = {};
-    private _views: typeof View[] = [];
+    private _views: { [name: string]: typeof View } = {};
     private _activeView: typeof View;
     private _activeModes: string[] = [];
     private _eventHandlers: { [key: string]: Function[] } = {};
@@ -96,38 +122,57 @@ export class Session extends EventEmitter {
     // Controls
     //////////////////////////////
 
-    set controls(controls: { [name: string]: Control }) {
-        const controlsArray: Control[] = [];
-        for (const controlName in controls) {
-            const control = controls[controlName];
-            control.name = controlName;
-            for (const existingControl of controlsArray) {
-                // if none of the ports match up, then there's no conflict
-                if (
-                    control.outPort !== existingControl.outPort &&
-                    control.inPort !== existingControl.inPort
-                ) {
-                    continue;
-                }
-                for (const pattern of control.patterns) {
-                    for (const existingPattern of existingControl.patterns) {
-                        if (pattern.conflictsWith(existingPattern))
-                            throw new Error(
-                                `Control "${control.name}" conflicts with existing Control "${existingControl.name}".`
-                            );
+    registerControls(controls: { [name: string]: Control }) {
+        if (Object.keys(this.controls).length) {
+            throw Error("The Session's registerControls method can only be called once.");
+        }
+
+        // assign view name to each view
+        Object.keys(controls).forEach(controlName => (controls[controlName].name = controlName));
+
+        const register = () => {
+            const controlsArray: Control[] = [];
+            for (const controlName in controls) {
+                const control = controls[controlName];
+
+                // make sure patterns don't overlap
+                for (const existingControl of controlsArray) {
+                    // if none of the ports match up, then there's no conflict
+                    const outPortsMatch = control.outPort !== existingControl.outPort;
+                    const inPortsMatch = control.inPort !== existingControl.inPort;
+                    if (outPortsMatch && inPortsMatch) continue;
+
+                    for (const pattern of control.patterns) {
+                        for (const existingPattern of existingControl.patterns) {
+                            if (pattern.conflictsWith(existingPattern))
+                                throw new Error(
+                                    `Control "${control.name}" conflicts with existing Control "${existingControl.name}".`
+                                );
+                        }
                     }
                 }
+                // add to control array
+                controlsArray.push(controls[controlName]);
             }
-            // add to control array
-            controlsArray.push(controls[controlName]);
-        }
-        this._controls = controls;
+
+            this._controls = controls;
+
+            // emit registerControls event
+            this.emit('registerControls');
+        };
+
+        // if called during init register immediately
+        if (this.isInit) return register();
+        // otherwise defer until init
+        this.on('init', register);
     }
 
-    get controls(): { [name: string]: Control } {
+    /** The map of controls registered to the session. */
+    get controls() {
         return { ...this._controls };
     }
 
+    /** Find the control associated with an incoming Midi message. */
     findControl(message: MidiMessage | SysexMessage): Control | null {
         // look for a matching registered control
         for (const controlName in this.controls) {
@@ -145,6 +190,13 @@ export class Session extends EventEmitter {
         return null;
     }
 
+    /**
+     * Connect each control from the control template with it's corresponding
+     * component (if any) in the active view stack.
+     * 
+     * This method is called internally anytime the active view or mode list
+     * changes to re-associate controls to the newly activated components.
+     */
     associateControlsInView() {
         // no view, no components to associate controls with
         if (!this.activeView) return;
@@ -155,6 +207,7 @@ export class Session extends EventEmitter {
         }
     }
 
+    /** Force re-render all controls. */
     resetControls() {
         for (const controlName in this.controls) {
             const control = this.controls[controlName];
@@ -165,47 +218,96 @@ export class Session extends EventEmitter {
     // Views
     //////////////////////////////
 
-    registerViews(...views: typeof View[]) {
+    /**
+     * Register views to the session (can only be called once).
+     * 
+     * @param views The mapping of view names to view classes to register
+     * to the session. 
+     */
+    registerViews(views: { [name: string]: typeof View }) {
+        if (Object.keys(this.views).length) {
+            throw Error("The Session's registerViews method can only be called once.");
+        }
+
+        // assign view name to each view
+        Object.keys(views).forEach(viewName => (views[viewName].viewName = viewName));
+
         const register = () => {
-            let validatedViews: (typeof View)[] = [];
-            for (const view of views) {
-                // validate view registration order
-                const parent = view.getParent();
-                if (parent && validatedViews.indexOf(parent) === -1)
-                    throw `Invalid view registration order: Parent view "${parent.name}" must be registered before child view "${view.name}".`;
-                // add to validate views list
-                if (validatedViews.indexOf(view) === -1) validatedViews = [...validatedViews, view];
-                // initialize view
-                view.init();
+            const viewsToRegister = Object.keys(views).map(viewName => this.views[viewName]);
+            const unvalidatedViews = [...viewsToRegister];
+            const validatedViews: (typeof View)[] = [];
+
+            while (true) {
+                const view = unvalidatedViews.shift();
+                if (!view) break; // if we've run out of views to register we are done.
+
+                // validate that parent exists in registration group
+                const parent = typeof view.parent === 'string' ? views[view.parent] : view.parent;
+                if (typeof view.parent === 'string' && parent === undefined) {
+                    throw Error(
+                        `View name "${view.parent}" not found for parent of ${view.viewName}.`
+                    );
+                } else if (viewsToRegister.indexOf(parent) === -1) {
+                    throw Error(
+                        `Parent view for "${view.viewName}" is missing from the registration object.`
+                    );
+                }
+
+                // if the views parent has yet to be registered, push it to the end of the line
+                if (parent && validatedViews.indexOf(parent) === -1) {
+                    unvalidatedViews.push(view);
+                    continue;
+                }
+
+                // everything looks good, register the view
+                if (validatedViews.indexOf(view) === -1) {
+                    // add to validate views list
+                    validatedViews.push(view);
+                    // initialize view
+                    view.init();
+                } else {
+                    throw Error(
+                        `The same view class (${view.name}) cannot be registered more than once.`
+                    );
+                }
             }
-            // set session views
-            this._views = validatedViews;
+
+            // with all views validated, set session views
+            this._views = views;
+
+            // emit registerViews event
+            this.emit('registerViews');
         };
+
         // if called during init register immediately
         if (this.isInit) return register();
         // otherwise defer until init
-        this.on('init', register);
+        this.on('registerControls', register);
     }
 
+    /**
+     * The mapping of view names to view classes that have been registered
+     * to the session.
+     */
     get views() {
-        return [...this._views];
+        return { ...this._views };
     }
 
-    getView(viewName: string) {
-        return this.views.filter(view => view.name === viewName)[0];
-    }
-
+    /** Set the active view for the session. */
     activateView(view: typeof View | string) {
-        const newView = typeof view === 'string' ? this.getView(view) : view;
-        if (this.views.indexOf(newView) === -1)
+        const viewList = Object.keys(this.views).map(viewName => this.views[viewName]);
+        const newView = typeof view === 'string' ? this.views[view] : view;
+        if (viewList.indexOf(newView) === -1) {
             throw new Error(
                 `${newView.name} must first be registered before being set as the active view.`
             );
+        }
         this._activeView = newView;
         this.emit('activateView', newView);
         this.associateControlsInView(); // re-associate controls in view
     }
 
+    /** The active view for the session. */
     get activeView(): typeof View {
         return this._activeView;
     }
@@ -213,10 +315,12 @@ export class Session extends EventEmitter {
     // Modes
     //////////////////////////////
 
+    /** Get the list of active modes in the order they were activated, from last to first. */
     getActiveModes() {
         return [...this._activeModes, '__BASE__'];
     }
 
+    /** Activate a mode, adding it to the active mode list */
     activateMode(mode: string) {
         if (mode === '__BASE__') throw new Error('Mode name "__BASE__" is reserved.');
         const modeIndex = this._activeModes.indexOf(mode);
@@ -226,6 +330,7 @@ export class Session extends EventEmitter {
         this.associateControlsInView(); // re-associate controls in view
     }
 
+    /** Deactivate a given mode, removing it from the active mode list. */
     deactivateMode(mode: string) {
         const modeIndex = this._activeModes.indexOf(mode);
         if (modeIndex > -1) {
@@ -235,24 +340,8 @@ export class Session extends EventEmitter {
         }
     }
 
+    /** Check if a given mode is active. */
     modeIsActive(mode: string) {
         return this.getActiveModes().indexOf(mode) > -1;
     }
-}
-
-export interface Session extends EventEmitter {
-    on(label: 'activateMode' | 'deactivateMode', callback: (mode: string) => void): void;
-    on(label: 'activateView', callback: (view: typeof View) => void): void;
-    on(label: 'init' | 'flush' | 'exit', callback: () => void): void;
-
-    addListener(label: 'activateMode' | 'deactivateMode', callback: (mode: string) => void): void;
-    addListener(label: 'activateView', callback: (view: typeof View) => void): void;
-    addListener(label: 'init' | 'flush' | 'exit', callback: () => void): void;
-
-    removeListener(
-        label: 'activateMode' | 'deactivateMode',
-        callback: (mode: string) => void
-    ): boolean;
-    removeListener(label: 'activateView', callback: (view: typeof View) => void): boolean;
-    removeListener(label: 'init' | 'flush' | 'exit', callback: () => void): boolean;
 }

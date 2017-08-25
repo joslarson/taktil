@@ -13,10 +13,12 @@ export class View {
         };
     };
 
+    static viewName: string;
+
     static parent: typeof View | string;
 
     static getParent(): typeof View | undefined {
-        if (typeof this.parent === 'string') return session.getView(this.parent);
+        if (typeof this.parent === 'string') return session.views[this.parent];
         return this.parent;
     }
 

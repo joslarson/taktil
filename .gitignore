@@ -7,4 +7,5 @@ node_modules
 **/*.js
 **/*.d.ts
 !gulpfile.js
-coverage
+/coverage
+/docs

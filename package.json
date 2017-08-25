@@ -14,6 +14,7 @@
     "tslib": "^1.7.1"
   },
   "devDependencies": {
+    "typedoc": "^0.8.0",
     "@types/jest": "^20.0.7",
     "@types/node": "^8.0.20",
     "del": "^3.0.0",
@@ -40,6 +41,7 @@
     "check": "tsc --noEmit",
     "lint": "tslint -c tslint.json $(find . ! -path './.git*' ! -path './node_modules*' -path '*.ts') || true",
     "format": "prettier --parser typescript --print-width 100 --tab-width 4 --single-quote --trailing-comma=es5 --write $(find . ! -path './.git*' ! -path './node_modules*' -path '*.ts')",
+    "typedoc": "typedoc --module commonjs theme 'minimal' --exclude '**/*.spec.ts' --out ./docs/typedoc/ src/index.ts",
     "preversion": "npm test && npm run build",
     "postversion": "npm run clean",
     "prepack": "npm test && npm run build",
