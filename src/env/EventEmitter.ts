@@ -29,7 +29,7 @@ export class EventEmitter {
         return false;
     }
 
-    protected emit(label: string, ...args: any[]) {
+    emit(label: string, ...args: any[]) {
         const listeners = this.listeners[label];
 
         if (listeners && listeners.length) {

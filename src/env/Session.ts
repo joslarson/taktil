@@ -233,7 +233,10 @@ export class Session extends EventEmitter {
         Object.keys(views).forEach(viewName => (views[viewName].viewName = viewName));
 
         const register = () => {
-            const viewsToRegister = Object.keys(views).map(viewName => this.views[viewName]);
+            if (!Object.keys(this.controls).length) {
+                throw Error('Controls must be registered before views.');
+            }
+            const viewsToRegister = Object.keys(views).map(viewName => views[viewName]);
             const unvalidatedViews = [...viewsToRegister];
             const validatedViews: (typeof View)[] = [];
 
@@ -242,23 +245,22 @@ export class Session extends EventEmitter {
                 if (!view) break; // if we've run out of views to register we are done.
 
                 // validate that parent exists in registration group
-                const parent = typeof view.parent === 'string' ? views[view.parent] : view.parent;
-                if (typeof view.parent === 'string' && parent === undefined) {
+                const parent =
+                    typeof view.parent === 'string' ? views[view.parent] : view.parent || undefined;
+                if (parent && typeof view.parent === 'string') {
                     throw Error(
                         `View name "${view.parent}" not found for parent of ${view.viewName}.`
                     );
-                } else if (viewsToRegister.indexOf(parent) === -1) {
+                } else if (parent && viewsToRegister.indexOf(parent) === -1) {
                     throw Error(
                         `Parent view for "${view.viewName}" is missing from the registration object.`
                     );
                 }
-
                 // if the views parent has yet to be registered, push it to the end of the line
                 if (parent && validatedViews.indexOf(parent) === -1) {
                     unvalidatedViews.push(view);
                     continue;
                 }
-
                 // everything looks good, register the view
                 if (validatedViews.indexOf(view) === -1) {
                     // add to validate views list
@@ -273,10 +275,12 @@ export class Session extends EventEmitter {
             }
 
             // with all views validated, set session views
-            this._views = views;
-
-            // emit registerViews event
-            this.emit('registerViews');
+            if (validatedViews.length === viewsToRegister.length) {
+                this._views = views;
+                this.emit('registerViews'); // emit registerViews event
+            } else {
+                throw Error('Unable to validate views for registration.');
+            }
         };
 
         // if called during init register immediately
@@ -316,7 +320,7 @@ export class Session extends EventEmitter {
     //////////////////////////////
 
     /** Get the list of active modes in the order they were activated, from last to first. */
-    getActiveModes() {
+    get activeModes() {
         return [...this._activeModes, '__BASE__'];
     }
 
@@ -332,6 +336,7 @@ export class Session extends EventEmitter {
 
     /** Deactivate a given mode, removing it from the active mode list. */
     deactivateMode(mode: string) {
+        if (mode === '__BASE__') throw new Error('Mode name "__BASE__" is reserved.');
         const modeIndex = this._activeModes.indexOf(mode);
         if (modeIndex > -1) {
             this._activeModes.splice(modeIndex, 1);
@@ -342,6 +347,6 @@ export class Session extends EventEmitter {
 
     /** Check if a given mode is active. */
     modeIsActive(mode: string) {
-        return this.getActiveModes().indexOf(mode) > -1;
+        return this.activeModes.indexOf(mode) > -1;
     }
 }

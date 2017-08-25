@@ -11,7 +11,7 @@ export class View {
             controls: Control[];
             components: Component[];
         };
-    };
+    } = {};
 
     static viewName: string;
 
@@ -40,7 +40,7 @@ export class View {
     static connectControl(control: Control) {
         // check view modes in order for component/control registration
         let component = null;
-        for (const activeMode of session.getActiveModes()) {
+        for (const activeMode of session.activeModes) {
             component = this.getComponent(control, activeMode);
             // if component is not null, we're done looking
             if (component) break;
@@ -52,8 +52,6 @@ export class View {
     static init() {
         const instance = new this();
         // give each subclass its own componentMap
-        this._componentMap = {};
-
         Object.getOwnPropertyNames(instance).map(key => {
             let value = instance[key];
             value = typeof value === 'function' ? value() : value;
