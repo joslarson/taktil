@@ -2,18 +2,18 @@ import '../../env';
 
 import { Control, ControlState } from '../control/Control';
 import { SimpleControl } from '../control/SimpleControl';
-import { Component, ComponentState, ComponentOptions } from './Component';
+import { Component, ComponentState, ComponentParams } from './Component';
 
 describe('Component', () => {
     const control = new SimpleControl({ status: 0xb0, data1: 21 });
 
-    type Options = ComponentOptions;
+    type Params = ComponentParams;
     interface State extends ComponentState {
         value: number;
         foo: { bar: number };
     }
 
-    class TestComponent extends Component<Options, State> {
+    class TestComponent extends Component<Params, State> {
         state: State = { value: control.minValue, foo: { bar: 0 } };
 
         getOutput(): ControlState {

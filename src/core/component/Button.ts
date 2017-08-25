@@ -1,8 +1,8 @@
-import { Component, ComponentState, ComponentOptions } from './Component';
+import { Component, ComponentState, ComponentParams } from './Component';
 import { Control } from '../control';
 import { ControlState } from '../control/Control';
 
-export type ButtonOptions = ComponentOptions;
+export type ButtonParams = ComponentParams;
 export interface ButtonState extends ComponentState {
     on: boolean;
     color?: { r: number; g: number; b: number };
@@ -13,9 +13,9 @@ export interface ButtonState extends ComponentState {
  * double press, release, and double release events.
  */
 export abstract class Button<
-    Options extends ButtonOptions = ButtonOptions,
+    Params extends ButtonParams = ButtonParams,
     State extends ButtonState = ButtonState
-> extends Component<Options, State> {
+> extends Component<Params, State> {
     state: State = { on: false } as State;
     memory: { [key: string]: any } = {};
 

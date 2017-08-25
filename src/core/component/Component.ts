@@ -4,31 +4,31 @@ import { ControlState } from '../control/Control';
 import { ObjectLiteral } from '../helpers/ObjectLiteral';
 
 export type ComponentState = ObjectLiteral;
-export type ComponentOptions = ObjectLiteral;
+export type ComponentParams = ObjectLiteral;
 
 /**
  * Abstract class defining the the base functionality from which all
  * other components must extend.
  */
 export abstract class Component<
-    Options extends ComponentOptions = ComponentOptions,
+    Params extends ComponentParams = ComponentParams,
     State extends ComponentState = ComponentState
 > {
     name: string;
     control: Control;
     mode: string;
-    options: Options = {} as Options;
+    params: Params = {} as Params;
     state: State = {} as State;
 
-    constructor(control: Control, mode: string, options: Options);
-    constructor(control: Control, options: Options);
-    constructor(control: Control, ...rest: (string | Options)[]) {
+    constructor(control: Control, mode: string, params: Params);
+    constructor(control: Control, params: Params);
+    constructor(control: Control, ...rest: (string | Params)[]) {
         this.control = control;
         this.mode = typeof rest[0] === 'string' ? rest[0] as string : '__BASE__';
-        this.options = {
-            ...this.options as object,
+        this.params = {
+            ...this.params as object,
             ...rest.slice(-1)[0] as object,
-        } as Options;
+        } as Params;
     }
 
     // called when component is registered to a view for the first time

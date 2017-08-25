@@ -1,16 +1,16 @@
 import { Control } from '../control';
 import { ControlState } from '../control/Control';
-import { Component, ComponentState, ComponentOptions } from './Component';
+import { Component, ComponentState, ComponentParams } from './Component';
 
-export type RangeOptions = ComponentOptions;
+export type RangeParams = ComponentParams;
 export interface RangeState extends ComponentState {
     value: number;
 }
 
 export abstract class Range<
-    Options extends RangeOptions = RangeOptions,
+    Params extends RangeParams = RangeParams,
     State extends RangeState = RangeState
-> extends Component<Options, State> {
+> extends Component<Params, State> {
     INPUT_DELAY = 350;
 
     state: State = { value: 0 } as State;
