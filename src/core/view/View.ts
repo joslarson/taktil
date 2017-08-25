@@ -11,7 +11,7 @@ export class View {
             controls: Control[];
             components: Component[];
         };
-    } = {};
+    };
 
     static viewName: string;
 
@@ -52,6 +52,7 @@ export class View {
     static init() {
         const instance = new this();
         // give each subclass its own componentMap
+        this._componentMap = {};
         Object.getOwnPropertyNames(instance).map(key => {
             let value = instance[key];
             value = typeof value === 'function' ? value() : value;
