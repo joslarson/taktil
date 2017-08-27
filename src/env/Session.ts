@@ -255,19 +255,13 @@ export class Session extends EventEmitter {
                 if (!view) break; // if we've run out of views to register we are done.
 
                 // validate that parent exists in registration group
-                const parent =
-                    typeof view.parent === 'string' ? views[view.parent] : view.parent || undefined;
-                if (parent && typeof view.parent === 'string') {
-                    throw Error(
-                        `View name "${view.parent}" not found for parent of ${view.viewName}.`
-                    );
-                } else if (parent && viewsToRegister.indexOf(parent) === -1) {
+                if (view.parent && viewsToRegister.indexOf(view.parent) === -1) {
                     throw Error(
                         `Parent view for "${view.viewName}" is missing from the registration object.`
                     );
                 }
                 // if the views parent has yet to be registered, push it to the end of the line
-                if (parent && validatedViews.indexOf(parent) === -1) {
+                if (view.parent && validatedViews.indexOf(view.parent) === -1) {
                     unvalidatedViews.push(view);
                     continue;
                 }

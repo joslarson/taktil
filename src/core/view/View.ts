@@ -15,12 +15,7 @@ export class View {
 
     static viewName: string;
 
-    static parent: typeof View | string;
-
-    static getParent(): typeof View | undefined {
-        if (typeof this.parent === 'string') return session.views[this.parent];
-        return this.parent;
-    }
+    static parent: typeof View;
 
     static getComponent(control: Control, mode: string): Component | null {
         // check in current view
@@ -31,8 +26,7 @@ export class View {
             }
         }
         // component not found in view? check in parent
-        const parent = this.getParent();
-        if (parent) return parent.getComponent(control, mode);
+        if (this.parent) return this.parent.getComponent(control, mode);
         // not in current view, no parent to check? return null
         return null;
     }
