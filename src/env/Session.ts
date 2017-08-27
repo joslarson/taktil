@@ -46,6 +46,7 @@ export class Session extends EventEmitter {
     private _activeModes: string[] = [];
     private _eventHandlers: { [key: string]: Function[] } = {};
 
+    /** Global MidiOutProxy instance  */
     midiOut: MidiOutProxy = new MidiOutProxy(this);
 
     constructor() {
@@ -87,6 +88,7 @@ export class Session extends EventEmitter {
         };
     }
 
+    /** Check if bitwig is currently in it's init startup phase */
     get isInit(): boolean {
         return this._isInit;
     }
@@ -94,6 +96,7 @@ export class Session extends EventEmitter {
     // Midi
     //////////////////////////////
 
+    /** The midi in ports available to the session */
     get midiInPorts(): API.MidiIn[] {
         const midiInPorts = [];
         for (let i = 0; true; i += 1) {
@@ -106,6 +109,7 @@ export class Session extends EventEmitter {
         return midiInPorts;
     }
 
+    /** Handle midi input, routing it to the correct control object */
     onMidiInput(message: MidiMessage | SysexMessage) {
         const control = this.findControl(message);
         const messageType = message instanceof MidiMessage ? '[MIDI] ' : '[SYSEX]';
@@ -122,6 +126,12 @@ export class Session extends EventEmitter {
     // Controls
     //////////////////////////////
 
+    /**
+     * Register controls to the session (can only be called once).
+     * 
+     * @param views The mapping of control names to control instances to register
+     * to the session. 
+     */
     registerControls(controls: { [name: string]: Control }) {
         if (Object.keys(this.controls).length) {
             throw Error("The Session's registerControls method can only be called once.");
@@ -172,7 +182,7 @@ export class Session extends EventEmitter {
         return { ...this._controls };
     }
 
-    /** Find the control associated with an incoming Midi message. */
+    /** Find the control (if it exists) associated with an incoming Midi message. */
     findControl(message: MidiMessage | SysexMessage): Control | null {
         // look for a matching registered control
         for (const controlName in this.controls) {
@@ -191,11 +201,11 @@ export class Session extends EventEmitter {
     }
 
     /**
-     * Connect each control from the control template with it's corresponding
-     * component (if any) in the active view stack.
+     * Connect each registered control with it's corresponding component (if any)
+     * in the active view stack.
      * 
      * This method is called internally anytime the active view or mode list
-     * changes to re-associate controls to the newly activated components.
+     * changes to re-associate controls to newly activated components.
      */
     associateControlsInView() {
         // no view, no components to associate controls with
@@ -207,7 +217,7 @@ export class Session extends EventEmitter {
         }
     }
 
-    /** Force re-render all controls. */
+    /** Force re-render all registered controls. */
     resetControls() {
         for (const controlName in this.controls) {
             const control = this.controls[controlName];
@@ -283,9 +293,9 @@ export class Session extends EventEmitter {
             }
         };
 
-        // if called during init register immediately
-        if (this.isInit) return register();
-        // otherwise defer until init
+        // if the controls have already been registered, register immediately
+        if (Object.keys(this.controls).length) return register();
+        // otherwise, defer until controls are registered
         this.on('registerControls', register);
     }
 
@@ -298,16 +308,17 @@ export class Session extends EventEmitter {
     }
 
     /** Set the active view for the session. */
-    activateView(view: typeof View | string) {
+    activateView(viewName: string) {
+        const view = this.views[viewName];
         const viewList = Object.keys(this.views).map(viewName => this.views[viewName]);
-        const newView = typeof view === 'string' ? this.views[view] : view;
-        if (viewList.indexOf(newView) === -1) {
+
+        if (viewList.indexOf(view) === -1) {
             throw new Error(
-                `${newView.name} must first be registered before being set as the active view.`
+                `${view.name} must first be registered before being set as the active view.`
             );
         }
-        this._activeView = newView;
-        this.emit('activateView', newView);
+        this._activeView = view;
+        this.emit('activateView', view);
         this.associateControlsInView(); // re-associate controls in view
     }
 
