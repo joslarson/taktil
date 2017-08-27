@@ -15,7 +15,7 @@ export class View {
 
     static viewName: string;
 
-    static parent: typeof View;
+    static parent: typeof View | undefined;
 
     static getComponent(control: Control, mode: string): Component | null {
         // check in current view
