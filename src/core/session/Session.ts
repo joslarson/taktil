@@ -304,7 +304,7 @@ export class Session extends EventEmitter {
         return { ...this._views };
     }
 
-    /** Set the active view for the session. */
+    /** Set the active view of the session. */
     activateView(viewName: string) {
         const view = this.views[viewName];
         const viewList = Object.keys(this.views).map(viewName => this.views[viewName]);
@@ -319,7 +319,7 @@ export class Session extends EventEmitter {
         this.associateControlsInView(); // re-associate controls in view
     }
 
-    /** The active view for the session. */
+    /** The active view of the session. */
     get activeView(): typeof View {
         return this._activeView;
     }
@@ -327,12 +327,12 @@ export class Session extends EventEmitter {
     // Modes
     //////////////////////////////
 
-    /** Get the list of active modes in the order they were activated, from last to first. */
+    /** The list of active modes in the order they were activated, from last to first. */
     get activeModes() {
         return [...this._activeModes, '__BASE__'];
     }
 
-    /** Activate a mode, adding it to the active mode list */
+    /** Activate a mode, adding it to the active mode list. */
     activateMode(mode: string) {
         if (mode === '__BASE__') throw new Error('Mode name "__BASE__" is reserved.');
         const modeIndex = this._activeModes.indexOf(mode);
