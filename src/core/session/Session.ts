@@ -129,7 +129,7 @@ export class Session extends EventEmitter {
     /**
      * Register controls to the session (can only be called once).
      * 
-     * @param views The mapping of control names to control instances to register
+     * @param controls The mapping of control names to control instances to register
      * to the session. 
      */
     registerControls(controls: { [name: string]: Control }) {
@@ -177,7 +177,10 @@ export class Session extends EventEmitter {
         this.on('init', register);
     }
 
-    /** The map of controls registered to the session. */
+    /**
+     * The mapping of control names to control instances that have
+     * been registered to the session.
+     */
     get controls() {
         return { ...this._controls };
     }
