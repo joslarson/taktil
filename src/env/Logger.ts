@@ -1,5 +1,4 @@
-import { session } from '../';
-
+import { Session } from '../core/session/Session';
 export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
 export type MidiLevel = 'Input' | 'Output' | 'Both' | 'None';
 
@@ -17,7 +16,7 @@ export class Logger {
     private _filterSetting: API.SettableEnumValue;
     private _initQueue: [Level | null, any[]][] = [];
 
-    constructor() {
+    constructor(session: Session) {
         session.on('init', () => {
             host
                 .getPreferences()

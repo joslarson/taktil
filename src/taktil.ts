@@ -1,8 +1,9 @@
+import { Session } from './core/session';
+export const session = new Session();
+import './env';
+
 import { Control, ControlState } from './core/control';
 import { View } from './core/view';
-import { Session } from './core/session';
-
-export const session = new Session();
 
 // Controls
 ////////////////////////
