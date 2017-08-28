@@ -3,7 +3,7 @@ import { Logger } from './Logger';
 import { DelayedTask } from './DelayedTask';
 
 // setup global env
-export const shim = (session: Session) => {
+export const shim = () => {
     const global = Function('return this')() || (42, eval)('this');
     if (!global.host) return;
 
@@ -34,7 +34,7 @@ export const shim = (session: Session) => {
     };
 
     // shim console with custom logger
-    global.console = new Logger(session);
+    global.console = new Logger();
 
     // hookup dummy function to unsupported logger methods
 

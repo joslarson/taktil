@@ -5,8 +5,8 @@ import { shim } from './env';
 
 // create global session instance
 export const session = new Session();
-// shim bitwig scripting env
-shim(session);
+// shim bitwig scripting env after session creation
+shim();
 
 // Controls
 ////////////////////////
