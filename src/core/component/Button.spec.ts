@@ -1,5 +1,4 @@
-import '../../env';
-
+import { session } from '../../taktil';
 import { Button } from './Button';
 import { SimpleControl } from '../control/SimpleControl';
 

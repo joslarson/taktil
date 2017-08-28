@@ -1,7 +1,7 @@
 import { EventEmitter } from './EventEmitter';
-import { MidiOutProxy, MidiMessage, SysexMessage } from '../core/midi';
-import { Control, ControlState } from '../core/control';
-import { View } from '../core/view';
+import { MidiOutProxy, MidiMessage, SysexMessage } from '../midi';
+import { Control, ControlState } from '../control';
+import { View } from '../view';
 
 declare const global: any;
 

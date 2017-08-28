@@ -1,5 +1,3 @@
-import '../../env';
-
 import { Control, ControlState } from '../control/Control';
 import { SimpleControl } from '../control/SimpleControl';
 import { Component, ComponentState, ComponentParams } from './Component';

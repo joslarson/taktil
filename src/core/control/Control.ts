@@ -1,3 +1,4 @@
+import { session } from '../../taktil';
 import { MidiMessage, SysexMessage, MessagePattern } from '../midi/';
 import { Component } from '../component';
 import { Color } from '../helpers';

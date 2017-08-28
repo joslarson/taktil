@@ -1,5 +1,3 @@
-import '../../env';
-
 import { View } from './View';
 
 class TestView extends View {}

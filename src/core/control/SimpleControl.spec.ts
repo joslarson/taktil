@@ -1,5 +1,3 @@
-import '../../env';
-
 import { SimpleControl } from './SimpleControl';
 import { MidiMessage } from '../midi/';
 

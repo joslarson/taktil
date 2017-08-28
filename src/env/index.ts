@@ -1,11 +1,5 @@
 import { Logger } from './Logger';
-import { Session } from './Session';
 import { DelayedTask } from './DelayedTask';
-
-// define global variables
-declare global {
-    const session: Session;
-}
 
 // setup global env
 (() => {
@@ -14,11 +8,8 @@ declare global {
     // add global reference to global namespace
     global.global = global;
 
-    // create global session object
-    global.session = new Session();
-
     // specific env setup for bitwig environment
-    if (global.loadAPI) {
+    if (global.host) {
         // shim Timeout and Interval methods using DelayedTask class
         global.setTimeout = function setTimeout(
             callback: (...args: any[]) => any,

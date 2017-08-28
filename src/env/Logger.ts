@@ -1,3 +1,5 @@
+import { session } from '../';
+
 export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
 export type MidiLevel = 'Input' | 'Output' | 'Both' | 'None';
 

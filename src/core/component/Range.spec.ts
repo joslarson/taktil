@@ -1,5 +1,3 @@
-import '../../env';
-
 import { SimpleControl } from '../control/SimpleControl';
 import { Range } from './Range';
 import { ControlState } from '../control/Control';

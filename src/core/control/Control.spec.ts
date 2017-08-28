@@ -1,5 +1,4 @@
-import '../../env';
-
+import { session } from '../../taktil';
 import { Control } from './Control';
 import { MidiMessage, SysexMessage } from '../midi/';
 import { Button } from '../component/Button';

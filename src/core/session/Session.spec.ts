@@ -1,11 +1,6 @@
-import '../env';
-
 import { Session } from './Session';
-import { SimpleControl } from '../core/control/SimpleControl';
-import { View } from '../core/view/View';
-
-// allows me to recreate session globally
-declare let session: Session;
+import { SimpleControl } from '../control';
+import { View } from '../view';
 
 describe('Session', () => {
     const controls = { CTRL: new SimpleControl({ status: 0xb0, data1: 0xb1 }) };
@@ -13,44 +8,42 @@ describe('Session', () => {
     class BaseView extends View {}
     const views = { BASE: BaseView };
 
-    session.emit('init');
-
     describe('Views', () => {
         it('should register controls correctly', () => {
-            session = new Session();
+            const session = new Session();
             session.registerControls(controls);
             expect(session.controls.CTRL).toBe(undefined);
             session.emit('init');
             expect(session.controls.CTRL).toBe(controls.CTRL);
 
-            session = new Session();
-            (session as any)._isInit = true;
-            session.registerControls(controls);
-            expect(session.controls.CTRL).toBe(controls.CTRL);
+            const session2 = new Session();
+            (session2 as any)._isInit = true;
+            session2.registerControls(controls);
+            expect(session2.controls.CTRL).toBe(controls.CTRL);
         });
 
         it('should register views correctly outside of init', () => {
             const viewInit = jest.spyOn(BaseView, 'init');
 
-            session = new Session();
+            const session = new Session();
             session.registerViews(views);
             expect(session.views.BASE).toBe(undefined);
             session.emit('init');
             expect(session.views.BASE).toBe(undefined);
 
-            session = new Session();
-            session.registerViews(views);
-            session.registerControls(controls);
-            expect(session.views.BASE).toBe(undefined);
-            session.emit('init');
-            expect(session.views.BASE).toBe(BaseView);
+            const session2 = new Session();
+            session2.registerViews(views);
+            session2.registerControls(controls);
+            expect(session2.views.BASE).toBe(undefined);
+            session2.emit('init');
+            expect(session2.views.BASE).toBe(BaseView);
 
             expect(viewInit).toHaveBeenCalledTimes(1);
             viewInit.mockRestore();
         });
 
         it('should register views correctly inside of init', () => {
-            session = new Session();
+            const session = new Session();
             (session as any)._isInit = true;
             session.registerViews(views);
             expect(Object.keys(session.views).length).toBe(0);
@@ -61,7 +54,7 @@ describe('Session', () => {
         });
 
         it('should activate views correctly', () => {
-            session = new Session();
+            const session = new Session();
             session.registerControls(controls);
             session.registerViews(views);
             session.emit('init');
@@ -72,7 +65,7 @@ describe('Session', () => {
     });
 
     describe('Modes', () => {
-        session = new Session();
+        const session = new Session();
         it('should activate/deactivate modes correctly', () => {
             const base = '__BASE__';
             const mode1 = 'TEST1';
