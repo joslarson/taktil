@@ -1,9 +1,12 @@
-import { Session } from './core/session';
-export const session = new Session();
-import './env';
-
 import { Control, ControlState } from './core/control';
 import { View } from './core/view';
+import { Session } from './core/session';
+import { shim } from './env';
+
+// create global session instance
+export const session = new Session();
+// shim bitwig scripting env
+shim();
 
 // Controls
 ////////////////////////
