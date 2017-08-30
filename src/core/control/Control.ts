@@ -153,8 +153,15 @@ export abstract class Control<State extends ControlState = ControlState> {
             if (message instanceof MidiMessage) {
                 // send message to cache, send to midi out if new
                 if (this.cacheMidiMessage(message) || force) {
-                    const { port, status, data1, data2 } = message;
-                    session.midiOut.sendMidi({ port, status, data1, data2, name: this.name });
+                    const { port, status, data1, data2, urgent } = message;
+                    session.midiOut.sendMidi({
+                        port,
+                        status,
+                        data1,
+                        data2,
+                        urgent,
+                        name: this.name,
+                    });
                 }
             } else if (message instanceof SysexMessage) {
                 const { port, data } = message;

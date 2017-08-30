@@ -9,13 +9,21 @@ export class MidiMessage implements SimpleMidiMessage {
     status: number;
     data1: number;
     data2: number;
+    urgent: boolean;
     hex: string;
 
-    constructor({ port = 0, status, data1, data2 }: { port?: number } & SimpleMidiMessage) {
+    constructor({
+        port = 0,
+        status,
+        data1,
+        data2,
+        urgent = false,
+    }: { port?: number; urgent?: boolean } & SimpleMidiMessage) {
         this.port = port;
         this.status = status;
         this.data1 = data1;
         this.data2 = data2;
+        this.urgent = urgent;
         this.hex = [status, data1, data2]
             .map(midiByte => {
                 let hexByteString = midiByte.toString(16).toUpperCase();
