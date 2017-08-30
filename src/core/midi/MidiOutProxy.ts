@@ -8,9 +8,15 @@ export interface NaiveMidiMessage extends SimpleMidiMessage {
     port: number;
 }
 
+export interface NaiveSysexMessage {
+    name?: string;
+    port: number;
+    data: string;
+}
+
 export class MidiOutProxy {
     private _midiQueue: NaiveMidiMessage[] = [];
-    private _sysexQueue: SysexMessage[] = [];
+    private _sysexQueue: NaiveSysexMessage[] = [];
 
     constructor(session: Session) {
         session.on('flush', () => this._flushQueues());
@@ -59,7 +65,7 @@ export class MidiOutProxy {
             console.log(`[SYSEX] OUT ${String(port)} <== ${data}${name ? ` "${name}"` : ''}`);
             host.getMidiOutPort(port).sendSysex(data);
         } else {
-            this._sysexQueue.push({ port, data });
+            this._sysexQueue.push({ name, port, data });
         }
     }
 
@@ -198,7 +204,8 @@ export class MidiOutProxy {
         // 2. async flush queued sysex messages
         setTimeout(() => {
             while (this._sysexQueue.length > 0) {
-                const { port, data } = this._sysexQueue.shift() as SysexMessage;
+                const { name, port, data } = this._sysexQueue.shift() as NaiveSysexMessage;
+                console.log(`[SYSEX] OUT ${String(port)} <== ${data}${name ? ` "${name}"` : ''}`);
                 host.getMidiOutPort(port).sendSysex(data);
             }
         });
