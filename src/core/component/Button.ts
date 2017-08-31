@@ -28,7 +28,7 @@ export abstract class Button<
     onRelease?(): void;
     onDoubleRelease?(): void;
 
-    onInput(input: ControlState) {
+    onControlInput(input: ControlState) {
         if (this.onPress) this.handlePress(input.value);
         if (this.onLongPress) this.handleLongPress(input.value);
         if (this.onDoublePress) this.handleDoublePress(input.value);
@@ -36,7 +36,7 @@ export abstract class Button<
         if (this.onDoubleRelease) this.handleDoubleRelease(input.value);
     }
 
-    getOutput(): ControlState {
+    getControlOutput(): ControlState {
         const { on, color } = this.state;
         return {
             value: on ? this.control.maxValue : this.control.minValue,

@@ -14,11 +14,11 @@ describe('Component', () => {
     class TestComponent extends Component<Params, State> {
         state: State = { value: control.minValue, foo: { bar: 0 } };
 
-        getOutput(): ControlState {
+        getControlOutput(): ControlState {
             return { value: this.state.value };
         }
 
-        onInput({ value }: ControlState) {
+        onControlInput({ value }: ControlState) {
             this.setState({ value });
         }
     }

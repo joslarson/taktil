@@ -50,13 +50,13 @@ describe('Button', () => {
         onDoubleRelease.mockReset();
 
         // double press/release
-        button.onInput({ value: control.maxValue });
+        button.onControlInput({ value: control.maxValue });
         jest.runTimersToTime(50);
-        button.onInput({ value: control.minValue });
+        button.onControlInput({ value: control.minValue });
         jest.runTimersToTime(100);
-        button.onInput({ value: control.maxValue });
+        button.onControlInput({ value: control.maxValue });
         jest.runTimersToTime(50);
-        button.onInput({ value: control.minValue });
+        button.onControlInput({ value: control.minValue });
         jest.runTimersToTime(50);
 
         expect(onPress).toHaveBeenCalledTimes(1);
@@ -72,9 +72,9 @@ describe('Button', () => {
         onLongPress.mockReset();
 
         // long press
-        button.onInput({ value: control.maxValue });
+        button.onControlInput({ value: control.maxValue });
         jest.runTimersToTime(350);
-        button.onInput({ value: control.minValue });
+        button.onControlInput({ value: control.minValue });
 
         expect(onPress).toHaveBeenCalledTimes(1);
         expect(onLongPress).toHaveBeenCalledTimes(1);

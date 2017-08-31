@@ -147,17 +147,13 @@ export class Session extends EventEmitter {
 
                 // make sure patterns don't overlap
                 for (const existingControl of controlsArray) {
-                    // if none of the ports match up, then there's no conflict
-                    const outPortsMatch = control.outPort !== existingControl.outPort;
-                    const inPortsMatch = control.inPort !== existingControl.inPort;
-                    if (outPortsMatch && inPortsMatch) continue;
-
                     for (const pattern of control.patterns) {
                         for (const existingPattern of existingControl.patterns) {
-                            if (pattern.conflictsWith(existingPattern))
+                            if (pattern.conflictsWith(existingPattern)) {
                                 throw new Error(
                                     `Control "${control.name}" conflicts with existing Control "${existingControl.name}".`
                                 );
+                            }
                         }
                     }
                 }
@@ -190,10 +186,6 @@ export class Session extends EventEmitter {
         // look for a matching registered control
         for (const controlName in this.controls) {
             const control = this.controls[controlName];
-
-            // skip controls with an inPort that does not match the midiMessage port
-            if (control.inPort !== message.port) continue;
-
             for (const pattern of control.patterns) {
                 // if pattern matches midiMessage, return control
                 if (pattern.test(message)) return control;

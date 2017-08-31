@@ -9,22 +9,12 @@ export interface ControlState {
     [key: string]: any;
 }
 
-export interface ControlOptions {
-    port?: number;
-    inPort?: number;
-    outPort?: number;
-    patterns: (string | MessagePattern)[]; // patterns for all inPort and outPort MidiMessages
-}
-
 /**
  * Abstract class defining the the base functionality from which all
  * other controls must extend.
  */
 export abstract class Control<State extends ControlState = ControlState> {
     name: string;
-
-    inPort: number = 0;
-    outPort: number = 0;
     patterns: MessagePattern[];
 
     cache: string[] = [];
@@ -33,26 +23,22 @@ export abstract class Control<State extends ControlState = ControlState> {
 
     minValue = 0;
     maxValue = 127;
+    get valueRange() {
+        return this.maxValue - this.minValue;
+    }
 
     abstract state: State;
 
     private _defaultState: State;
     private _activeComponent: Component | null = null;
 
-    constructor({ port, inPort, outPort, patterns }: ControlOptions) {
+    constructor(...patterns: (string | MessagePattern)[]) {
         if (!patterns || patterns.length === 0)
             throw new Error(`Error, Control must specify at least one pattern.`);
-
         // set object properties
-        this.inPort = port !== undefined ? port : inPort !== undefined ? inPort : this.inPort;
-        this.outPort = port !== undefined ? port : outPort !== undefined ? outPort : this.outPort;
         this.patterns = patterns.map(
             pattern => (typeof pattern === 'string' ? new MessagePattern(pattern) : pattern)
         );
-    }
-
-    get range() {
-        return this.maxValue - this.minValue;
     }
 
     // state
@@ -103,7 +89,7 @@ export abstract class Control<State extends ControlState = ControlState> {
 
     // midi i/o
 
-    abstract getInput(message: MidiMessage | SysexMessage): State;
+    abstract getControlInput(message: MidiMessage | SysexMessage): State;
 
     cacheMidiMessage(midiMessage: MidiMessage): boolean {
         if (this.cache.indexOf(midiMessage.hex) !== -1) return false;
@@ -126,7 +112,7 @@ export abstract class Control<State extends ControlState = ControlState> {
         if (this.cacheOnMidiIn && message instanceof MidiMessage) this.cacheMidiMessage(message);
 
         if (this.activeComponent) {
-            this.activeComponent.onInput(this.getInput(message));
+            this.activeComponent.onControlInput(this.getControlInput(message));
         } else {
             // re-render based on current state (messages will only be sent if they are
             // different than what's in the cache)
@@ -139,42 +125,49 @@ export abstract class Control<State extends ControlState = ControlState> {
 
     // render
 
-    preRender?(): void;
+    controlWillRender?(messages: (MidiMessage | SysexMessage)[]): void;
 
     render(force = false): boolean {
         // no midi out? no render.
         if (!this.enableMidiOut || !this.getMidiOutput) return false;
 
-        // pre render hook
-        if (this.preRender) this.preRender();
-
-        // send messages
-        for (const message of this.getMidiOutput(this.state)) {
+        // get list of messages that will be sent
+        const messages = this.getMidiOutput(this.state).filter(message => {
             if (message instanceof MidiMessage) {
-                // send message to cache, send to midi out if new
-                if (this.cacheMidiMessage(message) || force) {
-                    const { port, status, data1, data2, urgent } = message;
-                    session.midiOut.sendMidi({
-                        port,
-                        status,
-                        data1,
-                        data2,
-                        urgent,
-                        name: this.name,
-                    });
-                }
-            } else if (message instanceof SysexMessage) {
+                // send midi message to cache, add to message list if new
+                return this.cacheMidiMessage(message) || force;
+            } else {
+                // sysex messages are not cached, always send
+                return true;
+            }
+        });
+
+        // call pre render hook only if something will be rendered
+        if (messages.length && this.controlWillRender) this.controlWillRender(messages);
+
+        for (const message of messages) {
+            if (message instanceof MidiMessage) {
+                // send midi message
+                const { port, status, data1, data2, urgent } = message;
+                session.midiOut.sendMidi({
+                    port,
+                    status,
+                    data1,
+                    data2,
+                    urgent,
+                    name: this.name,
+                });
+            } else {
+                // send sysex message
                 const { port, data } = message;
                 session.midiOut.sendSysex({ port, data });
-            } else {
-                throw new Error('Unrecognized message type.');
             }
         }
 
-        // post render hook
-        if (this.postRender) this.postRender();
+        // call post render hook
+        if (this.controlDidRender) this.controlDidRender();
         return true;
     }
 
-    postRender?(): void;
+    controlDidRender?(): void;
 }

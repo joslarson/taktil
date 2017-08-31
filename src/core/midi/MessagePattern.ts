@@ -2,16 +2,33 @@ import { MidiMessage, SimpleMidiMessage } from './MidiMessage';
 import { SysexMessage } from './SysexMessage';
 
 export class MessagePattern {
+    static getPatternStringFromMidiMessage({
+        port,
+        status,
+        data1,
+        data2,
+    }: Partial<SimpleMidiMessage>) {
+        return [port, status, data1, data2]
+            .map(midiByte => {
+                if (midiByte === undefined) return '??';
+                let hexByteString = midiByte.toString(16).toUpperCase();
+                if (hexByteString.length === 1) hexByteString = `0${hexByteString}`;
+                return hexByteString;
+            })
+            .join('');
+    }
+
     string: string;
     regex: RegExp;
 
     constructor(input: string | Partial<SimpleMidiMessage>) {
         let string: string;
         if (typeof input === 'string') {
-            // handel string representation as input (e.g. 'B419??')
-            if (!/[a-fA-F0-9?]{6,}/.test(input))
+            // handel string representation as input (e.g. '00B419??')
+            string = input.length === 6 ? `??${input}` : input;
+            if (!/[a-fA-F0-9?]{8,}/.test(string))
                 throw new Error(`Invalid message pattern: "${input}"`);
-            string = input.toUpperCase();
+            string = string.toUpperCase();
         } else {
             // handle Partial<SimpleMidiMessage> as input
             string = MessagePattern.getPatternStringFromMidiMessage(input);
@@ -22,17 +39,6 @@ export class MessagePattern {
 
     toString() {
         return this.string;
-    }
-
-    static getPatternStringFromMidiMessage(midiMessage: Partial<SimpleMidiMessage>) {
-        return [midiMessage.status, midiMessage.data1, midiMessage.data2]
-            .map(midiByte => {
-                if (midiByte === undefined) return '??';
-                let hexByteString = midiByte.toString(16).toUpperCase();
-                if (hexByteString.length === 1) hexByteString = `0${hexByteString}`;
-                return hexByteString;
-            })
-            .join('');
     }
 
     conflictsWith(pattern: MessagePattern) {

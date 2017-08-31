@@ -1,7 +1,16 @@
 export interface SimpleMidiMessage {
+    port: number;
     status: number;
     data1: number;
     data2: number;
+}
+
+export interface MidiMessageConstructor {
+    port?: number;
+    status: number;
+    data1: number;
+    data2: number;
+    urgent?: boolean;
 }
 
 export class MidiMessage implements SimpleMidiMessage {
@@ -12,19 +21,13 @@ export class MidiMessage implements SimpleMidiMessage {
     urgent: boolean;
     hex: string;
 
-    constructor({
-        port = 0,
-        status,
-        data1,
-        data2,
-        urgent = false,
-    }: { port?: number; urgent?: boolean } & SimpleMidiMessage) {
+    constructor({ port = 0, status, data1, data2, urgent = false }: MidiMessageConstructor) {
         this.port = port;
         this.status = status;
         this.data1 = data1;
         this.data2 = data2;
         this.urgent = urgent;
-        this.hex = [status, data1, data2]
+        this.hex = [port, status, data1, data2]
             .map(midiByte => {
                 let hexByteString = midiByte.toString(16).toUpperCase();
                 if (hexByteString.length === 1) hexByteString = `0${hexByteString}`;
@@ -117,3 +120,5 @@ export class MidiMessage implements SimpleMidiMessage {
         return this.hex;
     }
 }
+
+new MidiMessage({ status: 0, data1: 0, data2: 0 });

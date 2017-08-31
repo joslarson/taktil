@@ -44,12 +44,12 @@ export abstract class Component<
 
     render(): void {
         // update hardware state if in view
-        if (this.control.activeComponent === this) this.control.setState(this.getOutput());
+        if (this.control.activeComponent === this) this.control.setState(this.getControlOutput());
     }
 
     // defines conversion of component state to control state
-    abstract getOutput(): ControlState;
+    abstract getControlOutput(): ControlState;
 
     // handles control input
-    abstract onInput(input: ControlState): void;
+    abstract onControlInput(input: ControlState): void;
 }

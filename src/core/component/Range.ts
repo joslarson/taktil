@@ -24,11 +24,11 @@ export abstract class Range<
         }, this.memory.input ? this.INPUT_DELAY : 0);
     }
 
-    getOutput(): ControlState {
+    getControlOutput(): ControlState {
         return { value: this.state.value };
     }
 
-    onInput({ value }: ControlState) {
+    onControlInput({ value }: ControlState) {
         // on input, start/restart input countdown timer to create input buffer time
         clearTimeout(this.memory.input);
         this.memory.input = setTimeout(() => delete this.memory.input, this.INPUT_DELAY);

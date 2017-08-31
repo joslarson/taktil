@@ -3,8 +3,8 @@ import { Range } from './Range';
 import { ControlState } from '../control/Control';
 
 class TestRange extends Range {
-    onInput({ value, ...rest }: ControlState) {
-        super.onInput({ value, ...rest });
+    onControlInput({ value, ...rest }: ControlState) {
+        super.onControlInput({ value, ...rest });
         this.setState({ value });
     }
 }
@@ -17,11 +17,11 @@ describe('Range', () => {
     (control as any)._activeComponent = range;
 
     jest.useFakeTimers();
-    const getOutput = jest.spyOn(range, 'getOutput');
+    const getOutput = jest.spyOn(range, 'getControlOutput');
 
     it('should not render until after the input timer runs out', () => {
-        range.onInput({ value: control.maxValue });
-        range.onInput({ value: control.minValue });
+        range.onControlInput({ value: control.maxValue });
+        range.onControlInput({ value: control.minValue });
         jest.runTimersToTime(range.INPUT_DELAY - 1);
 
         expect(getOutput).not.toHaveBeenCalled();

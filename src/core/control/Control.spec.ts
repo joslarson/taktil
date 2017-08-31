@@ -6,9 +6,10 @@ import { Button } from '../component/Button';
 type TestControlState = { value: number; nested: { value: number } };
 
 class TestControl extends Control<TestControlState> {
+    name = 'TEST_CONTROL';
     state = { value: 127, nested: { value: 0 } };
 
-    getInput(message: MidiMessage | SysexMessage) {
+    getControlInput(message: MidiMessage | SysexMessage) {
         return { ...this.state };
     }
 
@@ -28,7 +29,7 @@ class TestComponent extends Button {
 }
 
 describe('Control', () => {
-    const control = new TestControl({ patterns: ['B01F??'] });
+    const control = new TestControl('00B01F??');
     const component = new TestComponent(control, {});
 
     it('should initialize state correctly', () => {
