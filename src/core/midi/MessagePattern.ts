@@ -18,6 +18,19 @@ export class MessagePattern {
             .join('');
     }
 
+    static getMidiMessageFromPatternString(pattern: string): Partial<SimpleMidiMessage> {
+        const string = pattern.length === 6 ? `??${pattern}` : pattern;
+        const [port, status, data1, data2] = (string.match(/.{1,2}/g) as string[]).map(
+            byte => (byte.indexOf('?') > -1 ? undefined : parseInt(byte, 16))
+        );
+        return { port, status, data1, data2 };
+    }
+
+    port?: number;
+    status?: number;
+    data1?: number;
+    data2?: number;
+
     string: string;
     regex: RegExp;
 
@@ -29,9 +42,18 @@ export class MessagePattern {
             if (!/[a-fA-F0-9?]{8,}/.test(string))
                 throw new Error(`Invalid message pattern: "${input}"`);
             string = string.toUpperCase();
+            const message = MessagePattern.getMidiMessageFromPatternString(string);
+            this.port = message.port;
+            this.status = message.status;
+            this.data1 = message.data1;
+            this.data2 = message.data2;
         } else {
             // handle Partial<SimpleMidiMessage> as input
             string = MessagePattern.getPatternStringFromMidiMessage(input);
+            this.port = input.port;
+            this.status = input.status;
+            this.data1 = input.data1;
+            this.data2 = input.data2;
         }
         this.string = string;
         this.regex = new RegExp(`^${string.slice().replace(/\?/g, '.')}$`);
