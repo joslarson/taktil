@@ -10,8 +10,6 @@ export class SimpleControl<State extends SimpleControlState = SimpleControlState
     status: number;
     data1: number;
 
-    state = { value: 0 } as State;
-
     constructor({ port = 0, status, data1 }: { port?: number; status: number; data1: number }) {
         super(new MessagePattern({ port, status, data1 }));
         this.port = port;

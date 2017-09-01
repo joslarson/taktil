@@ -27,7 +27,7 @@ export abstract class Control<State extends ControlState = ControlState> {
         return this.maxValue - this.minValue;
     }
 
-    abstract state: State;
+    state: State = { value: 0 } as State;
 
     private _defaultState: State;
     private _activeComponent: Component | null = null;
