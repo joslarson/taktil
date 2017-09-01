@@ -181,33 +181,25 @@ export class MidiOutProxy {
         });
     }
 
-    // TODO: do I need to throttle this? do I need to make sure flushQueue
-    // function is only being run once at a given time?
+    // flush queued midi and sysex messages
     protected _flushQueues() {
-        // 1. async flush queued midi messages
-        setTimeout(() => {
-            while (this._midiQueue.length > 0) {
-                const {
-                    name,
-                    port,
-                    status,
-                    data1,
-                    data2,
-                } = this._midiQueue.shift() as NaiveMidiMessage;
+        while (this._midiQueue.length > 0 || this._sysexQueue.length > 0) {
+            const midiMessage = this._midiQueue.shift() as NaiveMidiMessage;
+            if (midiMessage) {
+                const { port, status, data1, data2 } = midiMessage;
                 console.log(
                     `[MIDI]  OUT ${String(port)} <== ${new MidiMessage({ status, data1, data2 })
                         .hex}${name ? ` "${name}"` : ''}`
                 );
                 host.getMidiOutPort(port).sendMidi(status, data1, data2);
             }
-        });
-        // 2. async flush queued sysex messages
-        setTimeout(() => {
-            while (this._sysexQueue.length > 0) {
-                const { name, port, data } = this._sysexQueue.shift() as NaiveSysexMessage;
+
+            const sysexMessage = this._sysexQueue.shift() as NaiveSysexMessage;
+            if (sysexMessage) {
+                const { port, data } = sysexMessage;
                 console.log(`[SYSEX] OUT ${String(port)} <== ${data}${name ? ` "${name}"` : ''}`);
                 host.getMidiOutPort(port).sendSysex(data);
             }
-        });
+        }
     }
 }
