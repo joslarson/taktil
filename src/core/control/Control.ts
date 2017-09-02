@@ -1,5 +1,5 @@
 import { session } from '../../taktil';
-import { MidiMessage, SysexMessage, MessagePattern } from '../midi/';
+import { MidiMessage, SimpleMidiMessage, SysexMessage, MessagePattern } from '../midi/';
 import { Component } from '../component';
 import { Color } from '../helpers';
 
@@ -13,32 +13,57 @@ export interface ControlState {
  * Abstract class defining the the base functionality from which all
  * other controls must extend.
  */
-export abstract class Control<State extends ControlState = ControlState> {
+export class Control<State extends ControlState = ControlState> {
     name: string;
     patterns: MessagePattern[];
 
-    cache: string[] = [];
-    enableMidiOut: boolean = true;
-    cacheOnMidiIn: boolean = true;
+    port?: number;
+    status?: number;
+    data1?: number;
+    data2?: number;
 
     minValue = 0;
     maxValue = 127;
-    get valueRange() {
-        return this.maxValue - this.minValue;
-    }
+    enableMidiOut: boolean = true;
+    cacheOnMidiIn: boolean = true;
 
     state: State = { value: 0 } as State;
 
+    protected cache: string[] = [];
     private _defaultState: State;
     private _activeComponent: Component | null = null;
 
-    constructor(...patterns: (string | MessagePattern)[]) {
+    constructor(...patterns: (string | Partial<SimpleMidiMessage> | MessagePattern)[]) {
         if (!patterns || patterns.length === 0)
             throw new Error(`Error, Control must specify at least one pattern.`);
         // set object properties
         this.patterns = patterns.map(
-            pattern => (typeof pattern === 'string' ? new MessagePattern(pattern) : pattern)
+            pattern => (pattern instanceof MessagePattern ? pattern : new MessagePattern(pattern))
         );
+
+        // pull out shared pattern info into port, status, data1, and data2
+        const isShared = this.patterns.reduce(
+            (result, p1, index) => {
+                // if there's just one pattern, return all true
+                if (index === 0) return result;
+                const p2 = this.patterns[index - 1];
+                if (result.port && p1.port !== p2.port) result.port = false;
+                if (result.status && p1.status !== p2.status) result.status = false;
+                if (result.data1 && p1.data1 !== p2.data1) result.data1 = false;
+                if (result.data2 && p1.data2 !== p2.data2) result.data2 = false;
+                return result;
+            },
+            { port: true, status: true, data1: true, data2: true }
+        );
+        const [{ port, status, data1, data2 }] = this.patterns;
+        if (isShared.port) this.port = port;
+        if (isShared.status) this.status = status;
+        if (isShared.data1) this.data1 = data1;
+        if (isShared.data2) this.data2 = data2;
+    }
+
+    get valueRange() {
+        return this.maxValue - this.minValue;
     }
 
     // state
@@ -89,7 +114,17 @@ export abstract class Control<State extends ControlState = ControlState> {
 
     // midi i/o
 
-    abstract getControlInput(message: MidiMessage | SysexMessage): State;
+    getControlInput(message: MidiMessage | SysexMessage): State {
+        if (
+            message instanceof MidiMessage &&
+            message.status === this.status &&
+            message.data1 === this.data1
+        ) {
+            return { ...this.state as ControlState, value: message.data2 } as State; // TODO: should be able to remove type casting in future typescript release
+        } else {
+            return this.state;
+        }
+    }
 
     cacheMidiMessage(midiMessage: MidiMessage): boolean {
         if (this.cache.indexOf(midiMessage.hex) !== -1) return false;
@@ -121,7 +156,16 @@ export abstract class Control<State extends ControlState = ControlState> {
         }
     }
 
-    getMidiOutput?(state: State): (MidiMessage | SysexMessage)[];
+    getMidiOutput(state: State): (MidiMessage | SysexMessage)[] {
+        const { port, status, data1, data2 } = this;
+        if (port !== undefined && status !== undefined && data1 !== undefined) {
+            // if it's a simple midi control (port,status, and data1 provided), handle it
+            return !data2 ? [new MidiMessage({ port, status, data1, data2: state.value })] : [];
+        } else {
+            // otherwise leave it up to the implementation
+            return [];
+        }
+    }
 
     // render
 
@@ -129,7 +173,7 @@ export abstract class Control<State extends ControlState = ControlState> {
 
     render(force = false): boolean {
         // no midi out? no render.
-        if (!this.enableMidiOut || !this.getMidiOutput) return false;
+        if (!this.enableMidiOut) return false;
 
         // get list of messages that will be sent
         const messages = this.getMidiOutput(this.state).filter(message => {
@@ -165,9 +209,9 @@ export abstract class Control<State extends ControlState = ControlState> {
         }
 
         // call post render hook
-        if (this.controlDidRender) this.controlDidRender();
+        if (this.controlDidRender) this.controlDidRender(messages);
         return true;
     }
 
-    controlDidRender?(): void;
+    controlDidRender?(messages: (MidiMessage | SysexMessage)[]): void;
 }

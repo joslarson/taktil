@@ -73,13 +73,35 @@ describe('Control', () => {
     it('should skip render in certain situations', () => {
         control.enableMidiOut = false;
         expect(control.render()).toBe(false);
+
         control.enableMidiOut = true;
-
-        const getOutput = TestControl.prototype.getMidiOutput;
-        delete TestControl.prototype.getMidiOutput;
-        expect(control.render()).toBe(false);
-        TestControl.prototype.getMidiOutput = getOutput;
-
         expect(control.render()).toBe(true);
+    });
+
+    it('should set shared port, status, data1, and data2 from patterns', () => {
+        const { port, status, data1, data2 } = new TestControl('00B41900', '00B41801');
+        expect({ port, status, data1, data2 }).toEqual({ port: 0, status: 0xb4 });
+    });
+
+    it('should generate correct input for simple control', () => {
+        const control = new Control({ status: 0xb0, data1: 21 });
+        const { status, data1 } = control as { status: number; data1: number };
+        expect(
+            control.getControlInput(new MidiMessage({ status, data1, data2: control.maxValue }))
+        ).toEqual({
+            value: control.maxValue,
+        });
+    });
+
+    it('should generate correct output for simple control', () => {
+        const control = new Control({ status: 0xb0, data1: 21 });
+        const { status, data1, state: { value } } = control as {
+            status: number;
+            data1: number;
+            state: { value: number };
+        };
+        expect(control.getMidiOutput(control.state)).toEqual([
+            new MidiMessage({ status, data1, data2: value }),
+        ]);
     });
 });

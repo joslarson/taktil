@@ -36,6 +36,10 @@ export class MidiMessage implements SimpleMidiMessage {
             .join('');
     }
 
+    get shortHex() {
+        return this.hex.slice(2);
+    }
+
     get channel() {
         return this.status & 0xf;
     }

@@ -117,9 +117,9 @@ export class Session extends EventEmitter {
         if (control) control.onMidiInput(message);
 
         console.log(
-            `${messageType} IN  ${String(message.port)} ==> ${message}${control && control.name
-                ? ` "${control.name}"`
-                : ''}`
+            `${messageType} IN  ${message.port} ==> ${message instanceof MidiMessage
+                ? message.shortHex
+                : message.data}${control && control.name ? ` "${control.name}"` : ''}`
         );
     }
 

@@ -38,7 +38,7 @@ export class MessagePattern {
         let string: string;
         if (typeof input === 'string') {
             // handel string representation as input (e.g. '00B419??')
-            string = input.length === 6 ? `??${input}` : input;
+            string = input.length === 6 ? `00${input}` : input;
             if (!/[a-fA-F0-9?]{8,}/.test(string))
                 throw new Error(`Invalid message pattern: "${input}"`);
             string = string.toUpperCase();
@@ -50,7 +50,7 @@ export class MessagePattern {
         } else {
             // handle Partial<SimpleMidiMessage> as input
             string = MessagePattern.getPatternStringFromMidiMessage(input);
-            this.port = input.port;
+            this.port = input.port || 0;
             this.status = input.status;
             this.data1 = input.data1;
             this.data2 = input.data2;

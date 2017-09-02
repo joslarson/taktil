@@ -10,12 +10,13 @@ export type MidiLevel = 'Input' | 'Output' | 'Both' | 'None';
  */
 export class Logger {
     private _levels = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
-    private _level: Level = 'DEBUG';
+    private _level: Level;
     private _midiLevel: MidiLevel;
     private _levelSetting: API.SettableEnumValue;
-    private _filter = '';
+    private _filter: string;
     private _filterSetting: API.SettableEnumValue;
     private _initQueue: [Level | null, any[]][] = [];
+    private _flushed = false;
 
     constructor() {
         session.on('init', () => {
@@ -29,32 +30,38 @@ export class Logger {
                 )
                 .addValueObserver((midiLevel: MidiLevel) => {
                     this._midiLevel = midiLevel;
+                    if (this._ready && !this._flushed) this._flushQueue();
                 });
 
             this._levelSetting = host
                 .getPreferences()
-                .getEnumSetting('Log Level', 'Development', this._levels, this._level);
+                .getEnumSetting('Log Level', 'Development', this._levels, 'ERROR');
 
-            this._levelSetting.addValueObserver((level: Level) => (this._level = level));
+            this._levelSetting.addValueObserver((level: Level) => {
+                this._level = level;
+                if (this._ready && !this._flushed) this._flushQueue();
+            });
 
             this._filterSetting = host
                 .getPreferences()
-                .getStringSetting('Log filter (Regex)', 'Development', 1000, this._filter);
+                .getStringSetting('Log filter (Regex)', 'Development', 1000, '');
             this._filterSetting.addValueObserver(value => {
                 this._filter = value;
-                if (value) {
-                    const message = ` Log filter regex set to \\${value}\\gi `;
+                if (this._filter) {
+                    const message = ` Log filter regex set to "${value}"`;
                     this.log(`╭───┬${'─'.repeat(message.length)}╮`);
                     this.log(`│ i │${message}` +               '│'); // prettier-ignore
                     this.log(`╰───┴${'─'.repeat(message.length)}╯`);
                 }
+                if (this._ready && !this._flushed) this._flushQueue();
             });
-
-            while (this._initQueue.length > 0) {
-                const [level, messages] = this._initQueue.shift() as [Level | null, any[]];
-                this._log(level, ...messages);
-            }
         });
+    }
+
+    private get _ready() {
+        return (
+            this._filter !== undefined && this._level !== undefined && this._midiLevel !== undefined
+        );
     }
 
     set level(level: Level) {
@@ -102,7 +109,7 @@ export class Logger {
     }
 
     private _log(level: Level | null, ...messages: any[]) {
-        if (!this._levelSetting) {
+        if (!this._ready) {
             this._initQueue.push([level, messages]);
             return;
         }
@@ -110,7 +117,7 @@ export class Logger {
         if (level && this._levels.indexOf(level) > this._levels.indexOf(this._level)) return;
 
         const message = `${level ? `[${level.toUpperCase()}] ` : ''}${messages.join(' ')}`;
-        if (this._filter) {
+        if (level && this._filter) {
             const re = new RegExp(this._filter, 'gi');
             if (!re.test(message)) return;
         }
@@ -123,5 +130,13 @@ export class Logger {
         if (this._midiLevel === 'Output' && isMidiInput) return;
 
         level === 'ERROR' ? host.errorln(message) : host.println(message);
+    }
+
+    private _flushQueue() {
+        while (this._initQueue.length > 0) {
+            const [level, messages] = this._initQueue.shift() as [Level | null, any[]];
+            this._log(level, ...messages);
+        }
+        this._flushed = true;
     }
 }

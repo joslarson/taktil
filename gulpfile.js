@@ -14,8 +14,8 @@ const tsProject = gts.createProject('tsconfig.build.json', { typescript });
 gulp.task('ts', () => {
     const tsResult = tsProject.src().pipe(tsProject());
     return merge([
-        tsResult.dts.pipe(gulp.dest('.')),
-        tsResult.js.pipe(gulp.dest('.')),
+        tsResult.dts.pipe(gulp.dest('./lib')),
+        tsResult.js.pipe(gulp.dest('./lib')),
     ]).on('finish', () => {
         if (test) gulp.start('test');
     });
@@ -33,10 +33,7 @@ gulp.task('watch', ['clean', 'ts'], () => {
 
 // clean
 gulp.task('clean', function() {
-    del.sync(glob.sync('**/*.@(js|d.ts)', { ignore: ['gulpfile.js', 'node_modules/**/*'] }));
-    ['contrib', 'core', 'env'].forEach(dir => {
-        deleteEmpty.sync(dir);
-    });
+    del.sync('./lib');
 });
 
 // default task

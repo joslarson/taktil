@@ -1,7 +1,6 @@
-import { View } from '../view/View';
-import { Control } from '../control';
-import { ControlState } from '../control/Control';
-import { ObjectLiteral } from '../helpers/ObjectLiteral';
+import { View } from '../view';
+import { Control, ControlState } from '../control';
+import { ObjectLiteral } from '../helpers';
 
 export type ComponentState = ObjectLiteral;
 export type ComponentParams = ObjectLiteral;
@@ -48,7 +47,7 @@ export abstract class Component<
     }
 
     // defines conversion of component state to control state
-    abstract getControlOutput(): ControlState;
+    abstract getControlOutput(): Partial<ControlState>;
 
     // handles control input
     abstract onControlInput(input: ControlState): void;

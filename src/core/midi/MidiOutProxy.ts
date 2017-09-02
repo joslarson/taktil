@@ -40,8 +40,9 @@ export class MidiOutProxy {
         // if urgent, fire midi message immediately, otherwise queue it up for next flush
         if (urgent) {
             console.log(
-                `[MIDI]  OUT ${String(port)} <== ${new MidiMessage({ status, data1, data2 })
-                    .hex}${name ? ` "${name}"` : ''}`
+                `[MIDI]  OUT ${port} <== ${new MidiMessage({ status, data1, data2 }).shortHex}${name
+                    ? ` "${name}"`
+                    : ''}`
             );
             host.getMidiOutPort(port).sendMidi(status, data1, data2);
         } else {
@@ -62,7 +63,7 @@ export class MidiOutProxy {
     }) {
         // if urgent, fire sysex immediately, otherwise queue it up for next flush
         if (urgent) {
-            console.log(`[SYSEX] OUT ${String(port)} <== ${data}${name ? ` "${name}"` : ''}`);
+            console.log(`[SYSEX] OUT ${port} <== ${data}${name ? ` "${name}"` : ''}`);
             host.getMidiOutPort(port).sendSysex(data);
         } else {
             this._sysexQueue.push({ name, port, data });
@@ -186,10 +187,10 @@ export class MidiOutProxy {
         while (this._midiQueue.length > 0 || this._sysexQueue.length > 0) {
             const midiMessage = this._midiQueue.shift() as NaiveMidiMessage;
             if (midiMessage) {
-                const { port, status, data1, data2 } = midiMessage;
+                const { name, port, status, data1, data2 } = midiMessage;
                 console.log(
-                    `[MIDI]  OUT ${String(port)} <== ${new MidiMessage({ status, data1, data2 })
-                        .hex}${name ? ` "${name}"` : ''}`
+                    `[MIDI]  OUT ${port} <== ${new MidiMessage({ status, data1, data2 })
+                        .shortHex}${name ? ` "${name}"` : ''}`
                 );
                 host.getMidiOutPort(port).sendMidi(status, data1, data2);
             }
@@ -197,7 +198,7 @@ export class MidiOutProxy {
             const sysexMessage = this._sysexQueue.shift() as NaiveSysexMessage;
             if (sysexMessage) {
                 const { port, data } = sysexMessage;
-                console.log(`[SYSEX] OUT ${String(port)} <== ${data}${name ? ` "${name}"` : ''}`);
+                console.log(`[SYSEX] OUT ${port} <== ${data}${name ? ` "${name}"` : ''}`);
                 host.getMidiOutPort(port).sendSysex(data);
             }
         }
