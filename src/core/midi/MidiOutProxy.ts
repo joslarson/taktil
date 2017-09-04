@@ -118,20 +118,20 @@ export class MidiOutProxy {
         this.sendMidi({ urgent, port, status: 0xa0 | channel, data1: key, data2: pressure });
     }
 
-    sendChannelController({
+    sendControlChange({
         port = 0,
         channel,
-        controller,
+        control,
         value,
         urgent = false,
     }: {
         port?: number;
         channel: number;
-        controller: number;
+        control: number;
         value: number;
         urgent?: boolean;
     }) {
-        this.sendMidi({ urgent, port, status: 0xb0 | channel, data1: controller, data2: value });
+        this.sendMidi({ urgent, port, status: 0xb0 | channel, data1: control, data2: value });
     }
 
     sendProgramChange({

@@ -1,9 +1,9 @@
 import { Session } from './Session';
-import { SimpleControl } from '../control';
+import { Control } from '../control';
 import { View } from '../view';
 
 describe('Session', () => {
-    const controls = { CTRL: new SimpleControl({ status: 0xb0, data1: 0xb1 }) };
+    const controls = { CTRL: new Control({ status: 0xb0, data1: 0xb1 }) };
 
     class BaseView extends View {}
     const views = { BASE: BaseView };

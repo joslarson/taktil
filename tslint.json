@@ -21,6 +21,7 @@
       "allow-leading-underscore",
       "allow-trailing-underscore",
       "allow-pascal-case"
-    ]
+    ],
+    "no-param-reassign": false
   }
 }

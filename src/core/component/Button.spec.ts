@@ -1,6 +1,6 @@
 import { session } from '../../taktil';
 import { Button } from './Button';
-import { SimpleControl } from '../control/SimpleControl';
+import { Control } from '../control';
 
 class TestButton extends Button {
     onPress() {
@@ -27,7 +27,7 @@ class TestButton extends Button {
 describe('Button', () => {
     jest.useFakeTimers();
 
-    const control = new SimpleControl({ status: 0xb0, data1: 21 });
+    const control = new Control({ status: 0xb0, data1: 21 });
     const button = new TestButton(control, {});
 
     const onPress = jest.spyOn(button, 'onPress');

@@ -1,6 +1,5 @@
-import { SimpleControl } from '../control/SimpleControl';
 import { Range } from './Range';
-import { ControlState } from '../control/Control';
+import { Control, ControlState } from '../control/Control';
 
 class TestRange extends Range {
     onControlInput({ value, ...rest }: ControlState) {
@@ -10,7 +9,7 @@ class TestRange extends Range {
 }
 
 describe('Range', () => {
-    const control = new SimpleControl({ status: 0xb0, data1: 21 });
+    const control = new Control({ status: 0xb0, data1: 21 });
     const range = new TestRange(control, 'MY_MODE', {});
 
     // if active component is not set, getOutput will not be called

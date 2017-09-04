@@ -1,9 +1,8 @@
-import { Control, ControlState } from '../control/Control';
-import { SimpleControl } from '../control/SimpleControl';
+import { Control, ControlState } from '../control';
 import { Component, ComponentState, ComponentParams } from './Component';
 
 describe('Component', () => {
-    const control = new SimpleControl({ status: 0xb0, data1: 21 });
+    const control = new Control({ status: 0xb0, data1: 21 });
 
     type Params = ComponentParams;
     interface State extends ComponentState {

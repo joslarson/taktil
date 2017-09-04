@@ -9,6 +9,8 @@ export interface ControlState {
     [key: string]: any;
 }
 
+type PatternInitializer = string | Partial<SimpleMidiMessage> | MessagePattern;
+
 /**
  * Abstract class defining the the base functionality from which all
  * other controls must extend.
@@ -24,8 +26,9 @@ export class Control<State extends ControlState = ControlState> {
 
     minValue = 0;
     maxValue = 127;
-    enableMidiOut: boolean = true;
-    cacheOnMidiIn: boolean = true;
+    enableMidiOut = true;
+    enableCache = true;
+    cacheOnMidiIn = true;
 
     state: State = { value: 0 } as State;
 
@@ -33,13 +36,33 @@ export class Control<State extends ControlState = ControlState> {
     private _defaultState: State;
     private _activeComponent: Component | null = null;
 
-    constructor(...patterns: (string | Partial<SimpleMidiMessage> | MessagePattern)[]) {
+    constructor({
+        patterns,
+        minValue,
+        maxValue,
+        enableMidiOut,
+        enableCache,
+        cacheOnMidiIn,
+    }: {
+        patterns: (string | Partial<SimpleMidiMessage> | MessagePattern)[];
+        minValue?: number;
+        maxValue?: number;
+        enableMidiOut?: boolean;
+        enableCache?: boolean;
+        cacheOnMidiIn?: boolean;
+    }) {
         if (!patterns || patterns.length === 0)
             throw new Error(`Error, Control must specify at least one pattern.`);
         // set object properties
         this.patterns = patterns.map(
             pattern => (pattern instanceof MessagePattern ? pattern : new MessagePattern(pattern))
         );
+
+        if (minValue) this.minValue = minValue;
+        if (maxValue) this.maxValue = maxValue;
+        if (enableMidiOut) this.enableMidiOut = enableMidiOut;
+        if (enableCache) this.enableCache = enableCache;
+        if (cacheOnMidiIn) this.cacheOnMidiIn = cacheOnMidiIn;
 
         // pull out shared pattern info into port, status, data1, and data2
         const isShared = this.patterns.reduce(
@@ -171,7 +194,7 @@ export class Control<State extends ControlState = ControlState> {
 
     controlWillRender?(messages: (MidiMessage | SysexMessage)[]): void;
 
-    render(force = false): boolean {
+    render(force = !this.enableCache): boolean {
         // no midi out? no render.
         if (!this.enableMidiOut) return false;
 

@@ -64,7 +64,7 @@ export class MidiMessage implements SimpleMidiMessage {
         return (this.status & 0xf0) === 0xa0;
     }
 
-    get isChannelController() {
+    get isControlChange() {
         return (this.status & 0xf0) === 0xb0;
     }
 
