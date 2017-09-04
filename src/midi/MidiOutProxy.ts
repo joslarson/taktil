@@ -1,7 +1,6 @@
 import { MidiMessage, SimpleMidiMessage } from './MidiMessage';
 import { SysexMessage } from './SysexMessage';
 import { Session } from '../session';
-import { session } from '../../taktil';
 
 export interface NaiveMidiMessage extends SimpleMidiMessage {
     name?: string;

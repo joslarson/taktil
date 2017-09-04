@@ -137,8 +137,11 @@ export class Session extends EventEmitter {
             throw Error("The Session's registerControls method can only be called once.");
         }
 
-        // assign view name to each view
-        Object.keys(controls).forEach(controlName => (controls[controlName].name = controlName));
+        // assign view name to and inject session into each view
+        Object.keys(controls).forEach(controlName => {
+            controls[controlName].name = controlName;
+            controls[controlName].session = this;
+        });
 
         const register = () => {
             const controlsArray: Control[] = [];
@@ -265,7 +268,7 @@ export class Session extends EventEmitter {
                     // add to validate views list
                     validatedViews.push(view);
                     // initialize view
-                    view.init();
+                    view.init(this);
                 } else {
                     throw Error(
                         `The same view class (${view.name}) cannot be registered more than once.`

@@ -1,4 +1,3 @@
-import { session } from '../../taktil';
 import { Button } from './Button';
 import { Control } from '../control';
 

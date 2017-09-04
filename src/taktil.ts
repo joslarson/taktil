@@ -1,6 +1,6 @@
-import { Control, ControlState } from './core/control';
-import { View } from './core/view';
-import { Session } from './core/session';
+import { Control, ControlState } from './control';
+import { View } from './view';
+import { Session } from './session';
 import { shim } from './env';
 
 // create global session instance
@@ -110,8 +110,8 @@ export function on(label: any, callback: (...args: any[]) => any) {
 // Core
 ////////////////////////
 
-export * from './core/component';
-export * from './core/control';
-export * from './core/helpers';
-export * from './core/midi';
-export * from './core/view';
+export * from './component';
+export * from './control';
+export * from './helpers';
+export * from './midi';
+export * from './view';

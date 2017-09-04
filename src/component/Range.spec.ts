@@ -1,5 +1,6 @@
 import { Range } from './Range';
 import { Control, ControlState } from '../control';
+import { Session } from '../session';
 
 class TestRange extends Range {
     onControlInput({ value, ...rest }: ControlState) {
@@ -9,24 +10,24 @@ class TestRange extends Range {
 }
 
 describe('Range', () => {
+    const session = new Session();
     const control = new Control({ patterns: [{ status: 0xb0, data1: 21 }] });
+    session.registerControls({ TEST: control });
     const range = new TestRange(control, 'MY_MODE', {});
 
     // if active component is not set, getOutput will not be called
-    (control as any)._activeComponent = range;
+    (control as any).activeComponent = range;
 
     jest.useFakeTimers();
     const getOutput = jest.spyOn(range, 'getControlOutput');
 
-    it('should not render until after the input timer runs out', () => {
+    it('should not render while receiving input', () => {
         range.onControlInput({ value: control.maxValue });
-        range.onControlInput({ value: control.minValue });
-        jest.runTimersToTime(range.INPUT_DELAY - 1);
-
+        range.setState({ value: control.minValue });
+        jest.runTimersToTime(range.INPUT_DELAY);
         expect(getOutput).not.toHaveBeenCalled();
 
-        jest.runTimersToTime(1);
-
+        range.setState({ value: control.minValue });
         expect(getOutput).toHaveBeenCalledTimes(1);
     });
 

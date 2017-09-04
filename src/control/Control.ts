@@ -1,7 +1,7 @@
-import { session } from '../../taktil';
 import { MidiMessage, SimpleMidiMessage, SysexMessage, MessagePattern } from '../midi/';
 import { Component } from '../component';
 import { Color } from '../helpers';
+import { Session } from '../session';
 
 export interface ControlState {
     value: number;
@@ -17,6 +17,7 @@ type PatternInitializer = string | Partial<SimpleMidiMessage> | MessagePattern;
  */
 export class Control<State extends ControlState = ControlState> {
     name: string;
+    session: Session;
     patterns: MessagePattern[];
 
     port?: number;
@@ -216,7 +217,7 @@ export class Control<State extends ControlState = ControlState> {
             if (message instanceof MidiMessage) {
                 // send midi message
                 const { port, status, data1, data2, urgent } = message;
-                session.midiOut.sendMidi({
+                this.session.midiOut.sendMidi({
                     port,
                     status,
                     data1,
@@ -227,7 +228,7 @@ export class Control<State extends ControlState = ControlState> {
             } else {
                 // send sysex message
                 const { port, data } = message;
-                session.midiOut.sendSysex({ port, data });
+                this.session.midiOut.sendSysex({ port, data });
             }
         }
 

@@ -1,27 +1,12 @@
-import { session } from '../../taktil';
 import { Control } from './Control';
 import { MidiMessage, SysexMessage } from '../midi/';
-import { Button } from '../component/Button';
+import { Button } from '../component';
+import { Session } from '../session';
 
 type TestControlState = { value: number; nested: { value: number } };
 
 class TestControl extends Control<TestControlState> {
-    name = 'TEST_CONTROL';
     state = { value: 127, nested: { value: 0 } };
-
-    getControlInput(message: MidiMessage | SysexMessage) {
-        return { ...this.state };
-    }
-
-    getMidiOutput({ value }: TestControlState) {
-        return [
-            new MidiMessage({
-                status: 0xb0,
-                data1: 0x1f,
-                data2: value,
-            }),
-        ];
-    }
 }
 
 class TestComponent extends Button {
@@ -29,7 +14,11 @@ class TestComponent extends Button {
 }
 
 describe('Control', () => {
+    const session = new Session();
     const control = new TestControl({ patterns: ['00B01F??'] });
+
+    session.registerControls({ TEST: control });
+
     const component = new TestComponent(control, {});
 
     it('should initialize state correctly', () => {

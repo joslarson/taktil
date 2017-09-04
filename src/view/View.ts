@@ -1,6 +1,6 @@
-import { session } from '../../taktil';
 import { Component } from '../component';
 import { Control } from '../control';
+import { Session } from '../session';
 
 export interface View {
     [key: string]: Component | Component[] | (() => Component | Component[]);
@@ -17,6 +17,8 @@ export class View {
     static viewName: string;
 
     static parent: typeof View | undefined;
+
+    static session: Session;
 
     static getComponent(control: Control, mode: string): Component | null {
         // check in current view
@@ -35,7 +37,7 @@ export class View {
     static connectControl(control: Control) {
         // check view modes in order for component/control registration
         let component = null;
-        for (const activeMode of session.activeModes) {
+        for (const activeMode of this.session.activeModes) {
             component = this.getComponent(control, activeMode);
             // if component is not null, we're done looking
             if (component) break;
@@ -44,7 +46,10 @@ export class View {
         if (control.activeComponent !== component) control.activeComponent = component;
     }
 
-    static init() {
+    static init(session: Session) {
+        // connect the session
+        this.session = session;
+        // instance gives us component mapping
         const instance = new this();
         // give each subclass its own componentMap
         this._componentMap = {};
