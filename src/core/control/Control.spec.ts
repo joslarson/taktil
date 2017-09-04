@@ -29,7 +29,7 @@ class TestComponent extends Button {
 }
 
 describe('Control', () => {
-    const control = new TestControl('00B01F??');
+    const control = new TestControl({ patterns: ['00B01F??'] });
     const component = new TestComponent(control, {});
 
     it('should initialize state correctly', () => {
@@ -79,12 +79,14 @@ describe('Control', () => {
     });
 
     it('should set shared port, status, data1, and data2 from patterns', () => {
-        const { port, status, data1, data2 } = new TestControl('00B41900', '00B41801');
+        const { port, status, data1, data2 } = new TestControl({
+            patterns: ['00B41900', '00B41801'],
+        });
         expect({ port, status, data1, data2 }).toEqual({ port: 0, status: 0xb4 });
     });
 
     it('should generate correct input for simple control', () => {
-        const control = new Control({ status: 0xb0, data1: 21 });
+        const control = new Control({ patterns: [{ status: 0xb0, data1: 21 }] });
         const { status, data1 } = control as { status: number; data1: number };
         expect(
             control.getControlInput(new MidiMessage({ status, data1, data2: control.maxValue }))
@@ -94,7 +96,7 @@ describe('Control', () => {
     });
 
     it('should generate correct output for simple control', () => {
-        const control = new Control({ status: 0xb0, data1: 21 });
+        const control = new Control({ patterns: [{ status: 0xb0, data1: 21 }] });
         const { status, data1, state: { value } } = control as {
             status: number;
             data1: number;

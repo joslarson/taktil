@@ -27,7 +27,7 @@ class TestButton extends Button {
 describe('Button', () => {
     jest.useFakeTimers();
 
-    const control = new Control({ status: 0xb0, data1: 21 });
+    const control = new Control({ patterns: [{ status: 0xb0, data1: 21 }] });
     const button = new TestButton(control, {});
 
     const onPress = jest.spyOn(button, 'onPress');
