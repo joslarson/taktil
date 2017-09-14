@@ -6,7 +6,7 @@ export class ChannelPressure<
     State extends ChannelPressureState = ChannelPressureState
 > extends Control<State> {
     enableMidiOut = false;
-    channel: number;
+    status: number;
 
     constructor({
         port = 0,
@@ -20,15 +20,14 @@ export class ChannelPressure<
         cacheOnMidiIn?: boolean;
     }) {
         super({ patterns: [{ port, status: 0xd0 | channel }], ...rest });
-        this.channel = channel;
     }
 
-    getControlInput(message: MidiMessage): State {
-        return { ...this.state as ControlState, value: message.data1 } as State; // TODO: should be able to remove type casting in future typescript release
+    getControlInput({ data1 }: MidiMessage): State {
+        return { ...this.state as ControlState, value: data1 } as State; // TODO: should be able to remove type casting in future typescript release
     }
 
     getMidiOutput({ value }: State): MidiMessage[] {
-        const { port, channel } = this;
-        return [new MidiMessage({ port, status: 0xd0 | channel, data1: value, data2: 0 })];
+        const { port, status } = this;
+        return [new MidiMessage({ port, status, data1: value, data2: 0 })];
     }
 }

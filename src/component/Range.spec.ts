@@ -16,7 +16,7 @@ describe('Range', () => {
     const range = new TestRange(control, 'MY_MODE', {});
 
     // if active component is not set, getOutput will not be called
-    (control as any).activeComponent = range;
+    control.activeComponent = range;
 
     jest.useFakeTimers();
     const getOutput = jest.spyOn(range, 'getControlOutput');

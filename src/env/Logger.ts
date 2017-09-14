@@ -1,4 +1,4 @@
-import { session } from '../taktil';
+import { Session } from '../session';
 
 export type Level = 'ERROR' | 'WARN' | 'INFO' | 'DEBUG';
 export type MidiLevel = 'Input' | 'Output' | 'Both' | 'None';
@@ -18,7 +18,7 @@ export class Logger {
     private _initQueue: [Level | null, any[]][] = [];
     private _flushed = false;
 
-    constructor() {
+    constructor(session: Session) {
         session.on('init', () => {
             host
                 .getPreferences()

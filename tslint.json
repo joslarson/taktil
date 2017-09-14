@@ -12,7 +12,7 @@
         "private-method-regex": "^[a-z_][\\w\\d]+$",
         "protected-method-regex": "^[a-z_][\\w\\d]+$",
         "static-method-regex": "^[a-z][\\w\\d]+$",
-        "function-regex": "^[a-z][\\w\\d]+$"
+        "function-regex": "^[a-zA-Z][\\w\\d]+$"
       }
     ],
     "variable-name": [

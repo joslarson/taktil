@@ -22,7 +22,7 @@ describe('Component', () => {
         }
     }
 
-    const component = new TestComponent(control, 'MY_MODE', {});
+    const component = new TestComponent(control, { mode: 'MY_MODE' });
 
     it('should initialize state correctly', () => {
         expect(component.state).toEqual({ value: control.minValue, foo: { bar: 0 } });
@@ -38,6 +38,6 @@ describe('Component', () => {
     });
 
     it('should set the mode correctly', () => {
-        expect(component.mode).toBe('MY_MODE');
+        expect(component.params.mode).toBe('MY_MODE');
     });
 });

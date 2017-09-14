@@ -2,10 +2,6 @@ import { Component } from '../component';
 import { Control } from '../control';
 import { Session } from '../session';
 
-export interface View {
-    [key: string]: Component | Component[] | (() => Component | Component[]);
-}
-
 export class View {
     private static _componentMap: {
         [mode: string]: {
@@ -13,11 +9,8 @@ export class View {
             components: Component[];
         };
     };
-
     static viewName: string;
-
-    static parent: typeof View | undefined;
-
+    static extends: typeof View[] = [];
     static session: Session;
 
     static getComponent(control: Control, mode: string): Component | null {
@@ -28,8 +21,11 @@ export class View {
                 return this._componentMap[mode].components[componentMapIndex];
             }
         }
-        // component not found in view? check in parent
-        if (this.parent) return this.parent.getComponent(control, mode);
+        // component not found in view? check in parents
+        for (const ancestor of this.extends) {
+            const component = ancestor.getComponent(control, mode);
+            if (component) return component;
+        }
         // not in current view, no parent to check? return null
         return null;
     }
@@ -53,6 +49,7 @@ export class View {
         const instance = new this();
         // give each subclass its own componentMap
         this._componentMap = {};
+
         Object.getOwnPropertyNames(instance).map(key => {
             let value = instance[key];
             value = typeof value === 'function' ? value() : value;
@@ -66,7 +63,7 @@ export class View {
                 component.name = isSingleComponent ? key : `${key}[${i}]`;
 
                 // register components and controls in view
-                const { control, mode } = component;
+                const { control, params: { mode } } = component;
                 // register control with view/mode
                 if (!this._componentMap[mode])
                     this._componentMap[mode] = {
@@ -89,4 +86,6 @@ export class View {
 
     // view should not be instantiated by user
     protected constructor() {}
+
+    [key: string]: Component | Component[] | (() => Component | Component[]);
 }

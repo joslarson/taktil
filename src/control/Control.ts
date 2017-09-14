@@ -59,11 +59,11 @@ export class Control<State extends ControlState = ControlState> {
             pattern => (pattern instanceof MessagePattern ? pattern : new MessagePattern(pattern))
         );
 
-        if (minValue) this.minValue = minValue;
-        if (maxValue) this.maxValue = maxValue;
-        if (enableMidiOut) this.enableMidiOut = enableMidiOut;
-        if (enableCache) this.enableCache = enableCache;
-        if (cacheOnMidiIn) this.cacheOnMidiIn = cacheOnMidiIn;
+        if (minValue !== undefined) this.minValue = minValue;
+        if (maxValue !== undefined) this.maxValue = maxValue;
+        if (enableMidiOut !== undefined) this.enableMidiOut = enableMidiOut;
+        if (enableCache !== undefined) this.enableCache = enableCache;
+        if (cacheOnMidiIn !== undefined) this.cacheOnMidiIn = cacheOnMidiIn;
 
         // pull out shared pattern info into port, status, data1, and data2
         const isShared = this.patterns.reduce(

@@ -2,8 +2,8 @@ import { View } from '../view';
 import { Control, ControlState } from '../control';
 import { ObjectLiteral } from '../helpers';
 
-export type ComponentState = ObjectLiteral;
-export type ComponentParams = ObjectLiteral;
+export interface ComponentState {}
+export interface ComponentParams {}
 
 /**
  * Abstract class defining the the base functionality from which all
@@ -15,19 +15,16 @@ export abstract class Component<
 > {
     name: string;
     control: Control;
-    mode: string;
-    params: Params = {} as Params;
+    params: Params & { mode: string } = {} as Params & { mode: string };
     state: State = {} as State;
 
-    constructor(control: Control, mode: string, params: Params);
-    constructor(control: Control, params: Params);
-    constructor(control: Control, ...rest: (string | Params)[]) {
+    constructor(control: Control, params: Params & { mode?: string }) {
         this.control = control;
-        this.mode = typeof rest[0] === 'string' ? rest[0] as string : '__BASE__';
         this.params = {
             ...this.params as object,
-            ...rest.slice(-1)[0] as object,
-        } as Params;
+            ...params as object,
+            mode: params.mode || '__BASE__',
+        } as Params & { mode: string };
     }
 
     // called when component is registered to a view for the first time

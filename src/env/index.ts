@@ -1,9 +1,9 @@
-import { Session } from '../core/session';
 import { Logger } from './Logger';
 import { DelayedTask } from './DelayedTask';
+import { Session } from '../session';
 
 // setup global env
-export const shim = () => {
+export const shim = (session: Session) => {
     const global = Function('return this')() || (42, eval)('this');
     if (!global.host) return;
 
@@ -34,7 +34,7 @@ export const shim = () => {
     };
 
     // shim console with custom logger
-    global.console = new Logger();
+    global.console = new Logger(session);
 
     // hookup dummy function to unsupported logger methods
 

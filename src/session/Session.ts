@@ -2,8 +2,13 @@ import { EventEmitter } from './EventEmitter';
 import { MidiOutProxy, MidiMessage, SysexMessage } from '../midi';
 import { Control, ControlState } from '../control';
 import { View } from '../view';
+import { shim } from '../env';
 
-declare const global: any;
+declare const global: {
+    init: () => void;
+    flush: () => void;
+    exit: () => void;
+};
 
 export interface Session extends EventEmitter {
     on(label: 'activateMode' | 'deactivateMode', callback: (mode: string) => void): void;
@@ -51,6 +56,9 @@ export class Session extends EventEmitter {
 
     constructor() {
         super();
+        // shim bitwig scripting env, injecting session
+        shim(this);
+
         global.init = () => {
             this._isInit = true;
 
@@ -246,23 +254,35 @@ export class Session extends EventEmitter {
             }
             const viewsToRegister = Object.keys(views).map(viewName => views[viewName]);
             const unvalidatedViews = [...viewsToRegister];
-            const validatedViews: (typeof View)[] = [];
+            const attemptedValidations: typeof View[] = [];
+            const validatedViews: typeof View[] = [];
 
-            while (true) {
+            validation: while (true) {
                 const view = unvalidatedViews.shift();
                 if (!view) break; // if we've run out of views to register we are done.
 
-                // validate that parent exists in registration group
-                if (view.parent && viewsToRegister.indexOf(view.parent) === -1) {
-                    throw Error(
-                        `Parent view for "${view.viewName}" is missing from the registration object.`
-                    );
+                for (const ancestor of view.extends) {
+                    // validate that parent exists in registration group
+                    if (viewsToRegister.indexOf(ancestor) === -1) {
+                        throw Error(
+                            `Parent view for "${view.viewName}" is missing from the registration object.`
+                        );
+                    }
+                    // if the views parent has yet to be registered, push it to the end of the line
+                    if (validatedViews.indexOf(ancestor) === -1) {
+                        unvalidatedViews.push(view);
+                        // catch circular dependency
+                        if (attemptedValidations.indexOf(view) === -1) {
+                            attemptedValidations.push(view);
+                        } else {
+                            throw Error(
+                                `Circular dependency detected in ${view.name} class with registered name "${view.viewName}".`
+                            );
+                        }
+                        continue validation;
+                    }
                 }
-                // if the views parent has yet to be registered, push it to the end of the line
-                if (view.parent && validatedViews.indexOf(view.parent) === -1) {
-                    unvalidatedViews.push(view);
-                    continue;
-                }
+
                 // everything looks good, register the view
                 if (validatedViews.indexOf(view) === -1) {
                     // add to validate views list
