@@ -9,7 +9,7 @@ export class View {
             components: Component[];
         };
     };
-    static viewName: string;
+    static label: string;
     static extends: typeof View[] = [];
     static session: Session;
 
@@ -59,8 +59,8 @@ export class View {
                 const isSingleComponent = components.length === 1;
                 // skip non-component properties
                 if (component instanceof Component === false) continue;
-                // set component name and view
-                component.name = isSingleComponent ? key : `${key}[${i}]`;
+                // set component label and view
+                component.label = isSingleComponent ? key : `${key}[${i}]`;
 
                 // register components and controls in view
                 const { control, params: { mode } } = component;
@@ -73,7 +73,7 @@ export class View {
 
                 // if control already registered in view mode, throw error
                 if (this._componentMap[mode].controls.indexOf(control) > -1)
-                    throw Error(`Duplicate Control "${control.name}" registration in view mode.`);
+                    throw Error(`Duplicate Control "${control.label}" registration in view mode.`);
 
                 // add control and component pair to component map
                 this._componentMap[mode].controls.push(control);

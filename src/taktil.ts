@@ -11,15 +11,15 @@ export const session = new Session();
 /**
  * Register controls to the session (can only be called once).
  * 
- * @param controls The mapping of control names to control instances to register
+ * @param controls The mapping of control labels to control instances to register
  * to the session. 
  */
-export function registerControls(controls: { [name: string]: Control }) {
+export function registerControls(controls: { [label: string]: Control }) {
     session.registerControls(controls);
 }
 
 /**
- * Get the mapping of control names to control instances that have
+ * Get the mapping of control labels to control instances that have
  * been registered to the session.
  */
 export function getControls() {
@@ -37,15 +37,15 @@ export function resetControls() {
 /**
  * Register views to the session (can only be called once).
  * 
- * @param views The mapping of view names to view classes to register
+ * @param views The mapping of view labels to view classes to register
  * to the session. 
  */
-export function registerViews(views: { [name: string]: typeof View }) {
+export function registerViews(views: { [label: string]: typeof View }) {
     return session.registerViews(views);
 }
 
 /**
- * Get the mapping of view names to view classes that have been
+ * Get the mapping of view labels to view classes that have been
  * registered to the session.
  */
 export function getViews() {
@@ -58,8 +58,8 @@ export function getActiveView() {
 }
 
 /** Set the active view of the session. */
-export function activateView(view: string) {
-    return session.activateView(view);
+export function activateView(label: string) {
+    return session.activateView(label);
 }
 
 // Modes

@@ -13,7 +13,7 @@ export abstract class Component<
     Params extends ComponentParams = ComponentParams,
     State extends ComponentState = ComponentState
 > {
-    name: string;
+    label: string;
     control: Control;
     params: Params & { mode: string } = {} as Params & { mode: string };
     state: State = {} as State;

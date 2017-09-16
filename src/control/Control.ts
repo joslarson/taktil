@@ -16,7 +16,7 @@ type PatternInitializer = string | Partial<SimpleMidiMessage> | MessagePattern;
  * other controls must extend.
  */
 export class Control<State extends ControlState = ControlState> {
-    name: string;
+    label: string;
     session: Session;
     patterns: MessagePattern[];
 
@@ -105,7 +105,7 @@ export class Control<State extends ControlState = ControlState> {
             if (partialState.value > this.maxValue || partialState.value < this.minValue) {
                 throw new Error(
                     `Invalid value "${partialState.value}" for Control "${this
-                        .name}" with value range ${this.minValue} to ${this.maxValue}.`
+                        .label}" with value range ${this.minValue} to ${this.maxValue}.`
                 );
             }
         }
@@ -162,7 +162,7 @@ export class Control<State extends ControlState = ControlState> {
         // no match
         throw new Error(
             `MidiMessage "${midiMessage.hex}" does not match existing pattern on Control "${this
-                .name}".`
+                .label}".`
         );
     }
 
@@ -176,7 +176,7 @@ export class Control<State extends ControlState = ControlState> {
             // re-render based on current state (messages will only be sent if they are
             // different than what's in the cache)
             this.render();
-            console.info(`Control "${this.name}" is not mapped in active view stack.`);
+            console.info(`Control "${this.label}" is not mapped in the active view stack.`);
         }
     }
 
@@ -223,7 +223,7 @@ export class Control<State extends ControlState = ControlState> {
                     data1,
                     data2,
                     urgent,
-                    name: this.name,
+                    label: this.label,
                 });
             } else {
                 // send sysex message

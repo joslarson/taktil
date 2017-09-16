@@ -3,12 +3,12 @@ import { SysexMessage } from './SysexMessage';
 import { Session } from '../session';
 
 export interface NaiveMidiMessage extends SimpleMidiMessage {
-    name?: string;
+    label?: string;
     port: number;
 }
 
 export interface NaiveSysexMessage {
-    name?: string;
+    label?: string;
     port: number;
     data: string;
 }
@@ -22,14 +22,14 @@ export class MidiOutProxy {
     }
 
     sendMidi({
-        name,
+        label,
         port = 0,
         status,
         data1,
         data2,
         urgent = false,
     }: {
-        name?: string;
+        label?: string;
         port?: number;
         status: number;
         data1: number;
@@ -39,33 +39,32 @@ export class MidiOutProxy {
         // if urgent, fire midi message immediately, otherwise queue it up for next flush
         if (urgent) {
             console.log(
-                `[MIDI]  OUT ${port} <== ${new MidiMessage({ status, data1, data2 }).shortHex}${name
-                    ? ` "${name}"`
-                    : ''}`
+                `[MIDI]  OUT ${port} <== ${new MidiMessage({ status, data1, data2 })
+                    .shortHex}${label ? ` "${label}"` : ''}`
             );
             host.getMidiOutPort(port).sendMidi(status, data1, data2);
         } else {
-            this._midiQueue.push({ name, port, status, data1, data2 });
+            this._midiQueue.push({ label, port, status, data1, data2 });
         }
     }
 
     sendSysex({
-        name,
+        label,
         port = 0,
         data,
         urgent = false,
     }: {
-        name?: string;
+        label?: string;
         port?: number;
         data: string;
         urgent?: boolean;
     }) {
         // if urgent, fire sysex immediately, otherwise queue it up for next flush
         if (urgent) {
-            console.log(`[SYSEX] OUT ${port} <== ${data}${name ? ` "${name}"` : ''}`);
+            console.log(`[SYSEX] OUT ${port} <== ${data}${label ? ` "${label}"` : ''}`);
             host.getMidiOutPort(port).sendSysex(data);
         } else {
-            this._sysexQueue.push({ name, port, data });
+            this._sysexQueue.push({ label, port, data });
         }
     }
 
@@ -186,18 +185,18 @@ export class MidiOutProxy {
         while (this._midiQueue.length > 0 || this._sysexQueue.length > 0) {
             const midiMessage = this._midiQueue.shift() as NaiveMidiMessage;
             if (midiMessage) {
-                const { name, port, status, data1, data2 } = midiMessage;
+                const { label, port, status, data1, data2 } = midiMessage;
                 console.log(
                     `[MIDI]  OUT ${port} <== ${new MidiMessage({ status, data1, data2 })
-                        .shortHex}${name ? ` "${name}"` : ''}`
+                        .shortHex}${label ? ` "${label}"` : ''}`
                 );
                 host.getMidiOutPort(port).sendMidi(status, data1, data2);
             }
 
             const sysexMessage = this._sysexQueue.shift() as NaiveSysexMessage;
             if (sysexMessage) {
-                const { port, data } = sysexMessage;
-                console.log(`[SYSEX] OUT ${port} <== ${data}${name ? ` "${name}"` : ''}`);
+                const { label, port, data } = sysexMessage;
+                console.log(`[SYSEX] OUT ${port} <== ${data}${label ? ` "${label}"` : ''}`);
                 host.getMidiOutPort(port).sendSysex(data);
             }
         }
