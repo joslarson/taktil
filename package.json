@@ -1,7 +1,7 @@
 {
   "name": "taktil",
   "description": "Taktil is a lightweight control surface scripting framework for Bitwig Studio that encourages rapid development and community code reuse.",
-  "version": "0.9.1-dev.3",
+  "version": "0.9.1-dev.4",
   "repository": "taktiljs/taktil",
   "author": "Joseph Larson",
   "tags": [
