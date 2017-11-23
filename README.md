@@ -13,7 +13,7 @@ Taktil's integrated build tool leverages the powers of TypeScript and Webpack to
 
 To get started started, you'll need to first make sure you have the following prerequisites installed and functioning on your system.
 
-* Node.js v6.0 or newer
+* Node.js v6.9 or newer
 * Bitwig Studio v2.0 or newer
 
 Once you've got that out of the way, you can install the Taktil CLI. It will handle starting projects and building + bundling them for you.
@@ -171,6 +171,7 @@ export const controls = {
     KNOB: new taktil.ControlChange({ channel: 0, control: 26 }),
 };
 ```
+
 With that, we've defined our controls.
 
 > **Note:** In the same way that ControlChange extends Control, you can create your own Control subclasses. You might, for example define a Control type that not only keeps track of your hardware control's value, but also handles its color, its brightness, and whether it's flashing or not. The sky's the limit. All controls must define the MIDI messages they will handle, but what they do with the input and what they render on output is up to you.
@@ -178,11 +179,9 @@ With that, we've defined our controls.
 
 ## Creating Components
 
-Now that we've defined our controls, we'll move on to building some reusable components. Components, in Taktil, are the state and business logic containers for non-hardware-specific functionality.
+Now that we've defined our controls, we'll move on to building some reusable components. Components, in Taktil, are the state and business logic containers for non-hardware-specific functionality. They receive and react to standardized `ControlInput` messages (through the `onControlInput` method) as well as Bitwig API events. They also decide when a connected `Control` should be updated by calling its `setState` method, usually in reaction to on of the above mentioned messages or events.
 
-Controls convert Midi input messages into standardized `ControlInput` messages. These messages are sent on to the component through the component's `onControlInput` method. In this way, each component definition is able to uniquely define how this input will be handled.
-
-Components are instantiated as members of a `View` definition providing a corresponding control and a params object.
+Controls convert Midi input messages into standardized `ControlInput` messages. These messages are sent on to a connected component through the component's `onControlInput` method. In this way, each component definition is able to uniquely define how this input will be handled and when and how a control's state will be modified.
 
 A connected control converts incoming Midi data into a standardized **ControlInput** object which it sends into the component's `onControlInput` method.
 
@@ -352,6 +351,8 @@ export const daw = new Daw();
 
 ## Constructing Views
 
+Components are instantiated as members of a `View` definition providing a corresponding control and a params object.
+
 ```ts
 // src/views.ts
 
@@ -372,7 +373,7 @@ class MixerView extends View {
 }
 
 export const views = {
-    BASE: ViewStack(BaseView),
+    BASE: BaseView,
     MIXER: ViewStack(MixerView, BaseView),
 };
 ```
