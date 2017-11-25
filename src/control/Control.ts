@@ -6,6 +6,13 @@ import { Session } from '../session';
 export interface ControlState {
     value: number;
     color?: Color;
+    pulse?:
+        | boolean
+        | {
+              on: boolean;
+              type?: 'sync' | 'free';
+              rate?: number;
+          };
     [key: string]: any;
 }
 
