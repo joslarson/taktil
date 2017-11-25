@@ -255,11 +255,9 @@ export class PlayToggle extends taktil.Button {
 }
 ```
 
-Now let's implement the rest of the components for our getting started project. First we want to implement a mode button which will toggle shift mode globally such that when the shift ModeGate button is pressed the PLAY control will toggle the metronome on/off, and when the shift ModeGate button is released the PLAY control will go back to being a PlayToggle.
+Now let's implement the rest of the components for our getting started project. First we want to implement a MetronomeToggle and a ModeGate button which will turn shift mode on/off globally such that when the shift ModeGate button is pressed the PLAY control will toggle the metronome on/off, and when the shift ModeGate button is released the PLAY control will go back to being a PlayToggle.
 
 > **Note:** We'll hook up the components to controls and modes in the view section, then you'll have a better understanding of what I'm talking about here.
-
-Then we'll implement a VolumeRange component
 
 ```js
 // src/components.js (continued...)
@@ -291,6 +289,12 @@ export class MetronomeToggle extends taktil.Button {
         this.params.transport.isMetronomeEnabled().toggle();
     }
 }
+```
+
+Finally, to get away from buttons, we'll implement a VolumeRange component which takes a Bitwig Track instance as a param and controls it's volume. When the volume changes in Bitwig the component will update its associated control, and when its associated control sends input, the tracks level will be adjust accordingly. In this way the component's job is to keep the control state's value and and the Track object's volume value in sync with one another.
+
+```js
+// src/components.js (continued...)
 
 // Volume Range
 
@@ -398,7 +402,7 @@ export const views = {
 
 ## Initializing the Session
 
-At this point we've defined our control layer, created some components, and assembled those controls and components into views. Now all that's left is to create our controller script's entry point where we will initialize our session.
+At this point we've defined our control layer, created some components, and assembled those controls and components into views. Now all that's left is to create our controller script's entry point where we will setup and initialize our session.
 
 ```js
 // src/index.js
