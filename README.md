@@ -16,16 +16,16 @@ To get started started, you'll need to first make sure you have the following pr
 * Node.js v6.9 or newer
 * Bitwig Studio v2.0 or newer
 
-Once you've got that out of the way, you can install the Taktil CLI. It will handle starting projects and building + bundling them for you.
+Once you've got that out of the way, you're ready to install Taktil. If you want to use the integrated CLI, you'll need to install it globally. Doing so will put the `taktil` CLI command in your path which will handle initializing projects and building + bundling them for you.
 
 ```bash
-$ npm install -g taktil-cli
+$ npm install -g taktil
 ```
 
 > **Note:** Don't miss the `-g` flag here as this installs the package globally, adding the the `taktil` command to your path.
 
 
-If you'd rather use Taktil without the CLI, you can install it directly into an existing project like so:
+If you'd rather use Taktil without the CLI, you can install it locally into an existing project like so:
 
 ```bash
 $ npm install taktil
@@ -49,7 +49,7 @@ Display Name: Getting Started
 Vendor/Category: Custom
 Version (1.0.0):
 Author: Joseph Larson
-API Version (2): 3
+API Version (2): 4
 [taktil] project initialization complete.
 ```
 
