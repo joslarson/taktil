@@ -5,7 +5,7 @@ Taktil
 
 Taktil is a lightweight control surface scripting framework for Bitwig Studio that encourages rapid development and community code reuse. At its core, it is designed around the idea of building reusable, extendable components and provides a simple but powerful view abstraction that makes contextually mapping hardware controls to different components a breeze.
 
-Taktil's integrated build tool leverages the powers of TypeScript and Webpack to enable ES2015+ language features in Bitwig's ES5 world (no messy build configurations necessary). Whether you want to go all in with TypeScript or stick with pure modern JavaScript, Taktil has got you covered.
+Taktil's integrated build tool leverages the powers of TypeScript and Webpack to enable ES2015+ language features and npm dependency support in Bitwig's ES5 world (no messy build configurations necessary). Whether you want to go all in with TypeScript or stick with pure modern JavaScript, Taktil has got you covered. **This documentation currently provides only JavaScript examples. TypeScript specific docs are in the works.**
 
 > **Warning!** While fully usable, Taktil is still pre-1.0 and has no backwards compatibility guarantees until the v1 release occurs!
 
@@ -13,7 +13,7 @@ Taktil's integrated build tool leverages the powers of TypeScript and Webpack to
 
 To get started started, you'll need to first make sure you have the following prerequisites installed and functioning on your system.
 
-* Node.js v6.9 or newer
+* Node.js v6.0 or newer
 * Bitwig Studio v2.0 or newer
 
 Once you've got that out of the way, you're ready to install Taktil. If you want to use the integrated CLI, you'll need to install it globally. Doing so will put the `taktil` CLI command in your path which will handle initializing projects and building + bundling them for you.
@@ -59,11 +59,11 @@ API Version (2): 4
 getting-started/
 ├── dist/ -> (symlinked into default Bitwig control surface scripts directory)
 ├── src
-│   ├── components.ts
-│   ├── controls.ts
-│   ├── daw.ts
-│   ├── index.ts
-│   └── views.ts
+│   ├── components.js
+│   ├── controls.js
+│   ├── daw.js
+│   ├── index.js
+│   └── views.js
 ├── README.md
 ├── package.json
 ├── tsconfig.json
@@ -87,7 +87,7 @@ At this point your newly built project files should have been picked up by Bitwi
 
 Activate your new controller script by selecting it from the script selection menu and assigning your Midi controller's corresponding MIDI I/O.
 
-> **Note**: The default project template is setup assuming a single midi input/output pair, but if you need more than that, more can be defined in the your project's entry file (`src/getting-started.control.ts` in this case).
+> **Note**: The default project template is setup assuming a single midi input/output pair, but if you need more than that, more can be defined in the your project's entry file (`src/index.js` in this case).
 
 With that, everything should be in place to start coding your control surface script. Let's get into it :)
 
@@ -134,8 +134,8 @@ All `Control` instances have a state object that contains a required value prope
 
 Let's begin by defining the `PLAY` button as MIDI CC 24 (or `0x18` in hex) on port 0, channel 0. That translates, in hex values, to a status of `0xb0`, a data1 of `0x18`, and a wild card match on the data2 value. In **string form** our definition will look as follows:
 
-```ts
-// src/controls.ts
+```js
+// src/controls.js
 
 import taktil from 'taktil';
 
@@ -146,8 +146,8 @@ export const controls = {
 
 The same definition in **object literal form** would look like this:
 
-```ts
-// src/controls.ts
+```js
+// src/controls.js
 
 import taktil from 'taktil';
 
@@ -160,8 +160,8 @@ export const controls = {
 
 Taktil provides further abstracted Control subclasses for CC (Control Change), Note, Channel Pressure, and Key Pressure messages. Assuming all three of our controls are MIDI CC controls, we can redefine our `PLAY` button and add to it definitions for our `SHIFT` button and `KNOB` as follows.
 
-```ts
-// src/controls.ts
+```js
+// src/controls.js
 
 import taktil from 'taktil';
 
@@ -192,21 +192,13 @@ They are defined as ES6 classes that must eventually extend the `Component` clas
 
 To get our feet wet, we'll start off by creating a simple play/pause toggle.
 
-```ts
-// src/components.ts
+```js
+// src/components.js
 
 import taktil from 'taktil';
 
-interface PlayToggleParams {
-    transport: API.Transport;
-}
-
-interface PlayToggleState {
-    on: boolean;
-}
-
-export class PlayToggle extends taktil.Component<PlayToggleParams, PlayToggleState> {
-    state: PlayToggleState = { on: false };
+export class PlayToggle extends taktil.Component {
+    state = { on: false };
 
     onInit() {
         this.params.transport
@@ -214,29 +206,24 @@ export class PlayToggle extends taktil.Component<PlayToggleParams, PlayToggleSta
             .addValueObserver(isPlaying => this.setState({ on: isPlaying }));
     }
 
-    onControlInput({ value }: taktil.ControlState) {
+    onControlInput({ value }) {
         if (value > this.control.minValue) this.params.transport.togglePlay();
     }
 
-    getControlOutput(): Partial<taktil.ControlState> {
+    getControlOutput()> {
         const { state: { on }, control: { minValue, maxValue } } = this;
         return { value: on ? maxValue : minValue };
     }
 }
 ```
 
-```ts
-// src/components.ts
+```js
+// src/components.js
 
 import taktil from 'taktil';
 
 // Play Button
-
-interface PlayToggleParams {
-    transport: API.Transport;
-}
-
-export class PlayToggle extends taktil.Button<PlayToggleParams> {
+export class PlayToggle extends taktil.Button {
     onInit() {
         this.params.transport
             .isPlaying()
@@ -251,11 +238,7 @@ export class PlayToggle extends taktil.Button<PlayToggleParams> {
 
 // Mode Gate
 
-export interface ModeGateParams {
-    target: string;
-}
-
-export class ModeGate extends taktil.Button<ModeGateParams> {
+export class ModeGate extends taktil.Button {
     onPress() {
         this.setState({ on: true });
         taktil.activateMode(this.params.target);
@@ -269,11 +252,7 @@ export class ModeGate extends taktil.Button<ModeGateParams> {
 
 // Metronome Toggle
 
-export interface MetronomeToggleParams {
-    transport: API.Transport;
-}
-
-export class MetronomeToggle extends taktil.Button<MetronomeToggleParams> {
+export class MetronomeToggle extends taktil.Button {
     onInit() {
         this.params.transport
             .isMetronomeEnabled()
@@ -287,17 +266,9 @@ export class MetronomeToggle extends taktil.Button<MetronomeToggleParams> {
 
 // Volume Range
 
-export interface VolumeRangeParams {
-    track: API.Track;
-}
-
-export interface VolumeRangeState {
-    value: number;
-}
-
-export class VolumeRange extends taktil.Component<VolumeRangeParams, VolumeRangeState> {
-    state: VolumeRangeState = { value: 0 };
-    memory: { input?: any } = {};
+export class VolumeRange extends taktil.Component {
+    state = { value: 0 };
+    memory = {};
 
     onInit() {
         this.params.track.getVolume().addValueObserver(value => {
@@ -305,14 +276,14 @@ export class VolumeRange extends taktil.Component<VolumeRangeParams, VolumeRange
         });
     }
 
-    onControlInput({ value }: taktil.ControlState) {
+    onControlInput({ value }) {
         if (this.memory.input) clearTimeout(this.memory.input);
         this.memory.input = setTimeout(() => delete this.memory.input, 350);
 
         this.params.track.getVolume().set(value / 127);
     }
 
-    getControlOutput(): Partial<taktil.ControlState> {
+    getControlOutput() {
         return { value: this.state.value };
     }
 
@@ -324,8 +295,8 @@ export class VolumeRange extends taktil.Component<VolumeRangeParams, VolumeRange
 
 ## Integrating with the Bitwig API
 
-```ts
-// src/daw.ts
+```js
+// src/daw.js
 
 import taktil from 'taktil';
 
@@ -353,8 +324,8 @@ export const daw = new Daw();
 
 Components are instantiated as members of a `View` definition providing a corresponding control and a params object.
 
-```ts
-// src/views.ts
+```js
+// src/views.js
 
 import { View, ViewStack } from 'taktil';
 
@@ -381,7 +352,7 @@ export const views = {
 
 ## Assembling the Session
 
-```ts
+```js
 import taktil from 'taktil';
 
 import { controls } from './controls';
@@ -393,10 +364,10 @@ host.loadAPI(3);
 // 2. define controller script
 host.defineController(
     'Custom', // vendor
-    'Simple Transport', // name
+    'Getting Started', // name
     '1.0.0', // version
     'f2b0f9b0-87be-11e7-855f-094b43050ba2', // uuid
-    'Michael Jackson' // author
+    'Joseph Larson' // author
 );
 
 // 3. setup and discover midi controllers
