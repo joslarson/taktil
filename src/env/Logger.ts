@@ -28,8 +28,8 @@ export class Logger {
                     ['None', 'Input', 'Output', 'Both'],
                     'None'
                 )
-                .addValueObserver((midiLevel: MidiLevel) => {
-                    this._midiLevel = midiLevel;
+                .addValueObserver(midiLevel => {
+                    this._midiLevel = midiLevel as MidiLevel;
                     if (this._ready && !this._flushed) this._flushQueue();
                 });
 
@@ -37,8 +37,8 @@ export class Logger {
                 .getPreferences()
                 .getEnumSetting('Log Level', 'Development', this._levels, 'ERROR');
 
-            this._levelSetting.addValueObserver((level: Level) => {
-                this._level = level;
+            this._levelSetting.addValueObserver(level => {
+                this._level = level as Level;
                 if (this._ready && !this._flushed) this._flushQueue();
             });
 

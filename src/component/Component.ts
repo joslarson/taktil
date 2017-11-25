@@ -1,6 +1,5 @@
 import { View } from '../view';
 import { Control, ControlState } from '../control';
-import { ObjectLiteral } from '../helpers';
 
 export interface ComponentState {}
 export interface ComponentParams {}
