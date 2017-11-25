@@ -6,6 +6,7 @@ import { Session } from '../session';
 export interface ControlState {
     value: number;
     color?: Color;
+    brightness?: number;
     pulse?:
         | boolean
         | {
