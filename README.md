@@ -4,9 +4,11 @@
 
 Taktil is a lightweight control surface scripting framework for Bitwig Studio that encourages rapid development and community code reuse. At its core, it is designed around the idea of building reusable, extendable components and provides a simple but powerful view abstraction that makes contextually mapping hardware controls to different components a breeze.
 
-Taktil's integrated build tool leverages the powers of TypeScript and Webpack to enable ES2015+ language features and npm dependency support in Bitwig's ES5 world (no messy build configurations necessary). Whether you want to go all in with TypeScript or stick with pure modern JavaScript, Taktil has got you covered. **This documentation currently provides only JavaScript examples. TypeScript specific docs are in the works.**
+Taktil's integrated build tool leverages the powers of TypeScript and Webpack to enable ES2015+ language features and npm dependency support in Bitwig's ES5 world (no messy build configurations necessary). Whether you want to go all in with TypeScript or stick with pure modern JavaScript, Taktil has got you covered. 
 
-> **Warning!** While fully usable, Taktil is still pre-1.0 and has no backwards compatibility guarantees until the v1 release occurs!
+> **Note:** This documentation currently provides only JavaScript examples. TypeScript specific docs are in the works.
+
+> **Warning!** While fully usable, Taktil is still pre-1.0 and has no backwards compatibility guarantees until the v1 release occurs! Your input is encouraged. Also, while the CLI is designed to work on Windows, Mac, and Linux, I have only tested it on macOS so far. So please create ticket and/or submit pull request as you find bugs.
 
 ## Installation
 
@@ -228,11 +230,11 @@ export class PlayToggle extends taktil.Component {
 
 Because buttons are such a big and predictable part of every controller script, Taktil provides a general purpose Button component. The button component extends the base Component class, adding five self described optionally implemented life-cycle methods: 
 
-* `onPress`
-* `onLongPress`
-* `onDoublePress`
-* `onRelease`
-* `onDoubleRelease`
+* **`onPress`**
+* **`onLongPress`**
+* **`onDoublePress`**
+* **`onRelease`**
+* **`onDoubleRelease`**
 
 Let's re-implement our PlayToggle by extending the Button component.
 
@@ -241,7 +243,6 @@ Let's re-implement our PlayToggle by extending the Button component.
 
 import taktil from 'taktil';
 
-// Play Button
 export class PlayToggle extends taktil.Button {
     onInit() {
         this.params.transport
@@ -255,16 +256,12 @@ export class PlayToggle extends taktil.Button {
 }
 ```
 
-Now let's implement the rest of the components for our getting started project. First we want to implement a mode button which will toggle shift mode globally such that when the shift ModeGate button is pressed the PLAY control will toggle the metronome on/off, and when the shift ModeGate button is released the PLAY control will go back to being a PlayToggle.
+Now let's implement the rest of the components for our getting started project. First we want to implement a MetronomeToggle and a ModeGate button which will turn shift mode on/off globally such that when the shift ModeGate button is pressed the PLAY control will toggle the metronome on/off, and when the shift ModeGate button is released the PLAY control will go back to being a PlayToggle.
 
 > **Note:** We'll hook up the components to controls and modes in the view section, then you'll have a better understanding of what I'm talking about here.
 
-Then we'll implement a VolumeRange component
-
 ```js
 // src/components.js (continued...)
-
-// Mode Gate
 
 export class ModeGate extends taktil.Button {
     onPress() {
@@ -278,8 +275,6 @@ export class ModeGate extends taktil.Button {
     }
 }
 
-// Metronome Toggle
-
 export class MetronomeToggle extends taktil.Button {
     onInit() {
         this.params.transport
@@ -291,8 +286,12 @@ export class MetronomeToggle extends taktil.Button {
         this.params.transport.isMetronomeEnabled().toggle();
     }
 }
+```
 
-// Volume Range
+Finally, to get away from buttons, we'll implement a VolumeRange component which takes a Bitwig Track instance as a param and controls it's volume. When the volume changes in Bitwig the component will update its associated control, and when its associated control sends input, the tracks level will be adjust accordingly. In this way the component's job is to keep the control state's value and and the Track object's volume value in sync with one another.
+
+```js
+// src/components.js (continued...)
 
 export class VolumeRange extends taktil.Component {
     state = { value: 0 };
@@ -398,7 +397,7 @@ export const views = {
 
 ## Initializing the Session
 
-At this point we've defined our control layer, created some components, and assembled those controls and components into views. Now all that's left is to create our controller script's entry point where we will initialize our session.
+At this point we've defined our control layer, created some components, and assembled those controls and components into views. Now all that's left is to create our controller script's entry point where we will setup and initialize our session.
 
 ```js
 // src/index.js
