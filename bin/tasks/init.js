@@ -9,6 +9,7 @@ const os = require('os');
 const fs = require('fs');
 const colors = require('colors/safe');
 const glob = require('glob').sync;
+const pkgjson = require('../../package.json');
 
 const isWindows = os.platform() === 'win32';
 const isMacOS = os.platform() === 'darwin';
@@ -56,6 +57,7 @@ module.exports = (dirname = '.', typescript = false) => {
 
     const context = {
         typescript,
+        taktilversion: pkgjson.version,
         scriptname,
         name,
         vendor,
