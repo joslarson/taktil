@@ -10,8 +10,8 @@ const build = require('./tasks/build');
 program
     .command('init [dirname]')
     .description('Initialize a new project with dirname (defaults to current directory).')
-    .option('-j, --js', 'use pure JavaScript instead of TypeScript')
-    .action((dirname, options) => init(dirname, options.js));
+    .option('-t, --typescript', 'setup project to use TypeScript')
+    .action((dirname, options) => init(dirname, options.typescript));
 
 // taktil build command
 program

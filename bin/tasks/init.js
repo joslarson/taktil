@@ -8,6 +8,7 @@ const prompt = require('prompt-sync')({ sigint: true });
 const os = require('os');
 const fs = require('fs');
 const colors = require('colors/safe');
+const glob = require('glob').sync;
 
 const isWindows = os.platform() === 'win32';
 const isMacOS = os.platform() === 'darwin';
@@ -36,11 +37,11 @@ function rprompt(question, defaultValue, test, badTestResponse) {
     return result;
 }
 
-module.exports = (dirname = '.', js = false) => {
+module.exports = (dirname = '.', typescript = false) => {
     console.log(`${taskName} begin project initialization...`);
     const templatesGlob = path.posix.join(
         path.dirname(require.main.filename),
-        js ? 'template_js' : 'template_ts',
+        'template',
         '**',
         '*'
     );
@@ -49,11 +50,12 @@ module.exports = (dirname = '.', js = false) => {
 
     const name = rprompt(colors.bold(colors.blue('Display Name: ')), '').trim();
     const vendor = rprompt(colors.bold(colors.blue('Vendor/Category: ')), '').trim();
-    const version = prompt(colors.bold(colors.blue('Version (1.0.0): ')), '1.0.0').trim();
     const author = prompt(colors.bold(colors.blue('Author: ')), '').trim();
+    const version = prompt(colors.bold(colors.blue('Version (1.0.0): ')), '1.0.0').trim();
     const apiversion = rprompt(colors.bold(colors.blue('API Version (2): ')), '2').trim();
 
     const context = {
+        typescript,
         scriptname,
         name,
         vendor,
@@ -63,8 +65,12 @@ module.exports = (dirname = '.', js = false) => {
         apiversion,
     };
 
+    const ignore = glob(templatesGlob)
+        .filter(p => p.endsWith(typescript ? '.ts' : '.js'))
+        .map(p => `!${p.slice(0, -3)}${typescript ? '.js' : '.ts'}`);
+
     gulp
-        .src(templatesGlob)
+        .src([templatesGlob, ...ignore])
         .pipe(
             change(function processTemplates(content) {
                 return nunjucks.configure(this.file.base).renderString(content, context);
@@ -72,6 +78,10 @@ module.exports = (dirname = '.', js = false) => {
         )
         .pipe(
             rename(filepath => {
+                if (filepath.basename !== 'webpack.config') {
+                    filepath.extname =
+                        typescript && filepath.extname === '.js' ? '.ts' : filepath.extname;
+                }
                 // run filenames through template renderer
                 filepath.basename = nunjucks.renderString(filepath.basename, context);
             })

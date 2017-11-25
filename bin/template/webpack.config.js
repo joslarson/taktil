@@ -7,7 +7,9 @@ const CaseSensitivePathsPlugin = require('case-sensitive-paths-webpack-plugin');
 const tsconfig = require('./tsconfig.json');
 
 module.exports = {
-    entry: { '{{ scriptname }}.control': './src/{{ scriptname }}.control.ts' },
+    entry: {
+        '{{ scriptname }}.control': './src/index.{% if typescript %}ts{% else %}js{% endif %}',
+    },
     output: { path: path.resolve(__dirname, 'dist'), filename: '[name].js' },
     resolve: {
         extensions: ['.ts', '.js'],
@@ -21,8 +23,8 @@ module.exports = {
                 test: /\.[tj]s$/,
                 loader: 'ts-loader',
                 options: {
-                    compilerOptions: { checkJs: false }, // don't have build process type check js files
-                    // entryFileIsJs: true, // this setting is required if your entry file is a js file
+                    compilerOptions: { checkJs: false }, // don't have build process type check js files{% if not typescript %}
+                    entryFileIsJs: true, // this setting is required if your entry file is a js file{% endif %}
                 },
                 exclude: /node_modules/,
             },

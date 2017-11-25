@@ -7,7 +7,7 @@
         "sourceMap": false,
         "moduleResolution": "node",
         "allowJs": true,
-        "checkJs": true,
+        "checkJs": false,
         "importHelpers": true,
         "lib": [
             "dom",

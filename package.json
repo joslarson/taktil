@@ -19,6 +19,7 @@
     "tslib": "^1.7.1",
     "colors": "^1.1.2",
     "commander": "^2.11.0",
+    "glob": "^7.1.2",
     "gulp": "^3.9.1",
     "gulp-change": "^1.0.0",
     "gulp-rename": "^1.2.2",
@@ -31,8 +32,6 @@
     "@types/node": "^8.0.20",
     "del": "^3.0.0",
     "delete-empty": "^1.0.1",
-    "glob": "^7.1.2",
-    "gulp": "^3.9.1",
     "gulp-typescript": "^3.2.1",
     "jest": "^20.0.4",
     "merge2": "^1.1.0",
@@ -65,9 +64,9 @@
   },
   "license": "BSD-3-Clause",
   "bugs": {
-    "url": "https://github.com/taktil/taktiljs/issues"
+    "url": "https://github.com/taktiljs/taktil/issues"
   },
-  "homepage": "https://github.com/taktil/taktiljs#readme",
+  "homepage": "https://github.com/taktiljs/taktil#readme",
   "jest": {
     "testEnvironment": "node",
     "transform": {
