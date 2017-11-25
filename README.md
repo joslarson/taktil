@@ -1,5 +1,4 @@
-Taktil
-==========================
+# Taktil
 
 [![Build Status](https://travis-ci.org/taktiljs/taktil.svg?branch=master)](https://travis-ci.org/taktiljs/taktil) [![npm version](https://badge.fury.io/js/taktil.svg)](https://badge.fury.io/js/taktil)
 
@@ -24,8 +23,7 @@ $ npm install -g taktil
 
 > **Note:** Don't miss the `-g` flag here as this installs the package globally, adding the the `taktil` command to your path.
 
-
-If you'd rather use Taktil without the CLI, you can install it locally into an existing project like so:
+If you'd rather use Taktil without the CLI, you can manually install it locally into an existing project like so:
 
 ```bash
 $ npm install taktil
@@ -49,7 +47,7 @@ Display Name: Getting Started
 Vendor/Category: Custom
 Version (1.0.0):
 Author: Joseph Larson
-API Version (2): 4
+API Version (4):
 [taktil] project initialization complete.
 ```
 
@@ -179,7 +177,7 @@ With that, we've defined our controls.
 
 ## Creating Components
 
-Now that we've defined our controls, we'll move on to building some reusable components. Components, in Taktil, are the state and business logic containers for non-hardware-specific functionality. They receive and react to standardized `ControlInput` messages (through the `onControlInput` method) as well as Bitwig API events. They also decide when a connected `Control` should be updated by calling its `setState` method, usually in reaction to on of the above mentioned messages or events.
+Now that we've defined our controls, we'll move on to building some components. Components, in Taktil, are the state and business logic containers for non-hardware-specific functionality. They receive and react to standardized `ControlInput` messages (through the `onControlInput` method) as well as Bitwig API events. They also decide when a connected `Control` should be updated by calling its `setState` method, usually in reaction to on of the above mentioned messages or events.
 
 Controls convert Midi input messages into standardized `ControlInput` messages. These messages are sent on to a connected component through the component's `onControlInput` method. In this way, each component definition is able to uniquely define how this input will be handled and when and how a control's state will be modified.
 
@@ -320,9 +318,17 @@ export const daw = new Daw();
 ```
 
 
-## Constructing Views
+## Assembling the Views
 
-Components are instantiated as members of a `View` definition providing a corresponding control and a params object.
+Now that we've defined our controls and and components, it's time to assemble them into views. I their simplest form, views are just a mapping of components to controls. When a view is active, the view's components will receive control input and generate control output. An inactive view's components, on the other hand, will not be sent control input messages, and will not generate any control output, but they will continue to maintain their internal state in preparation for being activated.
+
+View components are also registered to a specific view "mode" and will only be considered active if both the view and the mode are active. Taktil maintains the array of active mode strings globally. These modes are kept in the order they were activated such that a component registered to the same control but a different mode can override the another, with the most recently activated mode taking precedence. This allows a view to configure itself differently based on the global mode list. This is useful, for instance, when implementing a shift button, where having all views know our script is in "shift mode" will allow us to define secondary actions across multiple disconnected views.
+
+Views are defined by extending Taktil's View class or by stacking previously defined views using the ViewStack function. The ViewStack function accepts a list of view classes and returns a new View class definition where, in order, each of the provided views' component/control mappings override any subsequent view's mapping involving the same control (it's just simple inheritance where the the control portion of each mapping is the thing being overridden). This pattern makes it possible to define reusable chunks of view logic which can be combined together in different ways to create more complex views.
+
+In a simple project, a single view making use of view modes may be enough handle your needs. The value of view stacks will become apparent when developing more complex projects.
+
+As shown below, the component/control mappings are defined as instance properties. Valid instance property types consist of a component instance, an array of component instances, or a function that returns either of the previous. Component constructors take a control instance and a params object. The params object consists of an optional mode property—for defining which mode the component should be registered to—as well as whatever else the individual component needs to operate. This is generally where we will pass in objects retrieved or created through Bitwig's API as the view instance code will not be run until after the init phase.
 
 ```js
 // src/views.js
@@ -333,33 +339,49 @@ import { PlayToggle, ModeGate, MetronomeToggle, VolumeRange } from './components
 import { controls } from './controls';
 import { daw } from './daw';
 
+// in this view when you press the SHIFT button the PLAY button will toggle the metronome on/off
+// but when the SHIFT button is released, the PLAY button will toggle the transport's play state
 class BaseView extends View {
+    // map PlayToggle component to the PLAY control, registering it to the default base mode
     playToggle = new PlayToggle(controls.PLAY, { transport: daw.transport });
+    // map ModeGate component to the SHIFT control, registering it to the default base mode
     shiftModeGate = new ModeGate(controls.SHIFT, { target: 'SHIFT' });
+    // map MetronomeToggle component to the PLAY control, registering it to our custom 'SHIFT' mode
     metroToggle = new MetronomeToggle(controls.PLAY, { mode: 'SHIFT', transport: daw.transport });
 }
 
 class MixerView extends View {
+    // map VolumeRange component to the KNOB control, registering it the default base mode
     masterVolume = new VolumeRange(controls.KNOB, { track: daw.masterTrack });
 }
 
+// export the view name to view class mapping so that we can register these views to
+// the session to be activated by name
 export const views = {
     BASE: BaseView,
+    // by stacking these views, all components in MixerView that are connected to an active mode
+    // will be active and any components in BaseView that are connected to an active mode will
+    // be active as long as their connected controls do not conflict with any active component
+    // in the MixerView.
     MIXER: ViewStack(MixerView, BaseView),
 };
 ```
 
 
-## Assembling the Session
+## Initializing the Session
+
+At this point we've defined our control layer, created some components, and assembled those controls and components into views. Now all that's left is to create our controller script's entry point where we will initialize our session.
 
 ```js
+// src/index.js
+
 import taktil from 'taktil';
 
 import { controls } from './controls';
 import { views } from './views';
 
 // 1. set bitwig api version
-host.loadAPI(3);
+host.loadAPI(4);
 
 // 2. define controller script
 host.defineController(
@@ -385,5 +407,4 @@ taktil.registerViews(views);
 
 // 6. on init, activate view to trigger initial render
 taktil.on('init', () => taktil.activateView('BASE'));
-
 ```
