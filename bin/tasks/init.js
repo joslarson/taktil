@@ -53,7 +53,10 @@ module.exports = (dirname = '.', typescript = false) => {
     const vendor = rprompt(colors.bold(colors.blue('Vendor/Category: ')), '').trim();
     const author = prompt(colors.bold(colors.blue('Author: ')), '').trim();
     const version = prompt(colors.bold(colors.blue('Version (1.0.0): ')), '1.0.0').trim();
-    const apiversion = rprompt(colors.bold(colors.blue('API Version (2): ')), '2').trim();
+    const apiversion = rprompt(
+        colors.bold(colors.blue(`API Version (${pkgjson.bitwigApiVersion}): `)),
+        `${pkgjson.bitwigApiVersion}`
+    ).trim();
 
     const context = {
         typescript,
