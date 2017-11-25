@@ -177,16 +177,15 @@ With that, we've defined our controls.
 
 ## Creating Components
 
-Now that we've defined our controls, we'll move on to building some components. Components, in Taktil, are the state and business logic containers for non-hardware-specific functionality. They receive and react to standardized `ControlInput` messages (through the `onControlInput` method) as well as Bitwig API events. They also decide when a connected `Control` should be updated by calling its `setState` method, usually in reaction to on of the above mentioned messages or events.
+Now that we've defined our controls, we'll move on to building some components. Components, in Taktil, are the state and business logic containers for non-hardware-specific functionality. They receive and react to standardized `ControlInput` messages (through the `onControlInput` method) as well as Bitwig API events. They also decide when a connected `Control` should be updated by calling its `setState` method, usually in reaction to one of the above mentioned messages or events.
 
-Controls convert Midi input messages into standardized `ControlInput` messages. These messages are sent on to a connected component through the component's `onControlInput` method. In this way, each component definition is able to uniquely define how this input will be handled and when and how a control's state will be modified.
+Components are defined as ES6 classes that must eventually extend the `Component` base class. At instantiation time, a component will be passed an associated control and a params object. The params object is your component configuration object and is where all of the Bitwig API derived objects should be passed in for use in the components different life-cycle methods.
 
-A connected control converts incoming Midi data into a standardized **ControlInput** object which it sends into the component's `onControlInput` method.
+There are only three total component life-cycle methods and only two that are required for a component definition. They are as follows.
 
-The life cycle of a component begins with the `onControlInput` method which receives a standardized `Control` input object which is sent by its corresponding control on MIDI input
-
-They are defined as ES6 classes that must eventually extend the `Component` class. Component instances are initia
-
+* **`onInit` (optional):**  This where you define all of your component's "init" phase logic, which mostly consists of hooking up Bitwig API event callbacks.
+* **`onControlInput` (required):** This is where you define what happens when your component's connected control receives input.
+* **`getControlOutput` (required):** This returns the full or partial control state object that will be sent to the controls `setState` method whenever our component re-renders.
 
 To get our feet wet, we'll start off by creating a simple play/pause toggle.
 
@@ -198,22 +197,44 @@ import taktil from 'taktil';
 export class PlayToggle extends taktil.Component {
     state = { on: false };
 
+    // onInit is where you should hookup your Bitwig API event callbacks,
+    // as all of that work must be done during the "init" phase
     onInit() {
+        // we're expecting a Bitwig API derived transport object to be passed in to the params
+        // object at instantiation time, then we're hooking up a callback to sync the component
+        // state with the transport's isPlaying state.
         this.params.transport
             .isPlaying()
             .addValueObserver(isPlaying => this.setState({ on: isPlaying }));
     }
 
+    // onControlInput is where we define what happens when our component's connected control
+    // receives input
     onControlInput({ value }) {
+        // if the input value is greater than the controls min value, toggle play state
         if (value > this.control.minValue) this.params.transport.togglePlay();
     }
 
+    // getControlOutput is where we define the full or partial control state object
+    // that will be sent to the controls `setState` method whenever our component re-renders
     getControlOutput()> {
+        // in this case if our button is "on" we send the control's max value, otherwise
+        // we send it's minimum value
         const { state: { on }, control: { minValue, maxValue } } = this;
         return { value: on ? maxValue : minValue };
     }
 }
 ```
+
+Because buttons are such a big and predictable part of every controller script, Taktil provides a general purpose Button component. The button component extends the base Component class, adding five self described optionally implemented life-cycle methods: 
+
+* `onPress`
+* `onLongPress`
+* `onDoublePress`
+* `onRelease`
+* `onDoubleRelease`
+
+Let's re-implement our PlayToggle by extending the Button component.
 
 ```js
 // src/components.js
@@ -229,10 +250,19 @@ export class PlayToggle extends taktil.Button {
     }
 
     onPress() {
-        const { transport } = this.params;
-        this.state.on ? transport.stop() : transport.play();
+        this.params.transport.togglePlay()
     }
 }
+```
+
+Now let's implement the rest of the components for our getting started project. First we want to implement a mode button which will toggle shift mode globally such that when the shift ModeGate button is pressed the PLAY control will toggle the metronome on/off, and when the shift ModeGate button is released the PLAY control will go back to being a PlayToggle.
+
+> **Note:** We'll hook up the components to controls and modes in the view section, then you'll have a better understanding of what I'm talking about here.
+
+Then we'll implement a VolumeRange component
+
+```js
+// src/components.js (continued...)
 
 // Mode Gate
 
@@ -293,29 +323,27 @@ export class VolumeRange extends taktil.Component {
 
 ## Integrating with the Bitwig API
 
+Bitwig's API requires that all of our API derived object and event subscription needs be defined and setup during the controller scripts 'init' phase. This can be done by following the pattern below.
+
 ```js
 // src/daw.js
 
 import taktil from 'taktil';
 
-export class Daw {
-    transport: API.Transport;
-    masterTrack: API.MasterTrack;
-    // ...define what you are going to keep track of
-
-    constructor() {
-        taktil.on('init', this.onInit.bind(this)); // initialize store during script init
-    }
-
-    onInit() {
-        this.transport = host.createTransport();
-        this.masterTrack = host.createMasterTrack(0);
-        // ...setup all of your "init time only" bitwig api stuff here
-    }
-}
-
-export const daw = new Daw();
+// export our initialized empty daw object
+export const daw = {};
+// after the init phase our daw object will be populated with all of our needed API objects.
+// these object will be ready and can be accessed from within in a component's `onInit`
+// method to setup event callbacks related to that component. It's best practice to pass
+// these objects into components as params to make them more reusable.
+taktil.on('init', () => {
+    daw.transport = host.createTransport();
+    daw.masterTrack = host.createMasterTrack(0);
+    // ...setup all of your "init time only" bitwig api objects here
+});
 ```
+
+> **Note:** Bitwig's API only allows a single function to be defined as your init event callback. Taktil defines this function for us in a way that allows us to register multiple callbacks to the 'init' event via the `taktil.on('init', [callback])` method.
 
 
 ## Assembling the Views
