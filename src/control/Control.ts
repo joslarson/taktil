@@ -180,6 +180,7 @@ export class Control<State extends ControlState = ControlState> {
 
         if (this.activeComponent) {
             this.activeComponent.onControlInput(this.getControlInput(message));
+            this.render(); // make sure hardware reflects control state
         } else {
             // re-render based on current state (messages will only be sent if they are
             // different than what's in the cache)
