@@ -4,9 +4,9 @@
 
 Taktil is a lightweight control surface scripting framework for Bitwig Studio that encourages rapid development and community code reuse. At its core, it is designed around the idea of building reusable, extendable components and provides a simple but powerful view abstraction that makes contextually mapping hardware controls to different components a breeze.
 
-Taktil's integrated build tool leverages the powers of TypeScript and Webpack to enable ES2015+ language features and npm dependency support in Bitwig's ES5 world (no messy build configurations necessary). Whether you want to go all in with TypeScript or stick with pure modern JavaScript, Taktil has got you covered. 
+Taktil's integrated build tool transpiles and bundles your code to enable ES2015+ language features and npm dependency support in Bitwig's ES5 world (no messy build configurations necessary).
 
-> **Note:** This documentation currently provides only JavaScript examples. TypeScript specific docs are in the works.
+> **Note:** While Taktil is written in and provide first class support for TypeScript, this documentation currently provides only pure JavaScript examples. TypeScript specific docs are in the works.
 
 > **Warning!** While fully usable, Taktil is still pre-1.0 and has no backwards compatibility guarantees until the v1 release occurs! Your input is encouraged. Also, while the CLI is designed to work on Windows, Mac, and Linux, I have only tested it on macOS so far. So please create ticket and/or submit pull request as you find bugs.
 
@@ -20,7 +20,7 @@ To get started started, you'll need to first make sure you have the following pr
 Once you've got that out of the way, you're ready to install Taktil. If you want to use the integrated CLI, you'll need to install it globally. Doing so will put the `taktil` CLI command in your path which will handle initializing projects and building + bundling them for you.
 
 ```bash
-$ npm install -g taktil
+npm install -g taktil
 ```
 
 > **Note:** Don't miss the `-g` flag here as this installs the package globally, adding the the `taktil` command to your path.
@@ -28,7 +28,7 @@ $ npm install -g taktil
 If you'd rather use Taktil without the CLI, you can manually install it locally into an existing project like so:
 
 ```bash
-$ npm install taktil
+npm install taktil
 ```
 
 ## Project Setup
@@ -47,17 +47,17 @@ This command will ask you some questions then generate a working project skeleto
 [taktil] begin project initialization...
 Display Name: Getting Started
 Vendor/Category: Custom
-Version (1.0.0):
 Author: Joseph Larson
+Version (1.0.0):
 API Version (4):
 [taktil] project initialization complete.
 ```
 
 ...your new project will be created within a new `getting-started` directory, relative to your current working directory, and will have the following structure:
 
-```
+```bash
 getting-started/
-├── dist/ -> (symlinked into default Bitwig control surface scripts directory)
+├── dist/ -> ...  # symlinked into default Bitwig control surface scripts directory
 ├── src
 │   ├── components.js
 │   ├── controls.js
@@ -80,7 +80,7 @@ npm install
 Now, we'll run the CLI's `build` command, to generate your project's initial build.
 
 ```bash
-taktil build
+taktil build  # run from the project root
 ```
 
 At this point your newly built project files should have been picked up by Bitwig and your script should be listed under `Custom > Getting Started` in Bitwig's controller selection menu.
@@ -89,12 +89,19 @@ Activate your new controller script by selecting it from the script selection me
 
 > **Note**: The default project template is setup assuming a single midi input/output pair, but if you need more than that, more can be defined in the your project's entry file (`src/index.js` in this case).
 
+Now, before we start editing files, let's put the CLI's build command in watch mode so that our project will rebuild whenever we modify and save a source file.
+
+```bash
+taktil watch  # run from the project root
+# exit the build command with ctrl/cmd+c
+```
+
 With that, everything should be in place to start coding your control surface script. Let's get into it :)
 
 
 ## Defining Controls
 
-The first real task for any new Taktil project is to define an initial set of Midi controls for the script to react to and/or send updates to. This set of controls acts as the template for your control surface and all its knobs, buttons, pads, etc. Taktil's `Control` abstraction exists to help you model your unique hardware-specific controls in way that provides **a common interface with which to build reusable components.**
+The first real task for any new Taktil project is to define an initial set of Midi controls for the script to react to and/or send updates to. This set of controls acts as the template for your control surface and all its knobs, buttons, pads, etc. Taktil's `Control` abstraction exists to help you model your unique hardware-specific controls in way that provides **a common interface on top of which to build reusable components.**
 
 In this tutorial, our hypothetical control surface has three relevant controls: a `PLAY` button, a `SHIFT` button, and a general purpose `KNOB`. Let's take a quick look at Taktil's `Control` MIDI abstraction.
 
@@ -119,16 +126,16 @@ Patterns can be defined in string or object literal form.
 
 Beyond defining the MIDI patterns your `Control` will handle, you may also need to override some of the `Control`'s default options to reflect the type of `Control` you are defining. The most common of those options are as follows:
 
-* `enableMidiOut` (default: `true`): Set to `false` to disable Midi output for this control.
-* `enableCache` (default: `true`): Set to `false` if you'd like to disable the magic that is the cache.
-* `cacheOnMidiIn` (default: `true`): Set this to `false` for controls whose visual state (e.g. LED) is only updated on MIDI output.
+* **`enableMidiOut`** (default: `true`): Set to `false` to disable Midi output for this control.
+* **`enableCache`** (default: `true`): Set to `false` if you'd like to disable the magic that is the cache.
+* **`cacheOnMidiIn`** (default: `true`): Set this to `false` for controls whose visual state (e.g. LED) is only updated on MIDI output.
 
 > **Note:** Whenever this documentation mentions MIDI input or output it is speaking from the perspective of the script, not the controller. So "input" is referring to MIDI messages travelling from the controller to the script, and "output" is referencing messages moving from the script to the controller.
 
 
 ### Control State
 
-All `Control` instances have a state object that contains a required value property, an optional color property, and whatever other properties custom `Control` subclasses define. The state is updated by calling the `Controls`'s `setState` method, and is most often called from within a corresponding component (which we'll explore later on).
+All `Control` instances have a state object that contains a required value property, optional color, brightness, and flashing properties, and whatever other properties custom `Control` subclasses define. The state is updated by calling the `Controls`'s `setState` method, and is most often called from within a corresponding component (which we'll explore later on).
 
 ### The `PLAY` Button
 
@@ -174,7 +181,7 @@ export const controls = {
 
 With that, we've defined our controls.
 
-> **Note:** In the same way that ControlChange extends Control, you can create your own Control subclasses. You might, for example define a Control type that not only keeps track of your hardware control's value, but also handles its color, its brightness, and whether it's flashing or not. The sky's the limit. All controls must define the MIDI messages they will handle, but what they do with the input and what they render on output is up to you.
+> **Note:** In the same way that ControlChange extends Control, you can create your own Control subclasses. You might, for example define a Control type that not only keeps track of your hardware control's value, but also handles its color, its brightness, and whether it's pulsing or not. The sky's the limit. All controls must define the MIDI messages they will handle, but what they do with the input and what they render on output and when is up to you.
 
 
 ## Creating Components
@@ -219,7 +226,7 @@ export class PlayToggle extends taktil.Component {
 
     // getControlOutput is where we define the full or partial control state object
     // that will be sent to the controls `setState` method whenever our component re-renders
-    getControlOutput()> {
+    getControlOutput() {
         // in this case if our button is "on" we send the control's max value, otherwise
         // we send it's minimum value
         const { state: { on }, control: { minValue, maxValue } } = this;
@@ -433,5 +440,5 @@ taktil.registerControls(controls);
 taktil.registerViews(views);
 
 // 6. on init, activate view to trigger initial render
-taktil.on('init', () => taktil.activateView('BASE'));
+taktil.on('init', () => taktil.activateView('MIXER'));
 ```
