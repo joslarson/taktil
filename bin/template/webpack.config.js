@@ -23,8 +23,7 @@ module.exports = {
                 test: /\.[tj]s$/,
                 loader: 'ts-loader',
                 options: {
-                    compilerOptions: { checkJs: false }, // don't have build process type check js files{% if not typescript %}
-                    entryFileIsJs: true, // this setting is required if your entry file is a js file{% endif %}
+                    compilerOptions: { checkJs: false }, // don't have build process type check js files
                 },
                 exclude: /node_modules/,
             },
