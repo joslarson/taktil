@@ -75,7 +75,7 @@ module.exports = (dirname = '.', typescript = false) => {
         .map(p => `!${p.slice(0, -3)}${typescript ? '.js' : '.ts'}`);
 
     gulp
-        .src([templatesGlob, ...ignore])
+        .src([templatesGlob, `${templatesGlob.slice(0, -1)}.*`, ...ignore])
         .pipe(
             change(function processTemplates(content) {
                 return nunjucks.configure(this.file.base).renderString(content, context);

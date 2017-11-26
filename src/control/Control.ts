@@ -7,7 +7,7 @@ export interface ControlState {
     value: number;
     color?: Color;
     brightness?: number;
-    pulse?:
+    flashing?:
         | boolean
         | {
               on: boolean;

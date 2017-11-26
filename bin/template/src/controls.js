@@ -1,5 +1,5 @@
 import taktil from 'taktil';
 
 export const controls = {
-    PLAY: new taktil.SimpleControl({ status: 0xb4, data1: 0x14 }),
+    PLAY: new taktil.ControlChange({ channel: 0, control: 24 }),
 };
