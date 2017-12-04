@@ -235,7 +235,7 @@ export class PlayToggle extends taktil.Component {
 }
 ```
 
-Because buttons are such a big and predictable part of every controller script, Taktil provides a general purpose Button component. The button component extends the base Component class, adding five self described optionally implemented life-cycle methods: 
+Because buttons are such a big and predictable part of every controller script, Taktil provides a general purpose Button component. The button component extends the base Component class, adding five self described optionally implemented life-cycle methods:
 
 * **`onPress`**
 * **`onLongPress`**

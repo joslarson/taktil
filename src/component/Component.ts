@@ -30,6 +30,10 @@ export abstract class Component<
     // allows running of code that is only allowed in the API's init function
     onInit?(): void;
 
+    onActivate?(): void;
+
+    onDeactivate?(): void;
+
     setState(partialState: Partial<State>): void {
         // update object state
         this.state = { ...this.state as object, ...partialState as object } as State; // TODO: should be able to remove type casting in future typescript release

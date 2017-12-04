@@ -135,7 +135,16 @@ export class Control<State extends ControlState = ControlState> {
     set activeComponent(component: Component | null) {
         // component not changing? do nothing
         if (component === this._activeComponent) return;
+        // deactivate old component
+        if (this._activeComponent && this._activeComponent.onDeactivate) {
+            this._activeComponent.onDeactivate();
+        }
+
+        // activate new component
         this._activeComponent = component;
+        if (this._activeComponent && this._activeComponent.onActivate) {
+            this._activeComponent.onActivate();
+        }
 
         // on component change, reset state to default
         this.setState(this.defaultState, false);

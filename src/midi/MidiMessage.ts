@@ -124,5 +124,3 @@ export class MidiMessage implements SimpleMidiMessage {
         return this.hex;
     }
 }
-
-new MidiMessage({ status: 0, data1: 0, data2: 0 });
