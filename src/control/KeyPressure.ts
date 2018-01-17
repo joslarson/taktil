@@ -1,8 +1,10 @@
-import { Control, ControlState } from './Control';
-import { MidiMessage } from '../midi';
+import { MidiControl, MidiControlState } from './MidiControl';
+import { MidiMessage } from '../message';
 
-export type KeyPressureState = ControlState;
-export class KeyPressure<State extends KeyPressureState = KeyPressureState> extends Control<State> {
+export type KeyPressureState = MidiControlState;
+export class KeyPressure<State extends KeyPressureState = KeyPressureState> extends MidiControl<
+    State
+> {
     status: number;
     data1: number;
 

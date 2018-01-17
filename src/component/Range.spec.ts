@@ -1,5 +1,5 @@
 import { Range } from './Range';
-import { Control, ControlState } from '../control';
+import { MidiControl, ControlState } from '../control';
 import { Session } from '../session';
 
 class TestRange extends Range {
@@ -11,9 +11,9 @@ class TestRange extends Range {
 
 describe('Range', () => {
     const session = new Session();
-    const control = new Control({ patterns: [{ status: 0xb0, data1: 21 }] });
+    const control = new MidiControl({ patterns: [{ status: 0xb0, data1: 21 }] });
     session.registerControls({ TEST: control });
-    const range = new TestRange(control, 'MY_MODE', {});
+    const range = new TestRange(control, { mode: 'MY_MODE' });
 
     // if active component is not set, getOutput will not be called
     control.activeComponent = range;

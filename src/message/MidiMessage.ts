@@ -1,4 +1,6 @@
-export interface SimpleMidiMessage {
+import { Message } from './Message';
+
+export interface SimpleMidiMessage extends Message {
     port: number;
     status: number;
     data1: number;

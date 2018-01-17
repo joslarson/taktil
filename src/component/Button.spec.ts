@@ -1,5 +1,5 @@
 import { Button } from './Button';
-import { Control } from '../control';
+import { MidiControl } from '../control';
 
 class TestButton extends Button {
     onPress() {
@@ -26,7 +26,7 @@ class TestButton extends Button {
 describe('Button', () => {
     jest.useFakeTimers();
 
-    const control = new Control({ patterns: [{ status: 0xb0, data1: 21 }] });
+    const control = new MidiControl({ patterns: [{ status: 0xb0, data1: 21 }] });
     const button = new TestButton(control, {});
 
     const onPress = jest.spyOn(button, 'onPress');

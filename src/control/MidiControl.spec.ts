@@ -1,11 +1,11 @@
-import { Control } from './Control';
-import { MidiMessage, SysexMessage } from '../midi/';
+import { MidiControl } from './MidiControl';
+import { MidiMessage, SysexMessage } from '../message/';
 import { Button } from '../component';
 import { Session } from '../session';
 
 type TestControlState = { value: number; nested: { value: number } };
 
-class TestControl extends Control<TestControlState> {
+class TestControl extends MidiControl<TestControlState> {
     state = { value: 127, nested: { value: 0 } };
 }
 
@@ -75,7 +75,7 @@ describe('Control', () => {
     });
 
     it('should generate correct input for simple control', () => {
-        const control = new Control({ patterns: [{ status: 0xb0, data1: 21 }] });
+        const control = new MidiControl({ patterns: [{ status: 0xb0, data1: 21 }] });
         const { status, data1 } = control as { status: number; data1: number };
         expect(
             control.getControlInput(new MidiMessage({ status, data1, data2: control.maxValue }))
@@ -85,13 +85,13 @@ describe('Control', () => {
     });
 
     it('should generate correct output for simple control', () => {
-        const control = new Control({ patterns: [{ status: 0xb0, data1: 21 }] });
+        const control = new MidiControl({ patterns: [{ status: 0xb0, data1: 21 }] });
         const { status, data1, state: { value } } = control as {
             status: number;
             data1: number;
             state: { value: number };
         };
-        expect(control.getMidiOutput(control.state)).toEqual([
+        expect(control.getOutputMessages(control.state)).toEqual([
             new MidiMessage({ status, data1, data2: value }),
         ]);
     });

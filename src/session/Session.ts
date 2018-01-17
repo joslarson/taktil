@@ -1,8 +1,10 @@
 import { EventEmitter } from './EventEmitter';
-import { MidiOutProxy, MidiMessage, SysexMessage } from '../midi';
+import { MidiOutProxy, MidiMessage, SysexMessage } from '../message';
 import { Control, ControlState } from '../control';
 import { View } from '../view';
 import { shim } from '../env';
+import { MidiControl } from '../control/MidiControl';
+import { Message } from '../message/Message';
 
 declare const global: {
     init: () => void;
@@ -122,7 +124,7 @@ export class Session extends EventEmitter {
         const control = this.findControl(message);
         const messageType = message instanceof MidiMessage ? '[MIDI] ' : '[SYSEX]';
 
-        if (control) control.onMidiInput(message);
+        if (control) control.onInputMessage(message);
 
         console.log(
             `${messageType} IN  ${message.port} ==> ${message instanceof MidiMessage
@@ -155,15 +157,17 @@ export class Session extends EventEmitter {
             const controlsArray: Control[] = [];
             for (const controlName in controls) {
                 const control = controls[controlName];
-
-                // make sure patterns don't overlap
-                for (const existingControl of controlsArray) {
-                    for (const pattern of control.patterns) {
-                        for (const existingPattern of existingControl.patterns) {
-                            if (pattern.conflictsWith(existingPattern)) {
-                                throw new Error(
-                                    `Control "${control.label}" conflicts with existing Control "${existingControl.label}".`
-                                );
+                if (control instanceof MidiControl) {
+                    // make sure patterns don't overlap
+                    for (const existingControl of controlsArray) {
+                        if (!(existingControl instanceof MidiControl)) continue;
+                        for (const pattern of control.patterns) {
+                            for (const existingPattern of existingControl.patterns) {
+                                if (pattern.conflictsWith(existingPattern)) {
+                                    throw new Error(
+                                        `Control "${control.label}" conflicts with existing Control "${existingControl.label}".`
+                                    );
+                                }
                             }
                         }
                     }
@@ -193,13 +197,17 @@ export class Session extends EventEmitter {
     }
 
     /** Find the control (if it exists) associated with an incoming Midi message. */
-    findControl(message: MidiMessage | SysexMessage): Control | null {
+    findControl(message: Message): Control | null {
+        const isMidiMessage = message instanceof MidiMessage || message instanceof SysexMessage;
         // look for a matching registered control
         for (const controlName in this.controls) {
             const control = this.controls[controlName];
-            for (const pattern of control.patterns) {
-                // if pattern matches midiMessage, return control
-                if (pattern.test(message)) return control;
+            if (isMidiMessage && control instanceof MidiControl) {
+                const midiMessage = (message as MidiMessage) || SysexMessage;
+                for (const pattern of control.patterns) {
+                    // if pattern matches midiMessage, return control
+                    if (pattern.test(midiMessage)) return control;
+                }
             }
         }
         // not found, return null

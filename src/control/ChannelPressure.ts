@@ -1,10 +1,10 @@
-import { Control, ControlState } from './Control';
-import { MidiMessage } from '../midi';
+import { MidiControl, MidiControlState } from './MidiControl';
+import { MidiMessage } from '../message';
 
-export type ChannelPressureState = ControlState;
+export type ChannelPressureState = MidiControlState;
 export class ChannelPressure<
     State extends ChannelPressureState = ChannelPressureState
-> extends Control<State> {
+> extends MidiControl<State> {
     enableMidiOut = false;
     status: number;
 
@@ -23,10 +23,10 @@ export class ChannelPressure<
     }
 
     getControlInput({ data1 }: MidiMessage): State {
-        return { ...this.state as ControlState, value: data1 } as State; // TODO: should be able to remove type casting in future typescript release
+        return { ...this.state as object, value: data1 } as State; // TODO: should be able to remove type casting in future typescript release
     }
 
-    getMidiOutput({ value }: State): MidiMessage[] {
+    getOutputMessages({ value }: State): MidiMessage[] {
         const { port, status } = this;
         return [new MidiMessage({ port, status, data1: value, data2: 0 })];
     }

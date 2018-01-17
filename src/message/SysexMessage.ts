@@ -1,4 +1,6 @@
-export class SysexMessage {
+import { Message } from './Message';
+
+export class SysexMessage implements Message {
     port: number;
     data: string;
     urgent: boolean;

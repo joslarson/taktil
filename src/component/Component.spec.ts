@@ -1,8 +1,11 @@
-import { Control, ControlState } from '../control';
+import { MidiControl, ControlState } from '../control';
 import { Component, ComponentState, ComponentParams } from './Component';
 
 describe('Component', () => {
-    const control = new Control({ patterns: [{ status: 0xb0, data1: 21 }], enableMidiOut: false });
+    const control = new MidiControl({
+        patterns: [{ status: 0xb0, data1: 21 }],
+        enableMidiOut: false,
+    });
 
     type Params = ComponentParams;
     interface State extends ComponentState {

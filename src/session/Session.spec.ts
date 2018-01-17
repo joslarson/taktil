@@ -1,9 +1,9 @@
 import { Session } from './Session';
-import { Control } from '../control';
+import { MidiControl } from '../control';
 import { View } from '../view';
 
 describe('Session', () => {
-    const controls = { CTRL: new Control({ patterns: [{ status: 0xb0, data1: 0xb1 }] }) };
+    const controls = { CTRL: new MidiControl({ patterns: [{ status: 0xb0, data1: 0xb1 }] }) };
 
     class BaseView extends View {}
     const views = { BASE: BaseView };

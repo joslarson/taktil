@@ -110,5 +110,5 @@ export function on(label: any, callback: (...args: any[]) => any) {
 export * from './component';
 export * from './control';
 export * from './helpers';
-export * from './midi';
+export * from './message';
 export * from './view';
