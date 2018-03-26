@@ -4,7 +4,7 @@ import { controls } from './controls';
 import { views } from './views';
 
 // 1. set bitwig api version
-host.loadAPI({{ apiversion }});
+host.loadAPI({{ apiVersion }});
 
 // 2. define controller script
 host.defineController(

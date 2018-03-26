@@ -8,7 +8,7 @@ const tsconfig = require('./tsconfig.json');
 
 module.exports = {
     entry: {
-        '{{ scriptname }}.control': './src/index.{% if typescript %}ts{% else %}js{% endif %}',
+        '{{ scriptName }}.control': './src/index.{% if typescript %}ts{% else %}js{% endif %}',
     },
     output: { path: path.resolve(__dirname, 'dist'), filename: '[name].js' },
     resolve: {

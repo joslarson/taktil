@@ -13,7 +13,7 @@ describe('Range', () => {
     const session = new Session();
     const control = new Control({ patterns: [{ status: 0xb0, data1: 21 }] });
     session.registerControls({ TEST: control });
-    const range = new TestRange(control, 'MY_MODE', {});
+    const range = new TestRange(control, { mode: 'MY_MODE' });
 
     // if active component is not set, getOutput will not be called
     control.activeComponent = range;

@@ -1,18 +1,18 @@
 {
-  "name": "{{ scriptname }}",
+  "name": "{{ scriptName }}",
   "description": "{{ description }}",
   "author": "{{ author }}",
   "dependencies": {
-    "taktil": "^{{ taktilversion }}",
-    "tslib": "^1.8.0"
+    "taktil": "^{{ taktilVersion }}",
+    "tslib": "^1.9.0"
   },
   "devDependencies": {
     "bitwig-webpack-plugin": "^1.0.1",
     "case-sensitive-paths-webpack-plugin": "^2.1.1",
-    "copy-webpack-plugin": "^4.2.3",
-    "ts-loader": "^3.1.1",
-    "typed-bitwig-api": "^2.1.2",
-    "typescript": "^2.6.1",
-    "webpack": "^3.8.1"
+    "copy-webpack-plugin": "^4.5.0",
+    "ts-loader": "^4.0.1",
+    "typed-bitwig-api": "{{ apiTypesVersion }}",
+    "typescript": "{{ typescriptVersion }}",
+    "webpack": "^4.0.1"
   }
 }
