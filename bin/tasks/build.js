@@ -3,7 +3,7 @@ const colors = require('colors/safe');
 
 const taskName = colors.bold(colors.magenta(`[taktil]`));
 
-module.exports = (project_root = '.', { watch = false, optimize = false }) => {
+module.exports = (project_root = '.', { production = false, watch = false }) => {
     process.chdir(project_root);
 
     const webpackPath = path.join(process.cwd(), 'node_modules', 'webpack');
@@ -20,29 +20,25 @@ module.exports = (project_root = '.', { watch = false, optimize = false }) => {
         return;
     }
 
-    const webpackConfig = require(path.join(process.cwd(), 'webpack.config.js'));
-    const devConfig = typeof webpackConfig === 'function' ? webpackConfig() : webpackConfig;
-    const prodConfig =
-        typeof webpackConfig === 'function' ? webpackConfig({ production: true }) : webpackConfig;
-    const config = optimize ? prodConfig : devConfig;
+    let config = require(path.join(process.cwd(), 'webpack.config.js'));
 
-    // if webpack config does not take an env arg add optimizations
-    if (optimize && typeof webpackConfig !== 'function') {
-        config.plugins = [
-            ...config.plugins,
-            new webpack.DefinePlugin({
-                'process.env.NODE_ENV': JSON.stringify('production'),
-            }),
-            new webpack.optimize.UglifyJsPlugin({ comments: false }),
-        ];
-    }
+    const mode = production ? 'production' : 'development';
+    if (typeof config === 'function') config = config(undefined, { mode });
+    else config = { mode, ...config };
 
     const compiler = webpack(config);
 
-    compiler.plugin('compile', () => {
-        console.log(taskName, 'building...');
-        console.time(`${taskName} complete`);
-    });
+    if (compiler.hooks) {
+        compiler.hooks.compile.tap('TaktilCLI', () => {
+            console.log(taskName, 'building...');
+            console.time(`${taskName} complete`);
+        });
+    } else {
+        compiler.plugin('compile', () => {
+            console.log(taskName, 'building...');
+            console.time(`${taskName} complete`);
+        });
+    }
 
     function onBuild(err, stats) {
         if (err) console.error(err);
