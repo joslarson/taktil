@@ -40,7 +40,7 @@ export abstract class Button<
         const { on, color } = this.state;
         return {
             value: on ? this.control.maxValue : this.control.minValue,
-            ...color && { color },
+            ...(color && { color }),
         };
     }
 

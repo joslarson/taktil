@@ -20,8 +20,8 @@ export abstract class Component<
     constructor(control: Control, params: Params & { mode?: string }) {
         this.control = control;
         this.params = {
-            ...this.params as object,
-            ...params as object,
+            ...(this.params as object),
+            ...(params as object),
             mode: params.mode || '__BASE__',
         } as Params & { mode: string };
     }
@@ -36,7 +36,7 @@ export abstract class Component<
 
     setState(partialState: Partial<State>): void {
         // update object state
-        this.state = { ...this.state as object, ...partialState as object } as State; // TODO: should be able to remove type casting in future typescript release
+        this.state = { ...(this.state as object), ...(partialState as object) } as State; // TODO: should be able to remove type casting in future typescript release
         // re-render associated controls
         this.render();
     }
