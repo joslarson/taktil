@@ -80,5 +80,6 @@ module.exports = (_, { mode }) => ({
         timings: false,
         modules: false,
         builtAt: false,
+        entrypoints: false,
     },
 });

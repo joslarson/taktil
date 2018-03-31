@@ -7,7 +7,7 @@
     "tslib": "^1.9.0"
   },
   "devDependencies": {
-    "bitwig-webpack-plugin": "^1.1.0",
+    "bitwig-webpack-plugin": "^1.1.1",
     "clean-webpack-plugin": "^0.1.19",
     "copy-webpack-plugin": "^4.5.1",
     "glob": "^7.1.2",
