@@ -31,7 +31,7 @@ export abstract class Component<
 
     setState(partialState: Partial<State>): void {
         // update object state
-        Object.assign({}, this.state, partialState);
+        this.state = Object.assign({}, this.state, partialState);
         // re-render associated controls
         this.render();
     }
