@@ -1,8 +1,8 @@
-import { EventEmitter } from './EventEmitter';
-import { MidiOutProxy, MidiMessage, SysexMessage } from '../midi';
-import { Control, ControlState } from '../control';
-import { View } from '../view';
+import { Control } from '../control';
 import { shim } from '../env';
+import { MidiMessage, MidiOutProxy, SysexMessage } from '../midi';
+import { View } from '../view';
+import { EventEmitter } from './EventEmitter';
 
 declare const global: {
     init: () => void;
@@ -39,7 +39,7 @@ export interface Session extends EventEmitter {
 /**
  * A representation of the current project (or active Bitwig
  * Studio tab).
- * 
+ *
  * Assists in managing shared state and session level event
  * subscriptions between Taktil and the control surface script.
  */
@@ -49,7 +49,6 @@ export class Session extends EventEmitter {
     private _views: { [label: string]: typeof View } = {};
     private _activeView: typeof View;
     private _activeModes: string[] = [];
-    private _eventHandlers: { [key: string]: Function[] } = {};
 
     /** Global MidiOutProxy instance  */
     midiOut: MidiOutProxy = new MidiOutProxy(this);
@@ -68,11 +67,11 @@ export class Session extends EventEmitter {
             // setup midi/sysex callbacks per port
             const midiInPorts = this.midiInPorts;
             for (let port = 0; port < midiInPorts.length; port += 1) {
-                midiInPorts[
-                    port
-                ].setMidiCallback((status: number, data1: number, data2: number) => {
-                    this.onMidiInput(new MidiMessage({ port, status, data1, data2 }));
-                });
+                midiInPorts[port].setMidiCallback(
+                    (status: number, data1: number, data2: number) => {
+                        this.onMidiInput(new MidiMessage({ port, status, data1, data2 }));
+                    }
+                );
                 midiInPorts[port].setSysexCallback((data: string) => {
                     this.onMidiInput(new SysexMessage({ port, data }));
                 });
@@ -125,9 +124,9 @@ export class Session extends EventEmitter {
         if (control) control.onMidiInput(message);
 
         console.log(
-            `${messageType} IN  ${message.port} ==> ${message instanceof MidiMessage
-                ? message.shortHex
-                : message.data}${control && control.label ? ` "${control.label}"` : ''}`
+            `${messageType} IN  ${message.port} ==> ${
+                message instanceof MidiMessage ? message.shortHex : message.data
+            }${control && control.label ? ` "${control.label}"` : ''}`
         );
     }
 
@@ -136,9 +135,9 @@ export class Session extends EventEmitter {
 
     /**
      * Register controls to the session (can only be called once).
-     * 
+     *
      * @param controls The mapping of control labels to control instances to register
-     * to the session. 
+     * to the session.
      */
     registerControls(controls: { [label: string]: Control }) {
         if (Object.keys(this.controls).length) {
@@ -162,7 +161,9 @@ export class Session extends EventEmitter {
                         for (const existingPattern of existingControl.patterns) {
                             if (pattern.conflictsWith(existingPattern)) {
                                 throw new Error(
-                                    `Control "${control.label}" conflicts with existing Control "${existingControl.label}".`
+                                    `Control "${control.label}" conflicts with existing Control "${
+                                        existingControl.label
+                                    }".`
                                 );
                             }
                         }
@@ -188,7 +189,7 @@ export class Session extends EventEmitter {
      * The mapping of control labels to control instances that have
      * been registered to the session.
      */
-    get controls() {
+    get controls(): { [label: string]: Control } {
         return { ...this._controls };
     }
 
@@ -209,7 +210,7 @@ export class Session extends EventEmitter {
     /**
      * Connect each registered control with its corresponding component (if any)
      * in the active view stack.
-     * 
+     *
      * This method is called internally anytime the active view or mode list
      * changes to re-associate controls to newly activated components.
      */
@@ -236,9 +237,9 @@ export class Session extends EventEmitter {
 
     /**
      * Register views to the session (can only be called once).
-     * 
+     *
      * @param views The mapping of view labels to view classes to register
-     * to the session. 
+     * to the session.
      */
     registerViews(views: { [label: string]: typeof View }) {
         if (Object.keys(this.views).length) {
@@ -368,8 +369,11 @@ function flattenViews(views: typeof View[], distinct = true): typeof View[] {
 
     if (!distinct) return flattenedViews;
 
-    return flattenedViews.reduce((result, view) => {
-        if (result.indexOf(view) === -1) result.push(view);
-        return result;
-    }, [] as typeof View[]);
+    return flattenedViews.reduce(
+        (result, view) => {
+            if (result.indexOf(view) === -1) result.push(view);
+            return result;
+        },
+        [] as typeof View[]
+    );
 }

@@ -1,4 +1,3 @@
-import { View } from '../view';
 import { Control, ControlState } from '../control';
 
 export interface ComponentState {}
@@ -19,11 +18,7 @@ export abstract class Component<
 
     constructor(control: Control, params: Params & { mode?: string }) {
         this.control = control;
-        this.params = {
-            ...(this.params as object),
-            ...(params as object),
-            mode: params.mode || '__BASE__',
-        } as Params & { mode: string };
+        this.params = Object.assign({}, this.params, params, { mode: params.mode || '__BASE__' });
     }
 
     // called when component is registered to a view for the first time
@@ -36,7 +31,7 @@ export abstract class Component<
 
     setState(partialState: Partial<State>): void {
         // update object state
-        this.state = { ...(this.state as object), ...(partialState as object) } as State; // TODO: should be able to remove type casting in future typescript release
+        Object.assign({}, this.state, partialState);
         // re-render associated controls
         this.render();
     }

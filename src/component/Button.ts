@@ -1,6 +1,5 @@
-import { Component, ComponentState, ComponentParams } from './Component';
-import { Control } from '../control';
 import { ControlState } from '../control/Control';
+import { Component, ComponentParams, ComponentState } from './Component';
 
 export type ButtonParams = ComponentParams;
 export interface ButtonState extends ComponentState {

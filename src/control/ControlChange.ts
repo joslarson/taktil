@@ -1,5 +1,4 @@
 import { Control, ControlState } from './Control';
-import { MidiMessage } from '../midi';
 
 export type ControlChangeState = ControlState;
 export class ControlChange<State extends ControlChangeState = ControlChangeState> extends Control<
@@ -12,7 +11,7 @@ export class ControlChange<State extends ControlChangeState = ControlChangeState
         port = 0,
         channel,
         control,
-        ...rest,
+        ...rest
     }: {
         port?: number;
         channel: number;

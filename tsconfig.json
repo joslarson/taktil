@@ -21,7 +21,9 @@
             "@types/node"
         ],
         "strict": true,
-        "strictNullChecks": false
+        "strictNullChecks": false,
+        "noUnusedLocals": true,
+        "pretty": true
     },
     "compileOnSave": false,
     "include": [

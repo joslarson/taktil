@@ -1,5 +1,4 @@
 import { Control, ControlState } from './Control';
-import { MidiMessage } from '../midi';
 
 export type KeyPressureState = ControlState;
 export class KeyPressure<State extends KeyPressureState = KeyPressureState> extends Control<State> {
@@ -11,7 +10,7 @@ export class KeyPressure<State extends KeyPressureState = KeyPressureState> exte
         channel,
         key,
         enableMidiOut = false,
-        ...rest,
+        ...rest
     }: {
         port?: number;
         channel: number;

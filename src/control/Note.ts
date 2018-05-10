@@ -1,5 +1,5 @@
-import { Control, ControlState } from './Control';
 import { MidiMessage } from '../midi';
+import { Control, ControlState } from './Control';
 
 export type NoteState = ControlState;
 
@@ -12,7 +12,7 @@ export class Note<State extends NoteState = NoteState> extends Control<State> {
         port = 0,
         channel,
         key,
-        ...rest,
+        ...rest
     }: {
         port?: number;
         channel: number;
@@ -33,10 +33,7 @@ export class Note<State extends NoteState = NoteState> extends Control<State> {
 
     getControlInput(message: MidiMessage): State {
         if (message.isNoteOff && !this.useNoteOff) this.useNoteOff = true;
-        return {
-            ...this.state as ControlState,
-            value: message.isNoteOn ? message.data2 : 0,
-        } as State; // TODO: should be able to remove type casting in future typescript release
+        return Object.assign({}, this.state, { value: message.isNoteOn ? message.data2 : 0 });
     }
 
     getMidiOutput({ value }: State): MidiMessage[] {

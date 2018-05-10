@@ -1,5 +1,5 @@
-import { Control, ControlState } from '../control';
-import { Component, ComponentState, ComponentParams } from './Component';
+import { ControlState } from '../control';
+import { Component, ComponentParams, ComponentState } from './Component';
 
 export type RangeParams = ComponentParams;
 export interface RangeState extends ComponentState {
