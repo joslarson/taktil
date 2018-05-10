@@ -1,5 +1,5 @@
-import { MidiControl, MidiControlState } from './MidiControl';
 import { MidiMessage } from '../message';
+import { MidiControl, MidiControlState } from './MidiControl';
 
 export type ChannelPressureState = MidiControlState;
 export class ChannelPressure<
@@ -11,7 +11,7 @@ export class ChannelPressure<
     constructor({
         port = 0,
         channel,
-        ...rest,
+        ...rest
     }: {
         port?: number;
         channel: number;
@@ -23,7 +23,7 @@ export class ChannelPressure<
     }
 
     getControlInput({ data1 }: MidiMessage): State {
-        return { ...this.state as object, value: data1 } as State; // TODO: should be able to remove type casting in future typescript release
+        return Object.assign({}, this.state, { value: data1 });
     }
 
     getOutputMessages({ value }: State): MidiMessage[] {

@@ -93,7 +93,7 @@ Now, before we start editing files, let's put the CLI's build command in watch m
 
 ```bash
 taktil watch  # run from the project root
-# exit the build command with ctrl/cmd+c
+# exit the build command with ctrl+c
 ```
 
 With that, everything should be in place to start coding your control surface script. Let's get into it :)

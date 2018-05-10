@@ -1,6 +1,8 @@
 {
     "compilerOptions": {
         "target": "es5",
+        "module": "es2015",
+        "rootDir": "./src",
         "sourceMap": false,
         "declaration": true,
         "baseUrl": "./src",
@@ -18,7 +20,10 @@
             "@types/jest",
             "@types/node"
         ],
-        "strict": true
+        "strict": true,
+        "strictNullChecks": false,
+        "noUnusedLocals": true,
+        "pretty": true
     },
     "compileOnSave": false,
     "include": [

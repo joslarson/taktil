@@ -1,5 +1,5 @@
-import { Component, ComponentState, ComponentParams } from './Component';
-import { ControlState } from '../control';
+import { ControlState } from '../control/Control';
+import { Component, ComponentParams, ComponentState } from './Component';
 
 export type ButtonParams = ComponentParams;
 export interface ButtonState extends ComponentState {
@@ -39,7 +39,7 @@ export abstract class Button<
         const { on, color } = this.state;
         return {
             value: on ? this.control.maxValue : this.control.minValue,
-            ...color && { color },
+            ...(color && { color }),
         };
     }
 

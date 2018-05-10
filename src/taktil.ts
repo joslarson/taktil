@@ -1,6 +1,6 @@
-import { Control, ControlState } from './control';
-import { View } from './view';
+import { Control } from './control';
 import { Session } from './session';
+import { View } from './view';
 
 // create global session instance
 export const session = new Session();
@@ -10,9 +10,9 @@ export const session = new Session();
 
 /**
  * Register controls to the session (can only be called once).
- * 
+ *
  * @param controls The mapping of control labels to control instances to register
- * to the session. 
+ * to the session.
  */
 export function registerControls(controls: { [label: string]: Control }) {
     session.registerControls(controls);
@@ -36,9 +36,9 @@ export function resetControls() {
 
 /**
  * Register views to the session (can only be called once).
- * 
+ *
  * @param views The mapping of view labels to view classes to register
- * to the session. 
+ * to the session.
  */
 export function registerViews(views: { [label: string]: typeof View }) {
     return session.registerViews(views);

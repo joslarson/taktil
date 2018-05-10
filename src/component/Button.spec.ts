@@ -2,25 +2,11 @@ import { Button } from './Button';
 import { MidiControl } from '../control';
 
 class TestButton extends Button {
-    onPress() {
-        // ...
-    }
-
-    onLongPress() {
-        // ...
-    }
-
-    onDoublePress() {
-        // ...
-    }
-
-    onRelease() {
-        // ...
-    }
-
-    onDoubleRelease() {
-        // ...
-    }
+    onPress() {}
+    onLongPress() {}
+    onDoublePress() {}
+    onRelease() {}
+    onDoubleRelease() {}
 }
 
 describe('Button', () => {

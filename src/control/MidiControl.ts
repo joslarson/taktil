@@ -1,7 +1,5 @@
-import { MidiMessage, SimpleMidiMessage, SysexMessage, MessagePattern } from '../message/';
+import { MessagePattern, MidiMessage, SimpleMidiMessage, SysexMessage } from '../message/';
 import { Control, ControlState } from './Control';
-
-type PatternInitializer = string | Partial<SimpleMidiMessage> | MessagePattern;
 
 export type MidiControlState = ControlState;
 
@@ -76,7 +74,7 @@ export class MidiControl<State extends MidiControlState = MidiControlState> exte
             message.status === this.status &&
             message.data1 === this.data1
         ) {
-            return { ...this.state as object, value: message.data2 } as State; // TODO: should be able to remove type casting in future typescript release
+            return Object.assign({}, this.state, { value: message.data2 });
         } else {
             return this.state;
         }
@@ -93,8 +91,9 @@ export class MidiControl<State extends MidiControlState = MidiControlState> exte
         }
         // no match
         throw new Error(
-            `MidiMessage "${message.hex}" does not match existing pattern on Control "${this
-                .label}".`
+            `MidiMessage "${message.hex}" does not match existing pattern on Control "${
+                this.label
+            }".`
         );
     }
 

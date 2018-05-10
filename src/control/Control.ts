@@ -1,7 +1,7 @@
 import { Component } from '../component';
 import { Color } from '../helpers';
-import { Session } from '../session';
 import { Message } from '../message/Message';
+import { Session } from '../session';
 
 export interface ControlState {
     value: number;
@@ -54,16 +54,14 @@ export abstract class Control<State extends ControlState = ControlState> {
             // validate value input
             if (partialState.value > this.maxValue || partialState.value < this.minValue) {
                 throw new Error(
-                    `Invalid value "${partialState.value}" for Control "${this
-                        .label}" with value range ${this.minValue} to ${this.maxValue}.`
+                    `Invalid value "${partialState.value}" for Control "${
+                        this.label
+                    }" with value range ${this.minValue} to ${this.maxValue}.`
                 );
             }
         }
         // update state
-        this.state = {
-            ...this.state as object,
-            ...partialState as object,
-        } as State; // TODO: should be able to remove type casting in future typescript release
+        this.state = Object.assign({}, this.state, partialState);
         // re-render with new state
         if (render) this.render();
     }

@@ -1,7 +1,7 @@
-import { MidiControl } from './MidiControl';
-import { MidiMessage, SysexMessage } from '../message/';
 import { Button } from '../component';
+import { MidiMessage } from '../message/';
 import { Session } from '../session';
+import { MidiControl } from './MidiControl';
 
 type TestControlState = { value: number; nested: { value: number } };
 

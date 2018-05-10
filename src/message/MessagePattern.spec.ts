@@ -1,5 +1,4 @@
 import { MessagePattern } from './MessagePattern';
-import { SimpleMidiMessage } from './MidiMessage';
 
 describe('MessagePattern', () => {
     it('should convert to and from pattern string and midi message.', () => {

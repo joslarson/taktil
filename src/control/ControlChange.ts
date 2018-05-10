@@ -1,5 +1,4 @@
 import { MidiControl, MidiControlState } from './MidiControl';
-import { MidiMessage } from '../message';
 
 export type ControlChangeState = MidiControlState;
 export class ControlChange<
@@ -12,7 +11,7 @@ export class ControlChange<
         port = 0,
         channel,
         control,
-        ...rest,
+        ...rest
     }: {
         port?: number;
         channel: number;

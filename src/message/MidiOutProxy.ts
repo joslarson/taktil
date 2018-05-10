@@ -1,6 +1,5 @@
-import { MidiMessage, SimpleMidiMessage } from './MidiMessage';
-import { SysexMessage } from './SysexMessage';
 import { Session } from '../session';
+import { MidiMessage, SimpleMidiMessage } from './MidiMessage';
 
 export interface NaiveMidiMessage extends SimpleMidiMessage {
     label?: string;
@@ -39,8 +38,9 @@ export class MidiOutProxy {
         // if urgent, fire midi message immediately, otherwise queue it up for next flush
         if (urgent) {
             console.log(
-                `[MIDI]  OUT ${port} <== ${new MidiMessage({ status, data1, data2 })
-                    .shortHex}${label ? ` "${label}"` : ''}`
+                `[MIDI]  OUT ${port} <== ${new MidiMessage({ status, data1, data2 }).shortHex}${
+                    label ? ` "${label}"` : ''
+                }`
             );
             host.getMidiOutPort(port).sendMidi(status, data1, data2);
         } else {
@@ -187,8 +187,9 @@ export class MidiOutProxy {
             if (midiMessage) {
                 const { label, port, status, data1, data2 } = midiMessage;
                 console.log(
-                    `[MIDI]  OUT ${port} <== ${new MidiMessage({ status, data1, data2 })
-                        .shortHex}${label ? ` "${label}"` : ''}`
+                    `[MIDI]  OUT ${port} <== ${new MidiMessage({ status, data1, data2 }).shortHex}${
+                        label ? ` "${label}"` : ''
+                    }`
                 );
                 host.getMidiOutPort(port).sendMidi(status, data1, data2);
             }

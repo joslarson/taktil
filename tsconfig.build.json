@@ -1,32 +1,6 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "module": "es2015",
-        "sourceMap": false,
-        "declaration": true,
-        "rootDir": "./src",
-        "baseUrl": "./src",
-        "moduleResolution": "node",
-        "outDir": "./",
-        "lib": [
-            "dom",
-            "es6",
-            "dom.iterable",
-            "scripthost"
-        ],
-        "importHelpers": true,
-        "types": [
-            "typed-bitwig-api",
-            "@types/node"
-        ],
-        "strict": true
-    },
-    "compileOnSave": false,
-    "include": [
-        "src/**/*.ts"
-    ],
+    "extends": "./tsconfig.json",
     "exclude": [
-        "node_modules/**/*",
         "src/**/*.spec.ts"
     ]
 }

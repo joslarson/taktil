@@ -17,17 +17,15 @@ program
 program
     .command('build [project_root]')
     .description('Build Taktil project located at project_root (defaults to current directory).')
-    .option('-o, --optimize', 'optimize bundle(s) for distribution')
-    .action((project_root, options) => build(project_root, { optimize: options.optimize }));
+    .option('-p, --production', "build using Webpack's production mode")
+    .action((project_root, { production }) => build(project_root, { production }));
 
 // taktil watch command
 program
     .command('watch [project_root]')
     .description('Watches Taktil project located at project_root (defaults to current directory).')
-    .option('-o, --optimize', 'optimize bundle(s) for distribution')
-    .action((project_root, options) => {
-        build(project_root, { watch: true, optimize: options.optimize });
-    });
+    .option('-p, --production', "build using Webpack's production mode")
+    .action((project_root, { production }) => build(project_root, { production, watch: true }));
 
 // taktil uuid generator
 program
