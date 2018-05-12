@@ -22,7 +22,7 @@ export function registerControls(controls: { [label: string]: Control }) {
  * Get the mapping of control labels to control instances that have
  * been registered to the session.
  */
-export function getControls() {
+export function getControls(): { [key: string]: Control } {
     return session.controls;
 }
 
