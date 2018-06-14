@@ -1,3 +1,4 @@
+export * from './Message';
 export * from './MidiMessage';
 export * from './SysexMessage';
 export * from './MidiOutProxy';
