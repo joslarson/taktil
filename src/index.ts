@@ -52,6 +52,11 @@ export function getViews() {
     return session.views;
 }
 
+/** Get the view registered with a given name. */
+export function getView(name: string) {
+    return session.views[name];
+}
+
 /** Get the active view of the session. */
 export function getActiveView() {
     return session.activeView;
@@ -95,7 +100,7 @@ export function on(
     label: 'activateMode' | 'deactivateMode',
     callback: (mode: string) => void
 ): void;
-export function on(label: 'activateView', callback: (view: typeof View) => void): void;
+export function on(label: 'activateView', callback: (view: string) => void): void;
 export function on(
     label: 'init' | 'registerControls' | 'registerViews' | 'flush' | 'exit',
     callback: () => void

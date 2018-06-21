@@ -12,7 +12,7 @@ declare const global: {
 
 export interface Session extends EventEmitter {
     on(label: 'activateMode' | 'deactivateMode', callback: (mode: string) => void): void;
-    on(label: 'activateView', callback: (view: typeof View) => void): void;
+    on(label: 'activateView', callback: (view: string) => void): void;
     on(
         label: 'init' | 'registerControls' | 'registerViews' | 'flush' | 'exit',
         callback: () => void
@@ -47,7 +47,7 @@ export class Session extends EventEmitter {
     private _isInit: boolean = false;
     private _controls: { [label: string]: Control } = {};
     private _views: { [label: string]: typeof View } = {};
-    private _activeView: typeof View;
+    private _activeView: string;
     private _activeModes: string[] = [];
 
     /** Global MidiOutProxy instance  */
@@ -220,7 +220,7 @@ export class Session extends EventEmitter {
         // connect each control to the corresponding component in view (if any)
         for (const controlName in this.controls) {
             const control = this.controls[controlName];
-            this.activeView.connectControl(control);
+            this._views[this.activeView].connectControl(control);
         }
     }
 
@@ -317,13 +317,13 @@ export class Session extends EventEmitter {
         const view = this.views[label];
         if (view === undefined) throw new Error(`Cannot find view with label "${label}"`);
 
-        this._activeView = view;
-        this.emit('activateView', view);
+        this._activeView = label;
+        this.emit('activateView', label);
         this.associateControlsInView(); // re-associate controls in view
     }
 
     /** The active view of the session. */
-    get activeView(): typeof View {
+    get activeView(): string {
         return this._activeView;
     }
 

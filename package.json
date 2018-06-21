@@ -24,7 +24,7 @@
     "gulp-rename": "^1.2.2",
     "nunjucks": "^3.1.2",
     "prompt-sync": "^4.1.6",
-    "tslib": "^1.9.0",
+    "tslib": "^1.9.2",
     "uuid": "^3.2.1"
   },
   "devDependencies": {
@@ -43,7 +43,7 @@
     "tsutils": "^2.26.2",
     "typed-bitwig-api": "^6.0.0",
     "typedoc": "^0.11.1",
-    "typescript": "^2.8.3"
+    "typescript": "^2.9.2"
   },
   "scripts": {
     "start": "gulp watch",

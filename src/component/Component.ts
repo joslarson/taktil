@@ -13,7 +13,7 @@ export abstract class Component<
 > {
     label: string;
     control: Control;
-    params: Params & { mode: string } = {} as Params & { mode: string };
+    params: Params & { mode: string };
     state: State = {} as State;
 
     constructor(control: Control, params: Params & { mode?: string }) {
