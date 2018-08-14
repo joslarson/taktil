@@ -1,11 +1,15 @@
-import { Logger } from './Logger';
-import { DelayedTask } from './DelayedTask';
+import { __assign } from '../../node_modules/tslib';
 import { Session } from '../session';
+import { DelayedTask } from './DelayedTask';
+import { Logger } from './Logger';
 
 // setup global env
 export const shim = (session: Session) => {
     const global = Function('return this')() || (42, eval)('this');
     if (!global.host) return;
+
+    // polyfill Object.assign
+    global.Object.assign = __assign;
 
     // specific env setup for bitwig environment
     // shim Timeout and Interval methods using DelayedTask class
