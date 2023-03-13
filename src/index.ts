@@ -1,114 +1,99 @@
-import { Control, ControlState } from './control';
-import { View } from './view';
+import './env';
+
 import { Session } from './session';
+import { reconciler } from './reconciler';
+import { Midi } from './components/midi';
+import {
+  ControllerScript,
+  ControllerScriptProps,
+} from './components/controller-script';
+import {
+  createInitState,
+  createInitValue,
+  createInitObject,
+} from './init-helpers';
 
-// create global session instance
-export const session = new Session();
+const session = new Session();
 
-// Controls
-////////////////////////
+const LEGACY_ROOT = 0; // CONCURRENT_ROOT = 1
 
-/**
- * Register controls to the session (can only be called once).
- * 
- * @param controls The mapping of control labels to control instances to register
- * to the session. 
- */
-export function registerControls(controls: { [label: string]: Control }) {
-    session.registerControls(controls);
-}
+const render = (rootNode: JSX.Element) => {
+  // If ControllerScript component provided as rootNode, call related controller definition methods
+  if (rootNode.type === ControllerScript) {
+    const { api, author, name, uuid, vendor, version, midi } =
+      rootNode.props as ControllerScriptProps;
 
-/**
- * Get the mapping of control labels to control instances that have
- * been registered to the session.
- */
-export function getControls() {
-    return session.controls;
-}
+    // 1. set bitwig api version
 
-/** Force re-render all registered controls. */
-export function resetControls() {
-    return session.resetControls();
-}
+    host.loadAPI(api);
 
-// Views
-////////////////////////
+    // 2. define controller script
 
-/**
- * Register views to the session (can only be called once).
- * 
- * @param views The mapping of view labels to view classes to register
- * to the session. 
- */
-export function registerViews(views: { [label: string]: typeof View }) {
-    return session.registerViews(views);
-}
+    host.defineController(
+      vendor, // vendor
+      name, // name
+      version, // version
+      uuid, // uuid
+      author // author
+    );
 
-/**
- * Get the mapping of view labels to view classes that have been
- * registered to the session.
- */
-export function getViews() {
-    return session.views;
-}
+    // 3. setup and discover midi controllers
 
-/** Get the active view of the session. */
-export function getActiveView() {
-    return session.activeView;
-}
+    if (midi) {
+      if (Array.isArray(midi)) {
+        // handle multiple discovery pairs
+        host.defineMidiPorts(midi[0].inputs.length, midi[0].outputs.length);
+        midi.forEach(({ inputs, outputs }) =>
+          host.addDeviceNameBasedDiscoveryPair(inputs, outputs)
+        );
+      } else if (Array.isArray(midi.inputs) && Array.isArray(midi.outputs)) {
+        // handle single discovery pair
+        host.defineMidiPorts(midi.inputs.length, midi.outputs.length);
+        host.addDeviceNameBasedDiscoveryPair(midi.inputs, midi.outputs);
+      } else if (
+        typeof midi.inputs === 'number' &&
+        typeof midi.outputs === 'number'
+      ) {
+        // handle simple midi port count
+        host.defineMidiPorts(midi.inputs, midi.outputs);
+      }
+    }
+  }
 
-/** Set the active view of the session. */
-export function activateView(label: string) {
-    return session.activateView(label);
-}
+  session.on('init', () => {
+    const fiberRoot = reconciler.createContainer(
+      session,
+      LEGACY_ROOT,
+      null,
+      false,
+      null,
+      '',
+      () => {},
+      null
+    );
+    reconciler.updateContainer(rootNode, fiberRoot, null, () => null);
+  });
+};
 
-// Modes
-////////////////////////
+const ReactBitwig = {
+  render,
+  session,
+  createInitState,
+  createInitValue,
+  createInitObject,
+};
 
-/**
- * Get the list of active modes in the order they were activated,
- * from last to first.
- */
-export function getActiveModes() {
-    return session.activeModes;
-}
+export default ReactBitwig;
 
-/** Activate a mode, adding it to the active mode list. */
-export function activateMode(mode: string) {
-    return session.activateMode(mode);
-}
-
-/** Deactivate a given mode, removing it from the active mode list. */
-export function deactivateMode(mode: string) {
-    return session.deactivateMode(mode);
-}
-
-/** Check if a given mode is active. */
-export function modeIsActive(mode: string) {
-    return session.modeIsActive(mode);
-}
-
-// Events
-////////////////////////
-
-export function on(
-    label: 'activateMode' | 'deactivateMode',
-    callback: (mode: string) => void
-): void;
-export function on(label: 'activateView', callback: (view: typeof View) => void): void;
-export function on(
-    label: 'init' | 'registerControls' | 'registerViews' | 'flush' | 'exit',
-    callback: () => void
-): void;
-export function on(label: any, callback: (...args: any[]) => any) {
-    session.on(label, callback);
-}
-
-// Core
-////////////////////////
-
-export * from './component';
-export * from './control';
-export * from './helpers';
-export * from './midi';
-export * from './view';
+export {
+  render,
+  session,
+  Midi,
+  ControllerScript,
+  createInitState,
+  createInitValue,
+  createInitObject,
+};
+export * from './components/midi';
+export * from './components/controller-script';
+export * from './init-helpers';

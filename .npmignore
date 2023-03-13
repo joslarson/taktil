@@ -1,15 +1,5 @@
 node_modules
 .DS_Store
-/notes
 /.vscode
-/gulpfile.js
-/.travis.yml
 /tsconfig.*
-/tslint.json
 /src
-/coverage
-/docs
-
-# ignore the *.ts files but not *.d.ts
-*.ts
-!*.d.ts

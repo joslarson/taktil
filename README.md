@@ -1,69 +1,54 @@
-# Taktil
+# ReactBitwig
 
-[![Build Status](https://travis-ci.org/taktiljs/taktil.svg?branch=master)](https://travis-ci.org/taktiljs/taktil) [![npm version](https://badge.fury.io/js/taktil.svg)](https://badge.fury.io/js/taktil)
+Build Bitwig Studio controller scripts in React!
 
-Taktil is a lightweight control surface scripting framework for Bitwig Studio that encourages rapid development and community code reuse. At its core, it is designed around the idea of building reusable, extendable components and provides a simple but powerful view abstraction that makes contextually mapping hardware controls to different components a breeze.
+[![Build Status](https://travis-ci.org/joslarson/react-bitwig.svg?branch=master)](https://travis-ci.org/joslarson/react-bitwig) [![npm version](https://badge.fury.io/js/react-bitwig.svg)](https://badge.fury.io/js/react-bitwig)
 
-Taktil's integrated build tool transpiles and bundles your code to enable ES2015+ language features and npm dependency support in Bitwig's ES5 world (no messy build configurations necessary).
+ReactBitwig is React based JavaScript framework for building controller scripts in Bitwig Studio. At its core is a custom React renderer for MIDI that enables declarative component based control of your devices via the provided `Midi` component. Built around and on top of this foundation is a suite of smart tools and helpers designed to improve the experience of working in Bitwig's unique JavaScript environment:
 
-> **Note:** While Taktil is written in and provide first class support for TypeScript, this documentation currently provides only pure JavaScript examples. TypeScript specific docs are in the works.
+- Custom state management solution that takes Bitwig's init phase into consideration.
+- Highly detailed TypeScript [type definitions](https://github.com/joslarson/typed-bitwig-api) for Bitwig APIs
+- A growing library of useful components, hooks, and other helpers
+- Built in debug tooling for Midi I/O logging and log filtering
+- [Custom Webpack plugin](https://github.com/joslarson/bitwig-webpack-plugin) enabling use of ES Modules and bundling of NPM packages with project
+- Polyfills for relevant missing browser API's (console, setTimeout/setInterval, etc.)
 
-> **Warning!** While fully usable, Taktil is still pre-1.0 and has no backwards compatibility guarantees until the v1 release occurs! Your input is encouraged. Also, while the CLI is designed to work on Windows, Mac, and Linux, I have only tested it on macOS so far. So please create ticket and/or submit pull request as you find bugs.
+## Quick Start
 
-## Installation
+First make sure you have the following:
 
-To get started started, you'll need to first make sure you have the following prerequisites installed and functioning on your system.
+- Node.js v16 or newer
+- Bitwig Studio v4 or newer
 
-* Node.js v6.0 or newer
-* Bitwig Studio v2.0 or newer
+### Project Setup
 
-Once you've got that out of the way, you're ready to install Taktil. If you want to use the integrated CLI, you'll need to install it globally. Doing so will put the `taktil` CLI command in your path which will handle initializing projects and building + bundling them for you.
-
-```bash
-npm install -g taktil
-```
-
-> **Note:** Don't miss the `-g` flag here as this installs the package globally, adding the the `taktil` command to your path.
-
-If you'd rather use Taktil without the CLI, you can manually install it locally into an existing project like so:
+With that out of the way, let's initialize a new project using ReactBitwig's CLI tool. We'll call our project `getting-started`.
 
 ```bash
-npm install taktil
+npx react-bitwig init getting-started
+# run npx react-bitwig --help for detailed usage
 ```
 
-## Project Setup
-
-With that out of the way, let's start a new project using the CLI tool's `init` command. We'll call our project `getting-started`.
-
-```bash
-taktil init getting-started
-# run taktil --help for detailed usage
-```
-
-This command will ask you some questions then generate a working project skeleton based on your responses. If, after running the command above, we answer the prompts as follows...
+This command will ask you some questions then generate a working project skeleton based on your responses:
 
 ```bash
 # answers are optional where a default is provided in parentheses
-[taktil] begin project initialization...
+[react-bitwig] begin project initialization...
 Display Name: Getting Started
 Vendor/Category: Custom
 Author: Joseph Larson
 Version (1.0.0):
-API Version (4):
-[taktil] project initialization complete.
+API Version (17):
+[react-bitwig] project initialization complete.
 ```
 
-...your new project will be created within a new `getting-started` directory, relative to your current working directory, and will have the following structure:
+If you answered the prompts as shown above your new project will be created within a new `getting-started` directory, relative to your current working directory, and will have the following structure:
 
 ```bash
 getting-started/
 ├── dist/ -> ...  # symlinked into default Bitwig control surface scripts directory
-├── src
-│   ├── components.js
-│   ├── controls.js
-│   ├── daw.js
-│   ├── index.js
-│   └── views.js
+├── src/
+│   └── getting-started.control.js
 ├── README.md
 ├── package.json
 ├── tsconfig.json
@@ -77,368 +62,339 @@ cd getting-started
 npm install
 ```
 
-Now, we'll run the CLI's `build` command, to generate your project's initial build.
+Now, we'll run the `build` command, to generate your project's initial build.
 
 ```bash
-taktil build  # run from the project root
+npm run build
 ```
 
 At this point your newly built project files should have been picked up by Bitwig and your script should be listed under `Custom > Getting Started` in Bitwig's controller selection menu.
 
 Activate your new controller script by selecting it from the script selection menu and assigning your Midi controller's corresponding MIDI I/O.
 
-> **Note**: The default project template is setup assuming a single midi input/output pair, but if you need more than that, more can be defined in the your project's entry file (`src/index.js` in this case).
+> **Note**: The default project template is setup assuming a single midi input/output pair, but if you need more than that, more can be defined in the your project's entry file (`src/getting-started.control.js` in this case).
 
-Now, before we start editing files, let's put the CLI's build command in watch mode so that our project will rebuild whenever we modify and save a source file.
+Now, before we start editing files, let's run the build command in dev/watch mode so that our project will rebuild whenever we modify and save a source file.
 
 ```bash
-taktil watch  # run from the project root
+npm run dev # run from the project root
 # exit the build command with ctrl/cmd+c
 ```
 
 With that, everything should be in place to start coding your control surface script. Let's get into it :)
 
+### Creating Your First Component
 
-## Defining Controls
+With our bare bones project, our entry file should currently look something like this:
 
-The first real task for any new Taktil project is to define an initial set of Midi controls for the script to react to and/or send updates to. This set of controls acts as the template for your control surface and all its knobs, buttons, pads, etc. Taktil's `Control` abstraction exists to help you model your unique hardware-specific controls in way that provides **a common interface on top of which to build reusable components.**
+```jsx
+// src/getting-started.control.js
 
-In this tutorial, our hypothetical control surface has three relevant controls: a `PLAY` button, a `SHIFT` button, and a general purpose `KNOB`. Let's take a quick look at Taktil's `Control` MIDI abstraction.
+import ReactBitwig, { ControllerScript } from 'react-bitwig';
 
-### MIDI Patterns
+ReactBitwig.render(
+  <ControllerScript
+    api={17}
+    vendor="Custom"
+    name="Getting Started"
+    version="1.0.0"
+    uuid="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+    author="Joseph Larson"
+    midi={{ inputs: 1, outputs: 1 }}
+  >
+    {/* ...add components to render here */}
+  </ControllerScript>
+);
+```
 
-Each `Control` is composed of a list of MIDI input/output patterns that:
+Not very useful yet... Let's jump in and create some init phase values/state and create and wire up our first component, the `PlayToggle`:
 
-1. Define which MIDI input messages will be routed to the `Control` to be handled.
-2. Let Taktil know how to cache midi output messages such that redundant messages—those that would not change your Midi controller's state—are not sent.
+```tsx
+// src/components/play-toggle.js
 
-This list of patterns must not overlap with any other registered `Control` definition, such that a given Midi input message will always be routed to only one `Control`. This requirement is enforced to enable the above mentioned caching mechanism which provides significant automatic Midi output optimizations.
+import ReactBitwig, { Midi } from 'react-bitwig';
+
+// `createInitValue` defines a gettable value that needs to be setup during the init phase
+const TransportValue = ReactBitwig.createInitValue(() =>
+  host.createTransport()
+);
+
+// The createInitState helper assists in wiring up init-time-only
+// subscriptions and provides a `.use()` hook for subscribing to
+// changes from within React components.
+const IsPlayingState = ReactBitwig.createInitState(() => {
+  // You can safely access other init states and values inside this initializer
+  const transport = TransportValue.get();
+  transport
+    .isPlaying()
+    .addValueObserver((isPlaying) => IsPlayingState.set(isPlaying));
+  return false; // return initial state
+});
+
+// define our component using TransportValue and IsPlayingState form above
+const PlayToggle = () => {
+  // keep track of button pressed state so we can keep the button illuminated
+  // while the button is continues to be pressed when the transport is stopped
+  const [isPressed, setIsPressed] = React.useState(false);
+
+  // get the transport
+  const transport = TransportValue.get();
+  // subscribe to isPlaying transport state
+  const isPlaying = IsPlayingState.use();
+
+  return (
+    <Midi
+      // useful for logging/debugging
+      label="PLAY"
+      // defines the stable parts of MIDI messages associated with the control
+      pattern={{ status: 0xb0, data1: 0x18 }}
+      // messages matching the above pattern are now bound to this component
+      // and can be subscribed to via the onInput prop
+      onInput={({ data2 }) => {
+        // when pressing the button (data2 > 0), toggle transport.isPlaying
+        if (data2 > 0) transport.isPlaying().toggle();
+        // update local isPressed state so we can use it in determining the value below
+        setIsPressed(data2 > 0);
+      }}
+      // when setting the value you only have to specify the non-stable parts of
+      // the message. We want the button light on if it is pressed or if the
+      // transport is playing.
+      value={{ data2: isPressed || isPlaying ? 127 : 0 }}
+      // caching modes teach ReactBitwig how to keep your hardware state in sync with your
+      // script and help optimize to avoid sending redundant MIDI messages
+      cacheOnInput // assume MIDI messages sent from the hardware to Bitwig represent a change in hardware state
+      cacheOnOutput // assume MIDI messages sent from Bitwig to the hardware represent a change in hardware state
+    />
+  );
+};
+```
+
+> **Note:** Generally speaking, when this documentation mentions MIDI input or output, it is speaking from the perspective of the script, not the controller. So "input" is referring to MIDI messages traveling from the controller to the script, and "output" is referencing messages moving from the script to the controller.
+
+Once you've you've finished building your `PlayToggle` component, import it into `getting-started.control.js` and render it as a child of your ControllerScript component:
+
+```tsx
+// src/getting-started.control.js
+
+import ReactBitwig, { ControllerScript } from 'react-bitwig';
+import { PlayToggle } from './components/play-toggle';
+
+// render our controller script
+ReactBitwig.render(
+  <ControllerScript
+    api={17}
+    vendor="Custom"
+    name="Getting Started"
+    version="1.0.0"
+    uuid="XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+    author="Joseph Larson"
+    midi={{ inputs: 1, outputs: 1 }}
+  >
+    <PlayToggle />
+  </ControllerScript>
+);
+```
+
+## The Midi Component
+
+The Midi component allows you to declaratively send and/or receive MIDI messages to synchronize Midi hardware with your controller script state. The Midi component takes the following props:
+
+```ts
+type MidiProps = {
+  // Name your control (helpful for logging/debugging)
+  label?: string;
+  // MIDI port messages are sent/received on, defaults to 0
+  port?: number;
+  // defines initial value to send on mount
+  defaultValue?: MidiObjectPattern;
+  // defines value to send on render
+  value?: MidiObjectPattern;
+  // defines value to send on on unmount
+  unmountValue?: MidiObjectPattern;
+  // defines the stable parts of MIDI messages associated with the control to subscribe to
+  pattern?: MidiHexPattern | MidiObjectPattern;
+  // called anytime a message is received matching the port and pattern defined above
+  onInput?: (message: MidiObjectPattern) => void;
+  // similar to onInput, but is only called when input represents a change to hardware state
+  onChange?: (message: MidiObjectPattern) => void;
+  // assume messages sent from hardware to script represent a change in hardware state
+  cacheOnInput?: boolean;
+  // assume messages sent from script to hardware represent a change in hardware state
+  cacheOnOutput?: boolean;
+  // sets the priority of a message, defaulting to false (messages sent during Bitwig's flush phase)
+  urgent?: boolean;
+};
+```
+
+### Sending MIDI Messages
+
+The simplest use case for the Midi component is one where you just want to output a Midi message on mount/render/unmount. This can be accomplished using the `value`, `defaultValue`, and `unmountValue` props.
+
+```tsx
+// message sent on mount and render
+<Midi value={{ status: 0xb0, data1: 0x18, data2: 0x00 }} />
+// message sent on mount and render if value has changed
+<Midi value={{ status: 0xb0, data1: 0x18, data2: 0x00 }} cacheOnOutput />
+```
+
+```tsx
+// message sent on mount only
+<Midi defaultValue={{ status: 0xb0, data1: 0x18, data2: 0x00 }} />
+```
+
+```tsx
+// message sent on unmount only (helpful to zero out a control display when it is no longer rendered)
+<Midi unmountValue={{ status: 0xb0, data1: 0x18, data2: 0x00 }} />
+```
+
+### Responding to MIDI Input
+
+The `pattern` prop of the Midi component defines which MIDI messages the component instance is subscribed to. The `onInput` props allows you to register a callback to that subscription.
+
+```tsx
+// callback passed to onInput will be called for all messages matching the provided pattern
+<Midi pattern={{ status: 0xb0, data1: 0x18 }} onInput={(msg) => {...}} />
+```
+
+The `onChange` prop can similarly be used to subscribe **only to changes** in the control's hardware state. For example, if the script receives a matching MIDI message that is identical to the current cached state, the onChange handler will not be called. However, this behavior only be leveraged when a component instance has configured its caching mode.
+
+```tsx
+<Midi
+  pattern={{ status: 0xb0, data1: 0x18 }}
+  onChange={(msg) => {...}} // called only when virtual hardware state cache changes
+  cacheOnOutput // assume MIDI messages sent from Bitwig to the hardware represent a change in hardware state
+/>
+```
+
+#### Midi Patterns
 
 Patterns can be defined in string or object literal form.
 
-* **String form** patterns are the most expressive and concise, representing the MIDI port and each MIDI byte as consecutive two character hexadecimal values, with question marks used for wildcard matching (e.g. `'00B018??'` where `00`, `B0`, `18`, and `??` represent the port, status, data1, and data2 values). If the port byte is left off (`'B018??'`) the pattern's port defaults to 0.
+- **Object literal form** allows you to define MIDI patterns by assuming undefined MIDI byte values to be wild cards (e.g. `{ status: 0xb0, data1: 0x18 }` where any MIDI message matching the provided values will be passed through). Though slightly less powerful and more verbose than string from patterns, you may find object literal form to be more readable while still covering the vast majority of use cases.
 
-* **Object literal form** allows you to define MIDI patterns by assuming undefined MIDI byte values to be wild cards (e.g. `{ port: 0, status: 0xb0, data1: 0x18 }` where any MIDI message matching the provided values will be handled). If the port value is left off (`{ status: 0xb0, data1: 0x18 }`) the pattern's port defaults to 0. Though slightly less powerful and more verbose, you may find object literal form to be more readable while still covering the vast majority of use cases.
+- **String form** patterns are the most expressive and concise, representing the MIDI port and each MIDI byte as consecutive two character hexadecimal values, with question marks used for wildcard matching (e.g. `'B018??'` where `B0`, `18`, and `??` represent the status, data1, and data2 values).
 
-> **Note**: The values for the status and data1 arguments above (e.g. `0xb0`) are just plain numbers written in JavaScript's hexadecimal (base 16) form. This makes it easier to to see the type of message and which channel the `Control` maps to, but you can use regular base 10 integers 0-127 here if you want to.
+> **Note**: The values for the status and data1 arguments above (e.g. `0xb0`) are just plain numbers written in JavaScript's hexadecimal (base 16) form. This makes it easier to to see the type of message and which channel the control maps to, but you can use regular base 10 integers 0-127 here if you want to.
 
-### Control Options
+### Caching Modes
 
-Beyond defining the MIDI patterns your `Control` will handle, you may also need to override some of the `Control`'s default options to reflect the type of `Control` you are defining. The most common of those options are as follows:
+The `pattern`, `cacheOnInput`, and `cacheOnOutput` props work together to help ReactBitwig understand how to cache MIDI input/output messages such that redundant messages—those that would not change your MIDI controller's state—are not sent.
 
-* **`enableMidiOut`** (default: `true`): Set to `false` to disable Midi output for this control.
-* **`enableCache`** (default: `true`): Set to `false` if you'd like to disable the magic that is the cache.
-* **`cacheOnMidiIn`** (default: `true`): Set this to `false` for controls whose visual state (e.g. LED) is only updated on MIDI output.
+The caching mode configuration you choose will depending on your MIDI hardware (or virtual device). Passing the `cacheOnInput` prop tells ReactBitwig to assume that messages sent from hardware to script represent a change in hardware state. Similarly, the `cacheOnOutput` prop hints that messages sent from script to hardware represent a change in hardware state.
 
-> **Note:** Whenever this documentation mentions MIDI input or output it is speaking from the perspective of the script, not the controller. So "input" is referring to MIDI messages travelling from the controller to the script, and "output" is referencing messages moving from the script to the controller.
+As an example, pretend you have a hardware button with and integrated light. It's a gate style button, which sends a `data2` of 127 when pressed and 0 when released. Now consider when you press this button (and a the 127 value input is received by your script), does the button light up while it is pressed? And what about when the script outputs a `data2` of 127 back to the hardware, does the button light up then?
 
+Different hardware implementations answer these questions in different ways. Some hardware will update the hardware state both when sending and receiving data, while others will only do so when receiving data, and still others allow you configure such behavior.
 
-### Control State
+By default, the Midi component assumes no caching behavior at all, so it's important to understand how your hardware answers these questions and to configure Midi component instances accordingly.
 
-All `Control` instances have a state object that contains a required value property, optional color, brightness, and flashing properties, and whatever other properties custom `Control` subclasses define. The state is updated by calling the `Controls`'s `setState` method, and is most often called from within a corresponding component (which we'll explore later on).
+### Logging/Debugging Midi I/O & the `label` Prop
 
-### The `PLAY` Button
+Bitwig provides a "Controller Script Console" for logging messages to debug your controller scripts. Leveraging this, ReactBitwig provides some extra built-in tooling to make debugging easier. In your controller script settings (for controller scripts built using ReactBitwig), you can turn on automatic logging of MIDI input, output, or both. MIDI I/O is logged in hexadecimal format and is tagged with the label provided to a matching Midi component instance if any. Sample log output:
 
-Let's begin by defining the `PLAY` button as MIDI CC 24 (or `0x18` in hex) on port 0, channel 0. That translates, in hex values, to a status of `0xb0`, a data1 of `0x18`, and a wild card match on the data2 value. In **string form** our definition will look as follows:
-
-```js
-// src/controls.js
-
-import taktil from 'taktil';
-
-export const controls = {
-    PLAY: new taktil.Control({ patterns: ['B018??'] }),
-};
+```
+// Format: [MIDI] IN/OUT PORT ==>/<== XXXXXX "Control Label"
+[MIDI]  IN  0 ==> 91087F "PLAY"
+[MIDI]  OUT 0 <== 91087F "PLAY"
+[MIDI]  IN  0 ==> 910800 "PLAY"
 ```
 
-The same definition in **object literal form** would look like this:
+## State Management
 
-```js
-// src/controls.js
+Bitwig has a unique runtime environment, and as part of that, you can only access some features during the "init" phase (which runs only once when your script first boots up). Basically any Bitwig data/event you would like to subscribe to (channel count, selected track, transport state, etc) has to be wired up during this phase, making things a bit awkward for a paradigm like React where it is common to initialize such subscriptions on mount and tear them down on unmount.
 
-import taktil from 'taktil';
+To improve the developer experience in relation to the restrictions placed on us by this "init" phase, ReactBitwig provides some "init" helpers to assist in defining init phase data and subscriptions/state.
 
-export const controls = {
-    PLAY: new taktil.Control({ patterns: [{ status: 0xb0, data1: 0x18 }] }),
-};
-```
+### `createInitValue`
 
-### Further Control Abstraction
+Define a getter for an unchanging value, that is run only once during the init phase, but whose value can be requested any time thereafter (in our React components or elsewhere).
 
-Taktil provides further abstracted Control subclasses for CC (Control Change), Note, Channel Pressure, and Key Pressure messages. Assuming all three of our controls are MIDI CC controls, we can redefine our `PLAY` button and add to it definitions for our `SHIFT` button and `KNOB` as follows.
+```ts
+// `createInitValue` defines a gettable value that needs to be setup during the init phase
+const TransportValue = ReactBitwig.createInitValue(() =>
+  host.createTransport()
+);
 
-```js
-// src/controls.js
-
-import taktil from 'taktil';
-
-export const controls = {
-    PLAY: new taktil.ControlChange({ channel: 0, control: 24 }),
-    SHIFT: new taktil.ControlChange({ channel: 0, control: 25 }),
-    KNOB: new taktil.ControlChange({ channel: 0, control: 26 }),
-};
-```
-
-With that, we've defined our controls.
-
-> **Note:** In the same way that ControlChange extends Control, you can create your own Control subclasses. You might, for example define a Control type that not only keeps track of your hardware control's value, but also handles its color, its brightness, and whether it's pulsing or not. The sky's the limit. All controls must define the MIDI messages they will handle, but what they do with the input and what they render on output and when is up to you.
-
-
-## Creating Components
-
-Now that we've defined our controls, we'll move on to building some components. Components, in Taktil, are the state and business logic containers for non-hardware-specific functionality. They receive and react to standardized `ControlInput` messages (through the `onControlInput` method) as well as Bitwig API events. They also decide when a connected `Control` should be updated by calling its `setState` method, usually in reaction to one of the above mentioned messages or events.
-
-Components are defined as ES6 classes that must eventually extend the `Component` base class. At instantiation time, a component will be passed an associated control and a params object. The params object is your component configuration object and is where all of the Bitwig API derived objects should be passed in for use in the components different life-cycle methods.
-
-There are only three total component life-cycle methods and only two that are required for a component definition. They are as follows.
-
-* **`onInit` (optional):**  This where you define all of your component's "init" phase logic, which mostly consists of hooking up Bitwig API event callbacks.
-* **`onControlInput` (required):** This is where you define what happens when your component's connected control receives input.
-* **`getControlOutput` (required):** This returns the full or partial control state object that will be sent to the controls `setState` method whenever our component re-renders.
-
-To get our feet wet, we'll start off by creating a simple play/pause toggle.
-
-```js
-// src/components.js
-
-import taktil from 'taktil';
-
-export class PlayToggle extends taktil.Component {
-    state = { on: false };
-
-    // onInit is where you should hookup your Bitwig API event callbacks,
-    // as all of that work must be done during the "init" phase
-    onInit() {
-        // we're expecting a Bitwig API derived transport object to be passed in to the params
-        // object at instantiation time, then we're hooking up a callback to sync the component
-        // state with the transport's isPlaying state.
-        this.params.transport
-            .isPlaying()
-            .addValueObserver(isPlaying => this.setState({ on: isPlaying }));
-    }
-
-    // onControlInput is where we define what happens when our component's connected control
-    // receives input
-    onControlInput({ value }) {
-        // if the input value is greater than the controls min value, toggle play state
-        if (value > this.control.minValue) this.params.transport.togglePlay();
-    }
-
-    // getControlOutput is where we define the full or partial control state object
-    // that will be sent to the controls `setState` method whenever our component re-renders
-    getControlOutput() {
-        // in this case if our button is "on" we send the control's max value, otherwise
-        // we send it's minimum value
-        const { state: { on }, control: { minValue, maxValue } } = this;
-        return { value: on ? maxValue : minValue };
-    }
+// Access value (after init)
+const SomeComponent = () => {
+  const transport = TransportValue.get();
+  ...
 }
 ```
 
-Because buttons are such a big and predictable part of every controller script, Taktil provides a general purpose Button component. The button component extends the base Component class, adding five self described optionally implemented life-cycle methods:
+### `createInitObject`
 
-* **`onPress`**
-* **`onLongPress`**
-* **`onDoublePress`**
-* **`onRelease`**
-* **`onDoubleRelease`**
+Similar to `createInitValue`, but returns an object where key access is defined as getters underneath, so that it can be used like a regular object literal, without throwing errors before the init phase begins.
 
-Let's re-implement our PlayToggle by extending the Button component.
+```ts
+const bitwig = ReactBitwig.createInitObject(() => {
+  const arrangerCursorClip = host.createArrangerCursorClip(4, 128);
+  const launcherCursorClip = host.createLauncherCursorClip(4, 128);
 
-```js
-// src/components.js
+  // transport
+  const transport = host.createTransport();
+  transport.subscribe();
+  transport.tempo().markInterested();
+  transport.getPosition().markInterested();
+  transport.isPlaying().markInterested();
+  transport.timeSignature().markInterested();
 
-import taktil from 'taktil';
+  // application
+  const application = host.createApplication();
+  application.panelLayout().markInterested();
 
-export class PlayToggle extends taktil.Button {
-    onInit() {
-        this.params.transport
-            .isPlaying()
-            .addValueObserver(isPlaying => this.setState({ on: isPlaying }));
-    }
+  // cursorTrack
+  const cursorTrack = host.createCursorTrack(0, 16);
+  cursorTrack.isGroup().markInterested();
+  cursorTrack.color().markInterested();
+  cursorTrack.position().markInterested();
 
-    onPress() {
-        this.params.transport.togglePlay()
-    }
+  // trackBank
+  const trackBank = host.createMainTrackBank(8, 0, 0);
+  trackBank.cursorIndex().markInterested();
+  trackBank.channelCount().markInterested();
+  trackBank.setChannelScrollStepSize(8);
+
+
+  return {
+    arrangerCursorClip,
+    launcherCursorClip,
+    transport,
+    application,
+    cursorTrack,
+    trackBank,
+  };
+});
+
+
+// use it in a component as if it's a regular object literal
+const SomeComponent = () => {
+  // note: destructuring must happen in the component
+  // (it will error if you destructure at the module level)
+  const { application,  transport } = bitwig;
+  ...
 }
 ```
 
-Now let's implement the rest of the components for our getting started project. First we want to implement a MetronomeToggle and a ModeGate button which will turn shift mode on/off globally such that when the shift ModeGate button is pressed the PLAY control will toggle the metronome on/off, and when the shift ModeGate button is released the PLAY control will go back to being a PlayToggle.
+### `createInitState`
 
-> **Note:** We'll hook up the components to controls and modes in the view section, then you'll have a better understanding of what I'm talking about here.
+Creates an atomic piece of global state with an initializing function that is called during Bitwig's init phase. The resulting `InitState` instance provides a `.set(...)` method for updating the state, a `.use()` hook method for subscribing React components to the state, and `get/subscribe/unsubscribe` methods for accessing and subscribing to state outside of React components.
 
-```js
-// src/components.js (continued...)
+```ts
+// The createInitState helper assists in wiring up init-time-only
+// subscriptions and provides a `.use()` hook for subscribing to
+// changes from within React components.
+const IsPlayingState = ReactBitwig.createInitState(() => {
+  // You can safely access other init states and values inside this initializer
+  const transport = TransportValue.get();
+  transport
+    .isPlaying()
+    .addValueObserver((isPlaying) => IsPlayingState.set(isPlaying));
 
-export class ModeGate extends taktil.Button {
-    onPress() {
-        this.setState({ on: true });
-        taktil.activateMode(this.params.target);
-    }
-
-    onRelease() {
-        this.setState({ on: false });
-        taktil.deactivateMode(this.params.target);
-    }
-}
-
-export class MetronomeToggle extends taktil.Button {
-    onInit() {
-        this.params.transport
-            .isMetronomeEnabled()
-            .addValueObserver(isEnabled => this.setState({ on: isEnabled }));
-    }
-
-    onPress() {
-        this.params.transport.isMetronomeEnabled().toggle();
-    }
-}
-```
-
-Finally, to get away from buttons, we'll implement a VolumeRange component which takes a Bitwig Track instance as a param and controls it's volume. When the volume changes in Bitwig the component will update its associated control, and when its associated control sends input, the tracks level will be adjust accordingly. In this way the component's job is to keep the control state's value and and the Track object's volume value in sync with one another.
-
-```js
-// src/components.js (continued...)
-
-export class VolumeRange extends taktil.Component {
-    state = { value: 0 };
-    memory = {};
-
-    onInit() {
-        this.params.track.getVolume().addValueObserver(value => {
-            this.setState({ value: Math.round(value * 127) });
-        });
-    }
-
-    onControlInput({ value }) {
-        if (this.memory.input) clearTimeout(this.memory.input);
-        this.memory.input = setTimeout(() => delete this.memory.input, 350);
-
-        this.params.track.getVolume().set(value / 127);
-    }
-
-    getControlOutput() {
-        return { value: this.state.value };
-    }
-
-    render() {
-        if (!this.memory.input) super.render();
-    }
-}
-```
-
-## Integrating with the Bitwig API
-
-Bitwig's API requires that all of our API derived object and event subscription needs be defined and setup during the controller scripts 'init' phase. This can be done by following the pattern below.
-
-```js
-// src/daw.js
-
-import taktil from 'taktil';
-
-// export our initialized empty daw object
-export const daw = {};
-// after the init phase our daw object will be populated with all of our needed API objects.
-// these object will be ready and can be accessed from within in a component's `onInit`
-// method to setup event callbacks related to that component. It's best practice to pass
-// these objects into components as params to make them more reusable.
-taktil.on('init', () => {
-    daw.transport = host.createTransport();
-    daw.masterTrack = host.createMasterTrack(0);
-    // ...setup all of your "init time only" bitwig api objects here
+  return false; // return initial state
 });
 ```
 
-> **Note:** Bitwig's API only allows a single function to be defined as your init event callback. Taktil defines this function for us in a way that allows us to register multiple callbacks to the 'init' event via the `taktil.on('init', [callback])` method.
+### `createModes`
 
-
-## Assembling the Views
-
-Now that we've defined our controls and and components, it's time to assemble them into views. I their simplest form, views are just a mapping of components to controls. When a view is active, the view's components will receive control input and generate control output. An inactive view's components, on the other hand, will not be sent control input messages, and will not generate any control output, but they will continue to maintain their internal state in preparation for being activated.
-
-View components are also registered to a specific view "mode" and will only be considered active if both the view and the mode are active. Taktil maintains the array of active mode strings globally. These modes are kept in the order they were activated such that a component registered to the same control but a different mode can override the another, with the most recently activated mode taking precedence. This allows a view to configure itself differently based on the global mode list. This is useful, for instance, when implementing a shift button, where having all views know our script is in "shift mode" will allow us to define secondary actions across multiple disconnected views.
-
-Views are defined by extending Taktil's View class or by stacking previously defined views using the ViewStack function. The ViewStack function accepts a list of view classes and returns a new View class definition where, in order, each of the provided views' component/control mappings override any subsequent view's mapping involving the same control (it's just simple inheritance where the the control portion of each mapping is the thing being overridden). This pattern makes it possible to define reusable chunks of view logic which can be combined together in different ways to create more complex views.
-
-In a simple project, a single view making use of view modes may be enough handle your needs. The value of view stacks will become apparent when developing more complex projects.
-
-As shown below, the component/control mappings are defined as instance properties. Valid instance property types consist of a component instance, an array of component instances, or a function that returns either of the previous. Component constructors take a control instance and a params object. The params object consists of an optional mode property—for defining which mode the component should be registered to—as well as whatever else the individual component needs to operate. This is generally where we will pass in objects retrieved or created through Bitwig's API as the view instance code will not be run until after the init phase.
-
-```js
-// src/views.js
-
-import { View, ViewStack } from 'taktil';
-
-import { PlayToggle, ModeGate, MetronomeToggle, VolumeRange } from './components';
-import { controls } from './controls';
-import { daw } from './daw';
-
-// in this view when you press the SHIFT button the PLAY button will toggle the metronome on/off
-// but when the SHIFT button is released, the PLAY button will toggle the transport's play state
-class BaseView extends View {
-    // map PlayToggle component to the PLAY control, registering it to the default base mode
-    playToggle = new PlayToggle(controls.PLAY, { transport: daw.transport });
-    // map ModeGate component to the SHIFT control, registering it to the default base mode
-    shiftModeGate = new ModeGate(controls.SHIFT, { target: 'SHIFT' });
-    // map MetronomeToggle component to the PLAY control, registering it to our custom 'SHIFT' mode
-    metroToggle = new MetronomeToggle(controls.PLAY, { mode: 'SHIFT', transport: daw.transport });
-}
-
-class MixerView extends View {
-    // map VolumeRange component to the KNOB control, registering it the default base mode
-    masterVolume = new VolumeRange(controls.KNOB, { track: daw.masterTrack });
-}
-
-// export the view name to view class mapping so that we can register these views to
-// the session to be activated by name
-export const views = {
-    BASE: BaseView,
-    // by stacking these views, all components in MixerView that are connected to an active mode
-    // will be active and any components in BaseView that are connected to an active mode will
-    // be active as long as their connected controls do not conflict with any active component
-    // in the MixerView.
-    MIXER: ViewStack(MixerView, BaseView),
-};
-```
-
-
-## Initializing the Session
-
-At this point we've defined our control layer, created some components, and assembled those controls and components into views. Now all that's left is to create our controller script's entry point where we will setup and initialize our session.
-
-```js
-// src/index.js
-
-import taktil from 'taktil';
-
-import { controls } from './controls';
-import { views } from './views';
-
-// 1. set bitwig api version
-host.loadAPI(4);
-
-// 2. define controller script
-host.defineController(
-    'Custom', // vendor
-    'Getting Started', // name
-    '1.0.0', // version
-    'f2b0f9b0-87be-11e7-855f-094b43050ba2', // uuid
-    'Joseph Larson' // author
-);
-
-// 3. setup and discover midi controllers
-host.defineMidiPorts(1, 1); // number of midi inputs, outputs
-// host.addDeviceNameBasedDiscoveryPair(
-//     ['Input Name'],
-//     ['Output Name'],
-// );
-
-// 4. register controls to the session
-taktil.registerControls(controls);
-
-// 5. register views to the session
-taktil.registerViews(views);
-
-// 6. on init, activate view to trigger initial render
-taktil.on('init', () => taktil.activateView('MIXER'));
-```
+## `useButtonCallbacks`

@@ -1,1 +1,1 @@
-export * from './Session';
+export { Session } from './session';

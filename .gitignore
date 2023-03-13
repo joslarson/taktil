@@ -1,8 +1,5 @@
 node_modules
 .DS_Store
-/notes
 /.vscode
-
 /lib
-/coverage
-/docs/typedoc
+/dist

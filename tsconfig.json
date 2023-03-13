@@ -1,33 +1,19 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "module": "es2015",
-        "rootDir": "./src",
-        "sourceMap": false,
-        "declaration": true,
-        "baseUrl": "./src",
-        "moduleResolution": "node",
-        "outDir": "./",
-        "lib": [
-            "dom",
-            "es6",
-            "dom.iterable",
-            "scripthost"
-        ],
-        "importHelpers": true,
-        "types": [
-            "typed-bitwig-api",
-            "@types/jest",
-            "@types/node"
-        ],
-        "strict": true,
-        "strictNullChecks": false
-    },
-    "compileOnSave": false,
-    "include": [
-        "src/**/*.ts"
-    ],
-    "exclude": [
-        "node_modules/**/*"
-    ]
+  "compilerOptions": {
+    "target": "es2015",
+    "module": "commonjs",
+    "rootDir": "src",
+    "baseUrl": "./src",
+    "jsx": "react-jsx",
+    "lib": ["DOM", "ESNext", "ScriptHost"],
+    "types": ["typed-bitwig-api"],
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "declaration": true
+  },
+  "include": ["src"]
 }
