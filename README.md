@@ -2,8 +2,6 @@
 
 Build Bitwig Studio controller scripts in React!
 
-[![Build Status](https://travis-ci.org/joslarson/react-bitwig.svg?branch=master)](https://travis-ci.org/joslarson/react-bitwig) [![npm version](https://badge.fury.io/js/react-bitwig.svg)](https://badge.fury.io/js/react-bitwig)
-
 ReactBitwig is React based JavaScript framework for building controller scripts in Bitwig Studio. At its core is a custom React renderer for MIDI that enables declarative component based control of your devices via the provided `Midi` component. Built around and on top of this foundation is a suite of smart tools and helpers designed to improve the experience of working in Bitwig's unique JavaScript environment:
 
 - Custom state management solution that takes Bitwig's init phase into consideration.
@@ -394,7 +392,3 @@ const IsPlayingState = ReactBitwig.createInitState(() => {
   return false; // return initial state
 });
 ```
-
-### `createModes`
-
-## `useButtonCallbacks`
