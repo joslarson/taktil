@@ -33,7 +33,7 @@ const scriptsDirs = {
   ),
 };
 
-const taskName = colors.bold(colors.magenta(`[taktil]`));
+const taskName = colors.bold(colors.magenta(`[react-bitwig]`));
 const scriptsDir = IS_LINUX ? scriptsDirs.linux : scriptsDirs.other;
 
 const typescriptVersion = pkgjson.devDependencies['typescript'];
