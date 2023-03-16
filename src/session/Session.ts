@@ -20,13 +20,6 @@ export interface Session extends EventEmitter {
   ): boolean;
 }
 
-/**
- * A representation of the current project (or active Bitwig
- * Studio tab).
- *
- * Assists in managing shared state and session level event
- * subscriptions between Taktil and the control surface script.
- */
 export class Session extends EventEmitter {
   private _isExitPhase: boolean = false;
   private _isInitPhase: boolean = false;
