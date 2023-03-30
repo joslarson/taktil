@@ -1,4 +1,8 @@
-# Taktil
+# ~~Taktil~~ DEPRECATED
+
+> The work I did here matured into a new project that allows you to build controller scripts with the abstraction provided by React: [ReactBitwig](https://github.com/joslarson/react-bitwig)
+
+---
 
 [![npm version](https://badge.fury.io/js/taktil.svg)](https://badge.fury.io/js/taktil)
 
